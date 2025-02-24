@@ -6,10 +6,15 @@ authors = [
     {name = "Kimoto-Norihiro",email = "n000r111code@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.11, <4.0"
 dependencies = [
     "fastapi (>=0.115.8,<0.116.0)",
-    "uvicorn (>=0.34.0,<0.35.0)"
+    "uvicorn (>=0.34.0,<0.35.0)",
+    "langchain-core (>=0.3.37,<0.4.0)",
+    "langchain-openai (>=0.3.6,<0.4.0)",
+    "langserve (>=0.3.1,<0.4.0)",
+    "python-dotenv (>=1.0.1,<2.0.0)",
+    "sse-starlette (>=1.8.2,<2.0.0)"
 ]
 
 

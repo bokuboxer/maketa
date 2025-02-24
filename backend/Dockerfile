@@ -11,8 +11,8 @@ COPY pyproject.toml poetry.lock ./
 # poetryの設定（仮想環境を作成しない）
 RUN poetry config virtualenvs.create false
 
-# 依存関係のインストール
-RUN poetry install --only main --no-root
+# 依存関係のインストール（詳細な出力を有効化）
+RUN poetry install --only main --no-root --verbose
 
 # アプリケーションのコードをコピー
 COPY . .

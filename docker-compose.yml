@@ -9,6 +9,7 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
+      - ./backend/.env:/app/.env
     environment:
       - ENVIRONMENT=development
       - DATABASE_URL=mysql://root:root@db:3306/app
