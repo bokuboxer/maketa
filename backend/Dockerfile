@@ -1,0 +1,24 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# poetryのインストール
+RUN pip install poetry
+
+# 依存関係ファイルをコピー
+COPY pyproject.toml poetry.lock ./
+
+# poetryの設定（仮想環境を作成しない）
+RUN poetry config virtualenvs.create false
+
+# 依存関係のインストール
+RUN poetry install --only main --no-root
+
+# アプリケーションのコードをコピー
+COPY . .
+
+# ポートの公開
+EXPOSE 8000
+
+# アプリケーションの起動
+CMD ["poetry", "run", "uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000"] 
