@@ -1,25 +1,31 @@
 import os
-from typing import Any
 
 import pymysql
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
 
 pymysql.install_as_MySQLdb()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "mysql+pymysql://root:root@db:3306/app")
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "mysql+pymysql://root:root@db:3306/app",
+)
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-Base: Any = declarative_base()
+Base = declarative_base()
 
 
-def get_db():
+def get_db() -> Session:
     db = SessionLocal()
     try:
-        yield db
+        return db
+    except Exception as e:
+        print(e)
+        db.rollback()
+        raise e
     finally:
         db.close()
 

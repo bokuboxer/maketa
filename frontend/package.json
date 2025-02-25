@@ -24,6 +24,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "axios": "^1.7.9",
+    "firebase": "^11.3.1",
     "orval": "^7.5.0",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",

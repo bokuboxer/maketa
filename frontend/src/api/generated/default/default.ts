@@ -4,42 +4,33 @@
  * FastAPI
  * OpenAPI spec version: 0.1.0
  */
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery
+} from '@tanstack/react-query'
 import type {
   DataTag,
   DefinedInitialDataOptions,
+  DefinedUseInfiniteQueryResult,
   DefinedUseQueryResult,
+  InfiniteData,
   MutationFunction,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseInfiniteQueryOptions,
+  UseInfiniteQueryResult,
   UseMutationOptions,
   UseMutationResult,
   UseQueryOptions,
   UseQueryResult
-} from '@tanstack/react-query';
-import {
-  useMutation,
-  useQuery
-} from '@tanstack/react-query';
-import { customAxios } from './mutator';
-export interface CreateUserInput {
-  firebase_uid: string;
-  email: string;
-}
-
-export interface HTTPValidationError {
-  detail?: ValidationError[];
-}
-
-export type ValidationErrorLocItem = string | number;
-
-export interface ValidationError {
-  loc: ValidationErrorLocItem[];
-  msg: string;
-  type: string;
-}
-
-
+} from '@tanstack/react-query'
+import type {
+  CreateUserInput,
+  HTTPValidationError
+} from '../../model'
+import { customAxios } from '../../mutator';
 
 
 
@@ -107,8 +98,7 @@ export const useCreateUserUsersPost = <TError = HTTPValidationError,
 
       return useMutation(mutationOptions);
     }
-    
-/**
+    /**
  * @summary Get User By Firebase Uid
  */
 export const getUserByFirebaseUidUsersFirebaseUidGet = (
@@ -129,6 +119,72 @@ export const getGetUserByFirebaseUidUsersFirebaseUidGetQueryKey = (firebaseUid: 
     }
 
     
+export const getGetUserByFirebaseUidUsersFirebaseUidGetInfiniteQueryOptions = <TData = InfiniteData<Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>>, TError = HTTPValidationError>(firebaseUid: string, options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetUserByFirebaseUidUsersFirebaseUidGetQueryKey(firebaseUid);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>> = ({ signal }) => getUserByFirebaseUidUsersFirebaseUidGet(firebaseUid, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(firebaseUid), ...queryOptions} as UseInfiniteQueryOptions<Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetUserByFirebaseUidUsersFirebaseUidGetInfiniteQueryResult = NonNullable<Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>>
+export type GetUserByFirebaseUidUsersFirebaseUidGetInfiniteQueryError = HTTPValidationError
+
+
+export function useGetUserByFirebaseUidUsersFirebaseUidGetInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>>, TError = HTTPValidationError>(
+ firebaseUid: string, options: { query:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>,
+          TError,
+          Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>
+        > , 'initialData'
+      >, }
+
+  ):  DefinedUseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetUserByFirebaseUidUsersFirebaseUidGetInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>>, TError = HTTPValidationError>(
+ firebaseUid: string, options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>,
+          TError,
+          Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>
+        > , 'initialData'
+      >, }
+
+  ):  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetUserByFirebaseUidUsersFirebaseUidGetInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>>, TError = HTTPValidationError>(
+ firebaseUid: string, options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>, TError, TData>>, }
+
+  ):  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get User By Firebase Uid
+ */
+
+export function useGetUserByFirebaseUidUsersFirebaseUidGetInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>>, TError = HTTPValidationError>(
+ firebaseUid: string, options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>, TError, TData>>, }
+
+  ):  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetUserByFirebaseUidUsersFirebaseUidGetInfiniteQueryOptions(firebaseUid,options)
+
+  const query = useInfiniteQuery(queryOptions) as  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
 export const getGetUserByFirebaseUidUsersFirebaseUidGetQueryOptions = <TData = Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>, TError = HTTPValidationError>(firebaseUid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>, TError, TData>>, }
 ) => {
 
@@ -192,7 +248,6 @@ export function useGetUserByFirebaseUidUsersFirebaseUidGet<TData = Awaited<Retur
 
   return query;
 }
-
 
 
 
