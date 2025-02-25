@@ -1,10 +1,10 @@
-from app.controller import AnalyzeController, UserController
+from app.controller import AnalyzeController, FailureController, UserController
 from app.database import get_db
-from app.schema import CreateUserInput
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from langchain_openai import ChatOpenAI
+import app.schema as schema
 
 load_dotenv()
 
@@ -23,18 +23,26 @@ app.add_middleware(
 )
 
 db = get_db()
-analyze_controller = AnalyzeController(llm)
 user_controller = UserController(db)
+failure_controller = FailureController(db)
+analyze_controller = AnalyzeController(llm)
 
 
 @app.post("/users")
-async def create_user(input: CreateUserInput):
+async def create_user(input: schema.CreateUserInput) -> None:
     return user_controller.create(input)
 
 
-@app.get("/users/{firebase_uid}")
-async def get_user_by_firebase_uid(firebase_uid: str):
+@app.get("/user/{firebase_uid}")
+async def get_user_by_firebase_uid(
+    firebase_uid: str,
+) -> schema.User | None:
     return user_controller.get_by_firebase_uid(firebase_uid)
+
+
+@app.post("/failures")
+async def create_failure(input: schema.CreateFailureInput) -> None:
+    return failure_controller.create(input)
 
 
 # add_routes(

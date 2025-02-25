@@ -1,10 +1,9 @@
+import app.model as model
+import app.schema as schema
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
-from sqlalchemy.orm import Session
-
-from .model import User
-from .schema import CreateUserInput
+from sqlalchemy.orm import Session, joinedload
 
 template = """あなたは人間の行動と失敗の分析を専門とする心理学者です。以下の失敗事例を分析し、「5 Whys」手法を用いて根本原因を探ってください。
 
@@ -53,8 +52,8 @@ class UserController:
     def __init__(self, db: Session):
         self.db = db
 
-    def create(self, input: CreateUserInput) -> User:
-        user = User(
+    def create(self, input: schema.CreateUserInput) -> None:
+        user = model.User(
             firebase_uid=input.firebase_uid,
             email=input.email,
         )
@@ -62,7 +61,51 @@ class UserController:
         self.db.add(user)
         self.db.commit()
         self.db.refresh(user)
-        return user
+        return None
 
-    def get_by_firebase_uid(self, firebase_uid: str) -> User | None:
-        return self.db.query(User).filter(User.firebase_uid == firebase_uid).first()
+    def get_by_firebase_uid(self, firebase_uid: str) -> schema.User | None:
+        user: model.User | None = (
+            self.db.query(model.User)
+            .options(joinedload(model.User.failures))
+            .filter(model.User.firebase_uid == firebase_uid)
+            .first()
+        )
+
+        if not user:
+            return None
+
+        outputUser = schema.User(
+            id=user.id,
+            firebase_uid=user.firebase_uid,
+            email=user.email,
+            display_name=user.display_name,
+            created_at=user.created_at,
+            failures=[
+                schema.Failure(
+                    id=failure.id,
+                    description=failure.description,
+                    self_score=failure.self_score,
+                    created_at=failure.created_at,
+                    conclusion=failure.conclusion,
+                    elements=[],
+                )
+                for failure in (user.failures or [])
+            ],
+        )
+
+        return outputUser
+
+
+class FailureController:
+    def __init__(self, db: Session):
+        self.db = db
+
+    def create(self, input: schema.CreateFailureInput) -> None:
+        failure: model.Failure = model.Failure(
+            description=input.description, self_score=input.self_score
+        )
+
+        self.db.add(failure)
+        self.db.commit()
+        self.db.refresh(failure)
+        return None

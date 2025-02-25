@@ -5,6 +5,7 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './createFailureInput';
 export * from './createUserInput';
 export * from './hTTPValidationError';
 export * from './validationError';
