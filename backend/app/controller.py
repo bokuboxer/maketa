@@ -1,9 +1,10 @@
-import app.model as model
-import app.schema as schema
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
 from sqlalchemy.orm import Session, joinedload
+
+import app.model as model
+import app.schema as schema
 
 template = """あなたは人間の行動と失敗の分析を専門とする心理学者です。以下の失敗事例を分析し、「5 Whys」手法を用いて根本原因を探ってください。
 
@@ -102,7 +103,9 @@ class FailureController:
 
     def create(self, input: schema.CreateFailureInput) -> None:
         failure: model.Failure = model.Failure(
-            description=input.description, self_score=input.self_score
+            description=input.description,
+            self_score=input.self_score,
+            user_id=input.user_id,
         )
 
         self.db.add(failure)

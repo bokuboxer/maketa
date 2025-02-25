@@ -53,6 +53,6 @@ class GetUserByFirebaseUidInput(BaseModel):
 
 
 class CreateFailureInput(BaseModel):
+    user_id: int
     description: str
     self_score: int
-
