@@ -10,6 +10,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useCreateFailureFailuresPost, useGetUserByFirebaseUidUserFirebaseUidGet } from '../../api/generated/default/default';
+
 export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [uid, setUid] = useState<string | null>(null);
@@ -21,8 +22,8 @@ export default function Dashboard() {
   const [description, setDescription] = useState('');
   const [selfScore, setSelfScore] = useState(4);
 
-  const { mutate: createFailure } = useCreateFailureFailuresPost();
-  const { data: usr } = useGetUserByFirebaseUidUserFirebaseUidGet(
+  const { mutateAsync: createFailure } = useCreateFailureFailuresPost();
+  const { data: usr, refetch } = useGetUserByFirebaseUidUserFirebaseUidGet(
     uid ?? '', // 空文字列を渡すのではなく
     { 
       query: {
@@ -31,13 +32,11 @@ export default function Dashboard() {
     }
   );
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    console.log(usr);
     if (!usr?.id) return;
 
-    createFailure({
+    await createFailure({
       data: {
         description,
         self_score: selfScore,
@@ -46,6 +45,7 @@ export default function Dashboard() {
     });
     setDescription('');
     setSelfScore(4);
+    await refetch();
     close();
   };
 
