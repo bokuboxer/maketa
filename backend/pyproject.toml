@@ -5,7 +5,6 @@ description = ""
 authors = [
     {name = "Kimoto-Norihiro",email = "n000r111code@gmail.com"}
 ]
-readme = "README.md"
 requires-python = ">=3.11, <4.0"
 dependencies = [
     "fastapi (>=0.115.8,<0.116.0)",
@@ -33,6 +32,13 @@ exclude = ["migrations/"]
 
 [tool.mypy.plugins]
 sqlalchemy.mypy = true
+
+[tool.poetry]
+name = "backend"
+version = "0.1.0"
+packages = [
+    { include = "app" }
+]
 
 [tool.poetry.group.dev.dependencies]
 types-pymysql = "^1.1.0.20241103"
