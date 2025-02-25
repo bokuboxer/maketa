@@ -1,8 +1,13 @@
-*poetry addしたらdocker compose buildしなおす
+
+# backend/.env を作成
+
+cp backend/.env.example backend/.env
 
 # build
 
 docker compose build
+
+poetry addしたらdocker compose buildしなおす
 
 # コンテナ起動
 
