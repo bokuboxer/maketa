@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from enum import Enum as PyEnum
 from typing import List
 
 from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, Text
@@ -43,7 +44,7 @@ class Failure(Base):
     )
 
 
-class ElementType(Enum):
+class ElementType(PyEnum):
     INTERNAL = "internal"
     EXTERNAL = "external"
     EMOTIONAL = "emotional"
