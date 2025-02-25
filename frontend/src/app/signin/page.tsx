@@ -1,9 +1,11 @@
 'use client';
 
 import { useSignIn } from '@/hooks/useAuth';
+import { auth } from '@/lib/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -20,6 +22,13 @@ export default function Login() {
       console.error('ログインエラー:', error);
     }
   };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) router.push('/dashboard');
+    });
+    return () => unsubscribe();
+  }, [router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
