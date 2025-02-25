@@ -5,16 +5,20 @@ import { onAuthStateChanged } from 'firebase/auth';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useGetUserByFirebaseUidUsersFirebaseUidGet, useGetUserFailuresFailuresUserIdGet } from '../../api/generated/default/default';
 
-type Failure = {
-  id: number;
-  description: string;
-  self_score: number;
-  created_at: string;
-};
 
 export default function Dashboard() {
+  const [firebaseUid, setFirebaseUid] = useState<string | null>(null);
+  // const [user, setUser] = useState<User | null>(null);
   const [failures, setFailures] = useState<Failure[]>([]);
+
+  // const { data: user } = useGetUserByFirebaseUidUsersFirebaseUidGet(
+  //   firebaseUid
+  // );
+
+  // const fetchUser = async () => {
+
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -23,6 +27,8 @@ export default function Dashboard() {
       if (!user) {
         router.push('/signin');
       } else {
+        setFirebaseUid(user.uid);
+        console.log(user.uid);
         fetchFailures();
       }
       setLoading(false);
