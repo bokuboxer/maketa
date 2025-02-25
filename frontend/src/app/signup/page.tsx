@@ -1,9 +1,11 @@
 'use client';
 
 import { useSignUp } from '@/hooks/useAuth';
+import { auth } from '@/lib/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function Signup() {
   const [email, setEmail] = useState('');
@@ -22,6 +24,12 @@ export default function Signup() {
     }
   };
 
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) router.push('/dashboard');
+    });
+    return () => unsubscribe();
+  }, [router]);
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">

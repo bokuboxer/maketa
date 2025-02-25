@@ -1,51 +1,53 @@
 'use client';
 
+import { Failure } from '@/api/model/failure';
+import { User } from '@/api/model/user';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { useGetUserByFirebaseUidUsersFirebaseUidGet, useGetUserFailuresFailuresUserIdGet } from '../../api/generated/default/default';
-
+import { useGetUserByFirebaseUidUserFirebaseUidGet } from '../../api/generated/default/default';
 
 export default function Dashboard() {
-  const [firebaseUid, setFirebaseUid] = useState<string | null>(null);
-  // const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [uid, setUid] = useState<string | null>(null);
   const [failures, setFailures] = useState<Failure[]>([]);
-
-  // const { data: user } = useGetUserByFirebaseUidUsersFirebaseUidGet(
-  //   firebaseUid
-  // );
-
-  // const fetchUser = async () => {
-
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+
+  const { data: usr } = useGetUserByFirebaseUidUserFirebaseUidGet(
+    uid ?? '', // 空文字列を渡すのではなく
+    { 
+      query: {
+        enabled: !!uid // uidが存在する場合のみクエリを実行
+      }
+    }
+  );
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {
         router.push('/signin');
       } else {
-        setFirebaseUid(user.uid);
-        console.log(user.uid);
-        fetchFailures();
+        setUid(user.uid);
       }
       setLoading(false);
     });
-
     return () => unsubscribe();
   }, [router]);
 
-  const fetchFailures = async () => {
-    try {
-      // const response = await fetch('http://localhost:8000/failures');
-      // const data = await response.json();
-      // setFailures(data);
-    } catch (error) {
-      console.error('失敗の取得エラー:', error);
+  useEffect(() => {
+    if (usr) {
+      setUser(usr);
+      setFailures(usr?.failures || []);
     }
-  };
+  }, [usr]);
+
+  useEffect(() => {
+    console.log(user);
+    console.log(failures);
+  }, [user, failures]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -107,4 +109,4 @@ export default function Dashboard() {
       )}
     </div>
   );
-} 
+}

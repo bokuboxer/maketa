@@ -7,6 +7,13 @@
 
 export * from './createFailureInput';
 export * from './createUserInput';
+export * from './element';
+export * from './elementType';
+export * from './failure';
+export * from './failureConclusion';
+export * from './getUserByFirebaseUidUserFirebaseUidGet200';
 export * from './hTTPValidationError';
+export * from './user';
+export * from './userDisplayName';
 export * from './validationError';
 export * from './validationErrorLocItem';
