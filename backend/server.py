@@ -1,15 +1,18 @@
+from app.controller import AnalyzeController, UserController
+from app.database import get_db
+from app.schema import AnalyzeInput, CreateUserInput
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from langchain_openai import ChatOpenAI
 from langserve import add_routes
 
-from .app.controller import AnalyzeController, AnalyzeInput
-
 load_dotenv()
 
-app = FastAPI()
+db = Depends(get_db)
 llm = ChatOpenAI(model="chatgpt-4o-mini", temperature=0)
+
+app = FastAPI()
 
 # CORSミドルウェアの設定
 app.add_middleware(
@@ -21,11 +24,17 @@ app.add_middleware(
 )
 
 analyze_controller = AnalyzeController(llm)
-# failure_controller = FailureController(llm)
+user_controller = UserController(db)
 
-# @app.post("/failure")
-# async def create_failure(failure: Failure):
-#     return failure_controller.create_failure(failure)
+
+@app.post("/users")
+async def create_user(input: CreateUserInput):
+    return user_controller.create(input)
+
+
+@app.get("/users/{firebase_uid}")
+async def get_user_by_firebase_uid(firebase_uid: str):
+    return user_controller.get_by_firebase_uid(firebase_uid)
 
 
 add_routes(

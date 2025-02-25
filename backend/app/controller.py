@@ -1,7 +1,10 @@
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
-from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
+from .model import User
+from .schema import CreateUserInput
 
 template = """あなたは人間の行動と失敗の分析を専門とする心理学者です。以下の失敗事例を分析し、「5 Whys」手法を用いて根本原因を探ってください。
 
@@ -36,10 +39,6 @@ template = """あなたは人間の行動と失敗の分析を専門とする心
 : {text}"""
 
 
-class AnalyzeInput(BaseModel):
-    text: str
-
-
 class AnalyzeController:
     def __init__(self, llm: ChatOpenAI):
         self.llm = llm
@@ -48,3 +47,22 @@ class AnalyzeController:
 
     def get_chain(self):
         return self.chain
+
+
+class UserController:
+    def __init__(self, db: Session):
+        self.db = db
+
+    def create(self, input: CreateUserInput) -> User:
+        user = User(
+            firebase_uid=input.firebase_uid,
+            email=input.email,
+        )
+
+        self.db.add(user)
+        self.db.commit()
+        self.db.refresh(user)
+        return user
+
+    def get_by_firebase_uid(self, firebase_uid: str) -> User | None:
+        return self.db.query(User).filter(User.firebase_uid == firebase_uid).first()
