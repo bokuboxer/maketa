@@ -4,7 +4,6 @@ import { Failure } from '@/api/model/failure';
 import { User } from '@/api/model/user';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useGetUserByFirebaseUidUserFirebaseUidGet } from '../../api/generated/default/default';
@@ -72,12 +71,6 @@ export default function Dashboard() {
 						<br />
 						「失敗を記録する」ボタンから新しい記録を追加してください。
 					</p>
-					<Link 
-						href="/failures/new" 
-						className="mt-4 inline-block bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700"
-					>
-						失敗を記録する
-					</Link>
 				</div>
 			) : (
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -101,12 +94,6 @@ export default function Dashboard() {
 				</div>
 				)
 			}
-
-      {failures.length === 0 && (
-        <div className="text-center text-gray-500 mt-8">
-          失敗カードがありません。新規作成ボタンから追加してください。
-        </div>
-      )}
     </div>
   );
 }
