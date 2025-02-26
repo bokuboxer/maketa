@@ -18,7 +18,7 @@ export default function Signup() {
     e.preventDefault();
     try {
       await signUp(email, password);
-      router.push('/dashboard');
+      router.push('/failures');
     } catch (error) {
       console.error('新規登録エラー:', error);
     }
@@ -26,7 +26,7 @@ export default function Signup() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) router.push('/dashboard');
+      if (user) router.push('/failures');
     });
     return () => unsubscribe();
   }, [router]);

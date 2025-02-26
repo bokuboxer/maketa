@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useCreateFailureFailuresPost, useGetUserByFirebaseUidUserFirebaseUidGet } from '../../api/generated/default/default';
 
-export default function Dashboard() {
+export default function Failures() {
   const [user, setUser] = useState<User | null>(null);
   const [uid, setUid] = useState<string | null>(null);
   const [failures, setFailures] = useState<Failure[]>([]);
@@ -22,7 +22,7 @@ export default function Dashboard() {
   const [description, setDescription] = useState('');
   const [selfScore, setSelfScore] = useState(4);
 
-  const { mutateAsync: createFailure } = useCreateFailureFailuresPost();
+  const { mutate: createFailure } = useCreateFailureFailuresPost();
   const { data: usr, refetch } = useGetUserByFirebaseUidUserFirebaseUidGet(
     uid ?? '', // 空文字列を渡すのではなく
     { 
@@ -48,6 +48,10 @@ export default function Dashboard() {
     await refetch();
     close();
   };
+
+  useEffect(() => {
+    console.log(failures);
+  }, [failures]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -161,10 +165,20 @@ export default function Dashboard() {
             {failures.map((failure) => (
               <div
                 key={failure.id}
-                className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer"
-                onClick={() => router.push(`/failures/${failure.id}`)}
+                className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow"
               >
-                <p className="text-gray-600 mb-4">{failure.description}</p>
+                <div className="flex justify-between items-start mb-4">
+                  <p className="text-gray-600 flex-grow">{failure.description}</p>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      router.push(`/failures/${failure.id}/analyze`);
+                    }}
+                    className="ml-4 px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                  >
+                    分析
+                  </button>
+                </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500">
                     スコア: {failure.self_score}
