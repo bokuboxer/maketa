@@ -17,7 +17,7 @@ export default function Login() {
     e.preventDefault();
     try {
       await signIn(email, password);
-      router.push('/dashboard');
+      router.push('/failures');
     } catch (error) {
       console.error('ログインエラー:', error);
     }
@@ -25,7 +25,7 @@ export default function Login() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) router.push('/dashboard');
+      if (user) router.push('/failures');
     });
     return () => unsubscribe();
   }, [router]);

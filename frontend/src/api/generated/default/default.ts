@@ -27,6 +27,7 @@ import type {
   UseQueryResult
 } from '@tanstack/react-query'
 import type {
+  AnalyzeFailureFailuresFailureIdAnalyzePost200,
   CreateFailureInput,
   CreateUserInput,
   GetUserByFirebaseUidUserFirebaseUidGet200,
@@ -314,6 +315,68 @@ export const useCreateFailureFailuresPost = <TError = HTTPValidationError,
       > => {
 
       const mutationOptions = getCreateFailureFailuresPostMutationOptions(options);
+
+      return useMutation(mutationOptions);
+    }
+    /**
+ * @summary Analyze Failure
+ */
+export const analyzeFailureFailuresFailureIdAnalyzePost = (
+    failureId: number,
+ signal?: AbortSignal
+) => {
+      
+      
+      return customAxios<AnalyzeFailureFailuresFailureIdAnalyzePost200>(
+      {url: `/failures/${failureId}/analyze`, method: 'POST', signal
+    },
+      );
+    }
+  
+
+
+export const getAnalyzeFailureFailuresFailureIdAnalyzePostMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof analyzeFailureFailuresFailureIdAnalyzePost>>, TError,{failureId: number}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof analyzeFailureFailuresFailureIdAnalyzePost>>, TError,{failureId: number}, TContext> => {
+    
+const mutationKey = ['analyzeFailureFailuresFailureIdAnalyzePost'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof analyzeFailureFailuresFailureIdAnalyzePost>>, {failureId: number}> = (props) => {
+          const {failureId} = props ?? {};
+
+          return  analyzeFailureFailuresFailureIdAnalyzePost(failureId,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AnalyzeFailureFailuresFailureIdAnalyzePostMutationResult = NonNullable<Awaited<ReturnType<typeof analyzeFailureFailuresFailureIdAnalyzePost>>>
+    
+    export type AnalyzeFailureFailuresFailureIdAnalyzePostMutationError = HTTPValidationError
+
+    /**
+ * @summary Analyze Failure
+ */
+export const useAnalyzeFailureFailuresFailureIdAnalyzePost = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof analyzeFailureFailuresFailureIdAnalyzePost>>, TError,{failureId: number}, TContext>, }
+): UseMutationResult<
+        Awaited<ReturnType<typeof analyzeFailureFailuresFailureIdAnalyzePost>>,
+        TError,
+        {failureId: number},
+        TContext
+      > => {
+
+      const mutationOptions = getAnalyzeFailureFailuresFailureIdAnalyzePostMutationOptions(options);
 
       return useMutation(mutationOptions);
     }
