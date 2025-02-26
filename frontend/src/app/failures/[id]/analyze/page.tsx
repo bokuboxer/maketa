@@ -63,7 +63,7 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
           <div className="space-y-6">
             <div>
               <h2 className="text-xl font-semibold mb-4">分析要素</h2> 
-              <div className="grid gap-4">
+              <div className="space-y-4">
                 {failure.elements.map((element) => (
                   <div
                     key={element.id}

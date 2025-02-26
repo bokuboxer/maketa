@@ -161,31 +161,35 @@ export default function Failures() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6">
             {failures.map((failure) => (
               <div
                 key={failure.id}
                 className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow"
               >
-                <div className="flex justify-between items-start mb-4">
-                  <p className="text-gray-600 flex-grow">{failure.description}</p>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      router.push(`/failures/${failure.id}/analyze`);
-                    }}
-                    className="ml-4 px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
-                  >
-                    分析
-                  </button>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-500">
-                    スコア: {failure.self_score}
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    {new Date(failure.created_at).toLocaleDateString()}
-                  </span>
+                <div className="flex flex-col">
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="flex-grow">
+                      <p className="text-gray-600 break-words">{failure.description}</p>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/failures/${failure.id}/analyze`);
+                      }}
+                      className="shrink-0 px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 whitespace-nowrap"
+                    >
+                      分析
+                    </button>
+                  </div>
+                  <div className="flex justify-between items-center mt-4">
+                    <span className="text-sm text-gray-500">
+                      スコア: {failure.self_score}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      {new Date(failure.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
                 </div>
               </div>
             ))}
