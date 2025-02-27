@@ -5,6 +5,7 @@ import { Element } from '@/api/model/element';
 import { ElementType } from '@/api/model/elementType';
 import { DragDropContext, Draggable, DraggableProvided, DropResult, Droppable, DroppableProvided } from '@hello-pangea/dnd';
 import { Loader } from '@mantine/core';
+import { IconArrowLeft } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useState } from 'react';
 
@@ -213,9 +214,9 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
         <div className="flex items-center mb-4">
           <button
             onClick={() => router.back()}
-            className="text-black hover:text-gray-600 mr-4"
+            className="text-black hover:text-gray-600 mr-4 p-2 rounded-full hover:bg-gray-100"
           >
-            ←
+            <IconArrowLeft size={20} />
           </button>
           <h1 className="text-2xl font-bold text-black">詳細分析</h1>
         </div>
