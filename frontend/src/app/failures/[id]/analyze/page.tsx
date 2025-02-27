@@ -1,9 +1,8 @@
 'use client';
 
-import { useAnalyzeFailureFailuresFailureIdAnalyzePost, useSuggestElementsElementsSuggestPost } from '@/api/generated/default/default';
+import { useGetFailureByIdFailureFailureIdGet, useSuggestElementsElementsSuggestPost } from '@/api/generated/default/default';
 import { Element } from '@/api/model/element';
 import { ElementType } from '@/api/model/elementType';
-import { Failure } from '@/api/model/failure';
 import { DragDropContext, Draggable, DraggableProvided, DropResult, Droppable, DroppableProvided } from '@hello-pangea/dnd';
 import { Loader } from '@mantine/core';
 import { useRouter } from 'next/navigation';
@@ -27,7 +26,9 @@ interface GroupedElements {
 }
 
 export default function AnalyzePage({ params }: { params: Promise<PageParams> }) {
-	const [failure, setFailure] = useState<Failure | null>(null)
+  const resolvedParams = use(params);
+	const { data: failure, isLoading: isFailureLoading } = useGetFailureByIdFailureFailureIdGet(Number(resolvedParams.id))
+  const {mutate: suggestElements} = useSuggestElementsElementsSuggestPost()
 	const [loading, setLoading] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [activeStep, setActiveStep] = useState<ElementType>(ElementType.adversity);
@@ -46,11 +47,6 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
     effect: [],
   });
 	const router = useRouter();
-	const {mutate: analyzeFailure} = useAnalyzeFailureFailuresFailureIdAnalyzePost()
-  const {mutate: suggestElements} = useSuggestElementsElementsSuggestPost()
-	const resolvedParams = use(params);
-
-
 
   useEffect(() => {
     const fetchSuggestElements = async () => {
@@ -157,11 +153,36 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
   };
 
   const steps = [
-    { type: ElementType.adversity, label: '逆境' },
-    { type: ElementType.belief, label: '信念' },
-    { type: ElementType.consequence, label: '結果' },
-    { type: ElementType.disputation, label: '反論' },
-    { type: ElementType.effect, label: '効果' },
+    { 
+      type: ElementType.adversity, 
+      label: '逆境', 
+      description: '失敗の原因となった状況や出来事を選択してください',
+      example: '例：\n・締め切りに間に合わなかった\n・顧客からのクレームを受けた\n・チームメンバーと意見が合わなかった'
+    },
+    { 
+      type: ElementType.belief, 
+      label: '信念', 
+      description: 'その状況で抱いた考えや思い込みを選択してください',
+      example: '例：\n・自分は無能だ\n・もう取り返しがつかない\n・誰も自分を信用してくれない'
+    },
+    { 
+      type: ElementType.consequence, 
+      label: '結果', 
+      description: 'その考えによって引き起こされた行動や結果を選択してください',
+      example: '例：\n・落ち込んで仕事に手がつかなくなった\n・チームメンバーとの関係が悪化した\n・問題を先送りにしてしまった'
+    },
+    { 
+      type: ElementType.disputation, 
+      label: '反論', 
+      description: '考えの誤りに対する反論を選択してください',
+      example: '例：\n・一度の失敗で全てを判断するのは極端すぎる\n・誰にでもミスはある\n・この経験を次に活かすことができる'
+    },
+    { 
+      type: ElementType.effect, 
+      label: '効果', 
+      description: '反論による新しい考え方や行動の変化を選択してください',
+      example: '例：\n・冷静に問題に向き合えるようになった\n・同僚に相談して解決策を見つけた\n・再発防止の仕組みを作った'
+    },
   ];
 
   const handleNext = () => {
@@ -178,7 +199,7 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
     }
   };
 
-  if (loading) {
+  if (isFailureLoading || loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <Loader color="black" size="lg" variant="dots" />
@@ -200,12 +221,14 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
         </div>
         
         <div className="mb-6">
-          <h2 className="font-semibold mb-2 text-black">失敗の内容</h2>
-          <p className="text-black">description</p>
+          <div className="border rounded-lg p-3 bg-white">
+            <h2 className="font-semibold mb-2 text-black">失敗の内容</h2>
+            <p className="text-black text-sm">{failure?.description}</p>
+          </div>
         </div>
 
         {/* Stepper */}
-        <div className="mb-8">
+        <div className="mb-4">
           <div className="relative flex items-center justify-between">
             <div className="relative z-10 flex w-full justify-between">
               {steps.map((step, index) => (
@@ -231,6 +254,9 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
           <div className="space-y-4">
             <div key={activeStep}>
               <div className="border rounded-lg p-3 bg-white">
+                <div className="mb-4">
+                  <p className="text-sm text-gray-600">{steps.find(step => step.type === activeStep)?.description}</p>
+                </div>
                 <div className="w-full">
                   <Droppable droppableId={`selected-${activeStep}`}>
                     {(provided: DroppableProvided) => (

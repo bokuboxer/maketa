@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session, joinedload
-from app.chain import AnalyzeChain
 
 import app.model as model
 import app.schema as schema
+from app.chain import AnalyzeChain
 
 
 class UserController:
@@ -49,6 +49,12 @@ class FailureController:
         self.db.commit()
         self.db.refresh(failure)
         return None
+
+    def get_by_id(self, failure_id: int) -> schema.Failure | None:
+        failure: model.Failure | None = (
+            self.db.query(model.Failure).filter(model.Failure.id == failure_id).first()
+        )
+        return schema.to_schema_failure(failure) if failure else None
 
     def analyze(self, failure_id: int) -> schema.Failure | None:
         failure: model.Failure | None = (

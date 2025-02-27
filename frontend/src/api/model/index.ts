@@ -13,6 +13,7 @@ export * from './element';
 export * from './elementType';
 export * from './failure';
 export * from './failureConclusion';
+export * from './getFailureByIdFailureFailureIdGet200';
 export * from './getUserByFirebaseUidUserFirebaseUidGet200';
 export * from './hTTPValidationError';
 export * from './suggestElementsElementsSuggestPost200';

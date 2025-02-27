@@ -46,6 +46,11 @@ async def get_user_by_firebase_uid(
     return user_controller.get_by_firebase_uid(firebase_uid)
 
 
+@app.get("/failure/{failure_id}")
+async def get_failure_by_id(failure_id: int) -> schema.Failure | None:
+    return failure_controller.get_by_id(failure_id)
+
+
 @app.post("/failures")
 async def create_failure(input: schema.CreateFailureInput) -> None:
     return failure_controller.create(input)
