@@ -12,6 +12,8 @@
     "generate:api": "orval"
   },
   "dependencies": {
+    "@mantine/core": "^7.17.0",
+    "@mantine/hooks": "^7.17.0",
     "biome": "^0.3.3",
     "next": "15.1.7",
     "react": "^19.0.0",
