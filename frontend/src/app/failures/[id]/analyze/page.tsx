@@ -2,8 +2,10 @@
 
 import { useAnalyzeFailureFailuresFailureIdAnalyzePost, useSuggestElementsElementsSuggestPost } from '@/api/generated/default/default';
 import { Element } from '@/api/model/element';
+import { ElementType } from '@/api/model/elementType';
 import { Failure } from '@/api/model/failure';
 import { DragDropContext, Draggable, DraggableProvided, DropResult, Droppable, DroppableProvided } from '@hello-pangea/dnd';
+import { Loader } from '@mantine/core';
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useState } from 'react';
 
@@ -17,44 +19,38 @@ type DndElement = {
 }
 
 interface GroupedElements {
-  internal: DndElement[];
-  external: DndElement[];
-  emotional: DndElement[];
+  adversity: DndElement[];
+  belief: DndElement[];
+  consequence: DndElement[];
+  disputation: DndElement[];
+  effect: DndElement[];
 }
 
 export default function AnalyzePage({ params }: { params: Promise<PageParams> }) {
 	const [failure, setFailure] = useState<Failure | null>(null)
 	const [loading, setLoading] = useState(true);
+  const [isDragging, setIsDragging] = useState(false);
+  const [activeStep, setActiveStep] = useState<ElementType>(ElementType.adversity);
   const [selectedElements, setSelectedElements] = useState<GroupedElements>({
-    internal: [],
-    external: [],
-    emotional: [],
+    adversity: [],
+    belief: [],
+    consequence: [],
+    disputation: [],
+    effect: [],
   });
   const [suggestedElements, setSuggestedElements] = useState<GroupedElements>({
-    internal: [],
-    external: [],
-    emotional: [],
+    adversity: [],
+    belief: [],
+    consequence: [],
+    disputation: [],
+    effect: [],
   });
 	const router = useRouter();
 	const {mutate: analyzeFailure} = useAnalyzeFailureFailuresFailureIdAnalyzePost()
   const {mutate: suggestElements} = useSuggestElementsElementsSuggestPost()
 	const resolvedParams = use(params);
 
-	// useEffect(() => {
-	// 	const fetchFailure = () => {
-	// 		analyzeFailure(
-	// 			{ failureId: Number(resolvedParams.id) },
-	// 			{
-	// 				onSuccess: (data) => {
-	// 					setFailure(data);
-	// 					setLoading(false);
-	// 				},
-	// 			}
-	// 		);
-	// 	};
 
-	// 	fetchFailure();
-	// }, [resolvedParams.id, analyzeFailure]);
 
   useEffect(() => {
     const fetchSuggestElements = async () => {
@@ -69,26 +65,26 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
                   element,
                   isSelected: false
                 };
-                if (element.type === 'internal') acc.internal.push(dndElement);
-                if (element.type === 'external') acc.external.push(dndElement);
-                if (element.type === 'emotional') acc.emotional.push(dndElement);
+                if (element.type === ElementType.adversity) acc.adversity.push(dndElement);
+                if (element.type === ElementType.belief) acc.belief.push(dndElement);
+                if (element.type === ElementType.consequence) acc.consequence.push(dndElement);
+                if (element.type === ElementType.disputation) acc.disputation.push(dndElement);
+                if (element.type === ElementType.effect) acc.effect.push(dndElement);
                 return acc;
               },
-              { internal: [], external: [], emotional: [] }
+              { adversity: [], belief: [], consequence: [], disputation: [], effect: [] }
             );
 
             // 全ての要素を推測された要素として設定
-            setSuggestedElements({
-              internal: grouped.internal,
-              external: grouped.external,
-              emotional: grouped.emotional,
-            });
+            setSuggestedElements(grouped);
 
             // 選択された要素は空で初期化
             setSelectedElements({
-              internal: [],
-              external: [],
-              emotional: [],
+              adversity: [],
+              belief: [],
+              consequence: [],
+              disputation: [],
+              effect: [],
             });
           }
           setLoading(false);
@@ -98,36 +94,36 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
     fetchSuggestElements();
   }, [resolvedParams.id]);
 
+  const handleDragStart = () => {
+    setIsDragging(true);
+  };
+
   const handleDragEnd = (result: DropResult) => {
+    setIsDragging(false);
     if (!result.destination) return;
 
     const sourceType = result.source.droppableId.split('-')[0];
     const destType = result.destination.droppableId.split('-')[0];
-    const sourceCategory = result.source.droppableId.split('-')[1];
-    const destCategory = result.destination.droppableId.split('-')[1];
+    const elementType = result.source.droppableId.split('-')[1] as keyof GroupedElements;
 
-    // 異なるカテゴリー間の移動は許可しない
-    if (sourceCategory !== destCategory) return;
-
-    const category = sourceCategory as keyof GroupedElements;
     const sourceList = sourceType === 'selected' ? selectedElements : suggestedElements;
-    const dndElement = sourceList[category][result.source.index];
+    const dndElement = sourceList[elementType][result.source.index];
 
     // 同じリスト内での移動（selected内またはsuggested内）
     if (sourceType === destType) {
-      const items = Array.from(sourceList[category]);
+      const items = Array.from(sourceList[elementType]);
       const [removed] = items.splice(result.source.index, 1);
       items.splice(result.destination.index, 0, removed);
 
       if (sourceType === 'selected') {
         setSelectedElements(prev => ({
           ...prev,
-          [category]: items
+          [elementType]: items
         }));
       } else {
         setSuggestedElements(prev => ({
           ...prev,
-          [category]: items
+          [elementType]: items
         }));
       }
       return;
@@ -142,116 +138,207 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
     if (sourceType === 'selected') {
       setSelectedElements(prev => ({
         ...prev,
-        [category]: prev[category].filter((_, i) => i !== result.source.index)
+        [elementType]: prev[elementType].filter((_, i) => i !== result.source.index)
       }));
       setSuggestedElements(prev => ({
         ...prev,
-        [category]: [...prev[category], newDndElement]
+        [elementType]: [...prev[elementType], newDndElement]
       }));
     } else {
       setSuggestedElements(prev => ({
         ...prev,
-        [category]: prev[category].filter((_, i) => i !== result.source.index)
+        [elementType]: prev[elementType].filter((_, i) => i !== result.source.index)
       }));
       setSelectedElements(prev => ({
         ...prev,
-        [category]: [...prev[category], newDndElement]
+        [elementType]: [...prev[elementType], newDndElement]
       }));
     }
   };
 
-  const renderElementList = (dndElements: DndElement[], type: string, isSelected: boolean) => (
-    <Droppable droppableId={`${isSelected ? 'selected' : 'suggested'}-${type}`}>
-      {(provided: DroppableProvided) => (
-        <div
-          ref={provided.innerRef}
-          {...provided.droppableProps}
-          className="min-h-[100px]"
-        >
-          {dndElements.map((dndElement, index) => (
-            <Draggable
-              key={`${dndElement.element.id}-${isSelected ? 'selected' : 'suggested'}`}
-              draggableId={`${dndElement.element.id}-${isSelected ? 'selected' : 'suggested'}`}
-              index={index}
-            >
-              {(provided: DraggableProvided) => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.draggableProps}
-                  {...provided.dragHandleProps}
-                  className="bg-white border rounded-lg p-4 mb-2 shadow-sm hover:shadow transition-shadow cursor-move"
-                >
-                  <p className="text-gray-700">{dndElement.element.description}</p>
-                </div>
-              )}
-            </Draggable>
-          ))}
-          {provided.placeholder}
-        </div>
-      )}
-    </Droppable>
-  );
+  const steps = [
+    { type: ElementType.adversity, label: '逆境' },
+    { type: ElementType.belief, label: '信念' },
+    { type: ElementType.consequence, label: '結果' },
+    { type: ElementType.disputation, label: '反論' },
+    { type: ElementType.effect, label: '効果' },
+  ];
+
+  const handleNext = () => {
+    const currentIndex = steps.findIndex(step => step.type === activeStep);
+    if (currentIndex < steps.length - 1) {
+      setActiveStep(steps[currentIndex + 1].type);
+    }
+  };
+
+  const handlePrev = () => {
+    const currentIndex = steps.findIndex(step => step.type === activeStep);
+    if (currentIndex > 0) {
+      setActiveStep(steps[currentIndex - 1].type);
+    }
+  };
 
   if (loading) {
-    return <div className="p-8">分析中...</div>;
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <Loader color="black" size="lg" variant="dots" />
+      </div>
+    );
   }
 
-  // if (!failure) {
-  //   return <div className="p-8">失敗の分析情報が見つかりませんでした。</div>;
-  // }
-
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <button
-          onClick={() => router.back()}
-          className="text-blue-600 hover:text-blue-800"
-        >
-          ← 戻る
-        </button>
-      </div>
-
-      <div className="bg-white rounded-lg shadow p-6">
-        <h1 className="text-2xl font-bold mb-6">失敗の分析</h1>
+    <div className="min-h-screen bg-white">
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center mb-4">
+          <button
+            onClick={() => router.back()}
+            className="text-black hover:text-gray-600 mr-4"
+          >
+            ←
+          </button>
+          <h1 className="text-2xl font-bold text-black">詳細分析</h1>
+        </div>
         
         <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-2">失敗の内容</h2>
-          <p className="text-gray-700">discription</p>
+          <h2 className="font-semibold mb-2 text-black">失敗の内容</h2>
+          <p className="text-black">description</p>
         </div>
 
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <div className="space-y-8">
-            {(['internal', 'external', 'emotional'] as const).map((type) => (
-              <div key={type} className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-900">
-                  {type === 'internal' ? '内部要因' : type === 'external' ? '外部要因' : '感情要因'}
-                </h3>
-                <div className="border rounded-lg p-4 bg-gray-50">
-                  <div className="min-h-[100px]">
-                    {selectedElements[type].length > 0 ? (
-                      renderElementList(selectedElements[type], type, true)
-                    ) : (
-                      <div className="text-gray-400 text-sm p-4 border border-dashed border-gray-300 rounded bg-white">
-                        要素をここにドロップ
+        {/* Stepper */}
+        <div className="mb-8">
+          <div className="relative flex items-center justify-between">
+            <div className="relative z-10 flex w-full justify-between">
+              {steps.map((step, index) => (
+                <div key={step.type} className="flex flex-col items-center">
+                  <button
+                    onClick={() => setActiveStep(step.type)}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
+                      step.type === activeStep
+                        ? 'bg-black border-black text-white'
+                        : 'bg-white border-gray-300 text-black'
+                    }`}
+                  >
+                    {index + 1}
+                  </button>
+                  <div className="mt-2 text-sm font-bold text-black">{step.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <DragDropContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
+          <div className="space-y-4">
+            <div key={activeStep}>
+              <div className="border rounded-lg p-3 bg-white">
+                <div className="w-full">
+                  <Droppable droppableId={`selected-${activeStep}`}>
+                    {(provided: DroppableProvided) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        className="w-full"
+                        style={{ minHeight: 36 }}
+                      >
+                        {selectedElements[activeStep].length > 0 ? (
+                          selectedElements[activeStep].map((dndElement, index) => (
+                            <Draggable
+                              key={`${dndElement.element.id}-selected`}
+                              draggableId={`${dndElement.element.id}-selected`}
+                              index={index}
+                            >
+                              {(provided: DraggableProvided) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  className="bg-white border rounded-lg p-2 mb-1 shadow-sm hover:shadow transition-shadow cursor-move h-[36px] flex items-center"
+                                >
+                                  <p className="text-black text-sm leading-snug truncate">{dndElement.element.description}</p>
+                                </div>
+                              )}
+                            </Draggable>
+                          ))
+                        ) : !isDragging ? (
+                          <div className="text-gray-400 text-sm p-2 border border-dashed border-gray-300 rounded bg-white h-[36px] flex items-center justify-center">
+                            要素をここにドロップ
+                          </div>
+                        ) : null}
+                        {!isDragging && provided.placeholder}
                       </div>
                     )}
-                  </div>
-                  <div className="border-t border-gray-200 my-4" />
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-600 mb-4">推測された要素</h4>
-                    {suggestedElements[type].length > 0 ? (
-                      renderElementList(suggestedElements[type], type, false)
-                    ) : (
-                      <div className="text-gray-400 text-sm p-4">
-                        推測された要素はありません
+                  </Droppable>
+                </div>
+                <div className="border-t border-gray-200 my-3" />
+                <div>
+                  <h4 className="text-sm font-medium text-black mb-2">推測された要素</h4>
+                  <Droppable droppableId={`suggested-${activeStep}`}>
+                    {(provided: DroppableProvided) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        className="w-full"
+                        style={{ minHeight: 36 }}
+                      >
+                        {suggestedElements[activeStep].length > 0 ? (
+                          suggestedElements[activeStep].map((dndElement, index) => (
+                            <Draggable
+                              key={`${dndElement.element.id}-suggested`}
+                              draggableId={`${dndElement.element.id}-suggested`}
+                              index={index}
+                            >
+                              {(provided: DraggableProvided) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  className="bg-white border rounded-lg p-2 mb-1 shadow-sm hover:shadow transition-shadow cursor-move h-[36px] flex items-center"
+                                >
+                                  <p className="text-black text-sm leading-snug truncate">{dndElement.element.description}</p>
+                                </div>
+                              )}
+                            </Draggable>
+                          ))
+                        ) : !isDragging ? (
+                          <div className="text-gray-400 text-sm p-2 h-[36px] flex items-center justify-center">
+                            推測された要素はありません
+                          </div>
+                        ) : null}
+                        {!isDragging && provided.placeholder}
                       </div>
                     )}
-                  </div>
+                  </Droppable>
                 </div>
               </div>
-            ))}
+            </div>
           </div>
         </DragDropContext>
+
+        {/* Navigation buttons */}
+        <div className="flex justify-between mt-8">
+          <button
+            onClick={handlePrev}
+            disabled={activeStep === ElementType.adversity}
+            className={`px-4 py-2 rounded ${
+              activeStep === ElementType.adversity
+                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                : 'bg-black text-white hover:bg-gray-800'
+            }`}
+          >
+            前へ
+          </button>
+          <button
+            onClick={handleNext}
+            disabled={activeStep === ElementType.effect}
+            className={`px-4 py-2 rounded ${
+              activeStep === ElementType.effect
+                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                : 'bg-black text-white hover:bg-gray-800'
+            }`}
+          >
+            次へ
+          </button>
+        </div>
       </div>
     </div>
   );
