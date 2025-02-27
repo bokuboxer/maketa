@@ -1,5 +1,10 @@
 import app.schema as schema
-from app.controller import AnalyzeChain, FailureController, UserController
+from app.controller import (
+    AnalyzeChain,
+    ElementController,
+    FailureController,
+    UserController,
+)
 from app.database import get_db
 from dotenv import load_dotenv
 from fastapi import FastAPI
@@ -26,6 +31,7 @@ db = get_db()
 analyze_chain = AnalyzeChain(llm)
 user_controller = UserController(db)
 failure_controller = FailureController(db, analyze_chain)
+element_controller = ElementController(db, analyze_chain)
 
 
 @app.post("/users")
@@ -50,9 +56,15 @@ async def analyze_failure(failure_id: int) -> schema.Failure | None:
     return failure_controller.analyze(failure_id)
 
 
-# add_routes(
-#     app, analyze_controller.get_chain(), path="/analyze", input_type=AnalyzeInput
-# )
+@app.post("/elements/suggest")
+async def suggest_elements(failure_id: int) -> list[schema.Element] | None:
+    return element_controller.suggest(failure_id)
+
+
+@app.post("/elements")
+async def bulk_create_elements(input: schema.CreateElementInput) -> None:
+    return element_controller.bulk_create(input)
+
 
 if __name__ == "__main__":
     import uvicorn

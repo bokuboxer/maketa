@@ -36,17 +36,20 @@ export default function Failures() {
     e.preventDefault();
     if (!usr?.id) return;
 
-    await createFailure({
+    createFailure({
       data: {
         description,
         self_score: selfScore,
         user_id: usr.id
       } as any
+    }, {
+      onSuccess: async () => {
+        setDescription('');
+        setSelfScore(4);
+        await refetch();
+        close();
+      }
     });
-    setDescription('');
-    setSelfScore(4);
-    await refetch();
-    close();
   };
 
   useEffect(() => {

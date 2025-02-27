@@ -28,10 +28,13 @@ import type {
 } from '@tanstack/react-query'
 import type {
   AnalyzeFailureFailuresFailureIdAnalyzePost200,
+  CreateElementInput,
   CreateFailureInput,
   CreateUserInput,
   GetUserByFirebaseUidUserFirebaseUidGet200,
-  HTTPValidationError
+  HTTPValidationError,
+  SuggestElementsElementsSuggestPost200,
+  SuggestElementsElementsSuggestPostParams
 } from '../../model'
 import { customAxios } from '../../mutator';
 
@@ -377,6 +380,133 @@ export const useAnalyzeFailureFailuresFailureIdAnalyzePost = <TError = HTTPValid
       > => {
 
       const mutationOptions = getAnalyzeFailureFailuresFailureIdAnalyzePostMutationOptions(options);
+
+      return useMutation(mutationOptions);
+    }
+    /**
+ * @summary Suggest Elements
+ */
+export const suggestElementsElementsSuggestPost = (
+    params: SuggestElementsElementsSuggestPostParams,
+ signal?: AbortSignal
+) => {
+      
+      
+      return customAxios<SuggestElementsElementsSuggestPost200>(
+      {url: `/elements/suggest`, method: 'POST',
+        params, signal
+    },
+      );
+    }
+  
+
+
+export const getSuggestElementsElementsSuggestPostMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof suggestElementsElementsSuggestPost>>, TError,{params: SuggestElementsElementsSuggestPostParams}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof suggestElementsElementsSuggestPost>>, TError,{params: SuggestElementsElementsSuggestPostParams}, TContext> => {
+    
+const mutationKey = ['suggestElementsElementsSuggestPost'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof suggestElementsElementsSuggestPost>>, {params: SuggestElementsElementsSuggestPostParams}> = (props) => {
+          const {params} = props ?? {};
+
+          return  suggestElementsElementsSuggestPost(params,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SuggestElementsElementsSuggestPostMutationResult = NonNullable<Awaited<ReturnType<typeof suggestElementsElementsSuggestPost>>>
+    
+    export type SuggestElementsElementsSuggestPostMutationError = HTTPValidationError
+
+    /**
+ * @summary Suggest Elements
+ */
+export const useSuggestElementsElementsSuggestPost = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof suggestElementsElementsSuggestPost>>, TError,{params: SuggestElementsElementsSuggestPostParams}, TContext>, }
+): UseMutationResult<
+        Awaited<ReturnType<typeof suggestElementsElementsSuggestPost>>,
+        TError,
+        {params: SuggestElementsElementsSuggestPostParams},
+        TContext
+      > => {
+
+      const mutationOptions = getSuggestElementsElementsSuggestPostMutationOptions(options);
+
+      return useMutation(mutationOptions);
+    }
+    /**
+ * @summary Bulk Create Elements
+ */
+export const bulkCreateElementsElementsPost = (
+    createElementInput: CreateElementInput,
+ signal?: AbortSignal
+) => {
+      
+      
+      return customAxios<unknown>(
+      {url: `/elements`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createElementInput, signal
+    },
+      );
+    }
+  
+
+
+export const getBulkCreateElementsElementsPostMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof bulkCreateElementsElementsPost>>, TError,{data: CreateElementInput}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof bulkCreateElementsElementsPost>>, TError,{data: CreateElementInput}, TContext> => {
+    
+const mutationKey = ['bulkCreateElementsElementsPost'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof bulkCreateElementsElementsPost>>, {data: CreateElementInput}> = (props) => {
+          const {data} = props ?? {};
+
+          return  bulkCreateElementsElementsPost(data,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type BulkCreateElementsElementsPostMutationResult = NonNullable<Awaited<ReturnType<typeof bulkCreateElementsElementsPost>>>
+    export type BulkCreateElementsElementsPostMutationBody = CreateElementInput
+    export type BulkCreateElementsElementsPostMutationError = HTTPValidationError
+
+    /**
+ * @summary Bulk Create Elements
+ */
+export const useBulkCreateElementsElementsPost = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof bulkCreateElementsElementsPost>>, TError,{data: CreateElementInput}, TContext>, }
+): UseMutationResult<
+        Awaited<ReturnType<typeof bulkCreateElementsElementsPost>>,
+        TError,
+        {data: CreateElementInput},
+        TContext
+      > => {
+
+      const mutationOptions = getBulkCreateElementsElementsPostMutationOptions(options);
 
       return useMutation(mutationOptions);
     }

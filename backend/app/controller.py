@@ -1,36 +1,8 @@
-from langchain_core.output_parsers import PydanticOutputParser
-from langchain_core.prompts import PromptTemplate
-from langchain_openai import ChatOpenAI
 from sqlalchemy.orm import Session, joinedload
+from app.chain import AnalyzeChain
 
 import app.model as model
 import app.schema as schema
-
-template = """あなたは人間の行動と失敗の分析の専門家です。以下の失敗事例を分析し、要因を見つけ、3種類の要因「外部要因」「内部要因」「感情要因」に分類してください。
-
-失敗事例：
-{text}
-
-回答形式：
-{format_instructions}
-"""
-
-
-class AnalyzeChain:
-    def __init__(self, llm: ChatOpenAI):
-        self.llm = llm
-        json_parser = PydanticOutputParser(pydantic_object=schema.AnalysisResult)
-        self.prompt = PromptTemplate(
-            template=template,
-            input_variables=["text"],
-            partial_variables={
-                "format_instructions": json_parser.get_format_instructions()
-            },
-        )
-        self.chain = self.prompt | self.llm | json_parser
-
-    def get_chain(self):
-        return self.chain
 
 
 class UserController:
@@ -108,3 +80,40 @@ class FailureController:
         self.db.refresh(failure)
 
         return schema.to_schema_failure(failure)
+
+
+class ElementController:
+    def __init__(self, db: Session, analyze_chain: AnalyzeChain):
+        self.db = db
+        self.analyze_chain = analyze_chain
+
+    def suggest(self, failure_id: int) -> list[schema.Element] | None:
+        failure: model.Failure | None = (
+            self.db.query(model.Failure).filter(model.Failure.id == failure_id).first()
+        )
+
+        if not failure:
+            return None
+
+        result: schema.AnalysisResult = self.analyze_chain.get_chain().invoke(
+            {"text": failure.description}
+        )
+
+        return result.elements
+
+    def bulk_create(self, input: schema.CreateElementInput) -> None:
+        elements = [
+            model.Element(
+                description=element.description,
+                type=element.type,
+                failure_id=element.failure_id,
+            )
+            for element in input.elements
+        ]
+
+        self.db.add_all(elements)
+        self.db.commit()
+        for element in elements:
+            self.db.refresh(element)
+
+        return None

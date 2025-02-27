@@ -11,4 +11,5 @@ export interface Element {
   description: string;
   type: ElementType;
   created_at: string;
+  failure_id: number;
 }
