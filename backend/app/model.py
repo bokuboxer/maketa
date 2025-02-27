@@ -45,9 +45,11 @@ class Failure(Base):
 
 
 class ElementType(PyEnum):
-    INTERNAL = "internal"
-    EXTERNAL = "external"
-    EMOTIONAL = "emotional"
+    ADVERSITY = "adversity"
+    BELIEF = "belief"
+    CONSEQUENCE = "consequence"
+    DISPUTATION = "disputation"
+    EFFECT = "effect"
 
 
 class Element(Base):

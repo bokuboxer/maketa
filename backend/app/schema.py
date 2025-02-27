@@ -10,6 +10,7 @@ class Element(BaseModel):
     description: str
     type: model.ElementType
     created_at: datetime
+    failure_id: int
 
     class Config:
         orm_mode = True
@@ -58,6 +59,10 @@ class CreateFailureInput(BaseModel):
     self_score: int
 
 
+class CreateElementInput(BaseModel):
+    elements: list[Element]
+
+
 class AnalysisResult(BaseModel):
     elements: list[Element]
 
@@ -68,6 +73,7 @@ def to_schema_element(model_element: model.Element) -> Element:
         description=model_element.description,
         type=model_element.type,
         created_at=model_element.created_at,
+        failure_id=model_element.failure_id,
     )
 
 

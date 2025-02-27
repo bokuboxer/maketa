@@ -6,6 +6,7 @@
  */
 
 export * from './analyzeFailureFailuresFailureIdAnalyzePost200';
+export * from './createElementInput';
 export * from './createFailureInput';
 export * from './createUserInput';
 export * from './element';
@@ -14,6 +15,9 @@ export * from './failure';
 export * from './failureConclusion';
 export * from './getUserByFirebaseUidUserFirebaseUidGet200';
 export * from './hTTPValidationError';
+export * from './suggestElementsElementsSuggestPost200';
+export * from './suggestElementsElementsSuggestPostParams';
+export * from './suggestElementsFailuresFailureIdElementsPost200';
 export * from './user';
 export * from './userDisplayName';
 export * from './validationError';
