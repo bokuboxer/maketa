@@ -10,7 +10,6 @@ import type { Element } from './element';
 export interface Failure {
   id: number;
   description: string;
-  self_score: number;
   created_at: string;
   conclusion: FailureConclusion;
   elements: Element[];

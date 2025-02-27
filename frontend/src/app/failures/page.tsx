@@ -1,7 +1,5 @@
 'use client';
 
-import { Failure } from '@/api/model/failure';
-import { User } from '@/api/model/user';
 import { auth } from '@/lib/firebase';
 import { Loader, Modal } from '@mantine/core';
 import '@mantine/core/styles.css';
@@ -12,17 +10,14 @@ import { useEffect, useState } from 'react';
 import { useCreateFailureFailuresPost, useGetUserByFirebaseUidUserFirebaseUidGet } from '../../api/generated/default/default';
 
 export default function Failures() {
-  const [user, setUser] = useState<User | null>(null);
   const [uid, setUid] = useState<string | null>(null);
-  const [failures, setFailures] = useState<Failure[]>([]);
-  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   const [opened, { close, open }] = useDisclosure(false);
   const [description, setDescription] = useState('');
 
   const { mutate: createFailure } = useCreateFailureFailuresPost();
-  const { data: usr, refetch } = useGetUserByFirebaseUidUserFirebaseUidGet(
+  const { data: user, refetch, isLoading } = useGetUserByFirebaseUidUserFirebaseUidGet(
     uid ?? '', // 空文字列を渡すのではなく
     { 
       query: {
@@ -33,12 +28,12 @@ export default function Failures() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!usr?.id) return;
+    if (!user?.id) return;
 
     createFailure({
       data: {
         description,
-        user_id: usr.id
+        user_id: user.id
       } as any
     }, {
       onSuccess: async () => {
@@ -50,29 +45,17 @@ export default function Failures() {
   };
 
   useEffect(() => {
-    console.log(failures);
-  }, [failures]);
-
-  useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {
         router.push('/signin');
       } else {
         setUid(user.uid);
       }
-      setLoading(false);
     });
     return () => unsubscribe();
   }, [router]);
 
-  useEffect(() => {
-    if (usr) {
-      setUser(usr);
-      setFailures(usr?.failures || []);
-    }
-  }, [usr]);
-
-  if (loading) {
+  if (isLoading || !user) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <Loader color="black" size="lg" variant="dots" />
@@ -139,7 +122,7 @@ export default function Failures() {
             </button>
           </div>
 
-          {failures.length === 0 ? (
+          {user?.failures.length === 0 ? (
             <div className="text-center py-10">
               <p className="text-black text-lg">
                 まだ失敗記録がありません。
@@ -149,7 +132,7 @@ export default function Failures() {
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4">
-              {failures.map((failure) => (
+              {user?.failures.map((failure) => (
                 <div
                   key={failure.id}
                   className="bg-white p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"

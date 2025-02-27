@@ -42,7 +42,6 @@ class FailureController:
     def create(self, input: schema.CreateFailureInput) -> None:
         failure: model.Failure = model.Failure(
             description=input.description,
-            self_score=input.self_score,
             user_id=input.user_id,
         )
 

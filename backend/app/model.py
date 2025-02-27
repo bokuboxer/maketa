@@ -27,7 +27,6 @@ class Failure(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     description: Mapped[str] = mapped_column(Text, nullable=False)
-    self_score: Mapped[int] = mapped_column(Integer, nullable=False)
     has_analyzed: Mapped[bool] = mapped_column(Boolean, default=False)
     conclusion: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
