@@ -235,7 +235,6 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
               {steps.map((step, index) => (
                 <div key={step.type} className="flex flex-col items-center">
                   <button
-                    onClick={() => setActiveStep(step.type)}
                     className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
                       step.type === activeStep
                         ? 'bg-black border-black text-white'
