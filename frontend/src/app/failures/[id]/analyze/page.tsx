@@ -66,7 +66,7 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
             element,
             isSelected: false
           }));
-          
+
           setSuggestedElements(prev => ({
             ...prev,
             [element_type]: dndElements
@@ -193,11 +193,16 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
       const nextStep = steps[currentIndex + 1].type;
       setNextLoading(true);
       
+      let currentElements: Element[] = [];
       // 現在のselectedElementsを入力として次のステップの要素を取得
-      const currentElements = selectedElements[activeStep].map(dndElement => dndElement.element);
-      
+      if (nextStep === ElementType.disputation) {
+        currentElements = selectedElements[ElementType.belief].map(dndElement => dndElement.element);
+      } else {
+        currentElements = selectedElements[activeStep].map(dndElement => dndElement.element);
+      }
+
       await new Promise((resolve) => {
-        suggestElements({ 
+        suggestElements({
           data: {
             type: nextStep,
             text: "",
