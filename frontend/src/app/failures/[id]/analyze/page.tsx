@@ -1,6 +1,6 @@
 'use client';
 
-import { useGetFailureByIdFailureFailureIdGet, useSuggestElementsElementsSuggestPost } from '@/api/generated/default/default';
+import { useGetFailureByIdFailureFailureIdGet, useSuggestElementsElementsSuggestPost, useBulkCreateElementsElementsPost } from '@/api/generated/default/default';
 import { Element } from '@/api/model/element';
 import { ElementType } from '@/api/model/elementType';
 import { DragDropContext, Draggable, DraggableProvided, DropResult, Droppable, DroppableProvided } from '@hello-pangea/dnd';
@@ -8,7 +8,7 @@ import { Loader } from '@mantine/core';
 import { IconArrowLeft, IconArrowRight, IconDeviceFloppy } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useState } from 'react';
-
+import HypnoticLoader from '@/components/HypnoticLoader';
 interface PageParams {
 	id: string;
 }
@@ -30,6 +30,7 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
   const resolvedParams = use(params);
 	const { data: failure, isLoading: isFailureLoading } = useGetFailureByIdFailureFailureIdGet(Number(resolvedParams.id))
   const {mutate: suggestElements} = useSuggestElementsElementsSuggestPost()
+  const {mutate: createElements} = useBulkCreateElementsElementsPost()
 	const [loading, setLoading] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [activeStep, setActiveStep] = useState<ElementType>(ElementType.adversity);
@@ -48,52 +49,52 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
     effect: [],
   });
 	const router = useRouter();
+  const [nextLoading, setNextLoading] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
+
+  const fetchSuggestElements = async (element_type: ElementType, text: string, elements: Element[]) => {
+    suggestElements({ 
+      data: {
+        type: element_type,
+        text: text,
+        elements: elements
+      }
+    }, {
+      onSuccess: (data) => {
+        if (data) {
+          const dndElements = data.map(element => ({
+            element,
+            isSelected: false
+          }));
+          
+          setSuggestedElements(prev => ({
+            ...prev,
+            [element_type]: dndElements
+          }));
+
+          setSelectedElements(prev => ({
+            ...prev,
+            [element_type]: []
+          }));
+        }
+        setLoading(false);
+      },
+    });
+  };
 
   useEffect(() => {
-    const fetchSuggestElements = async () => {
-      suggestElements({ 
-        params: { failure_id: Number(resolvedParams.id) }
-      }, {
-        onSuccess: (data) => {
-          if (data) {
-            const grouped = data.reduce<GroupedElements>(
-              (acc, element) => {
-                const dndElement: DndElement = {
-                  element,
-                  isSelected: false
-                };
-                if (element.type === ElementType.adversity) acc.adversity.push(dndElement);
-                if (element.type === ElementType.belief) acc.belief.push(dndElement);
-                if (element.type === ElementType.consequence) acc.consequence.push(dndElement);
-                if (element.type === ElementType.disputation) acc.disputation.push(dndElement);
-                if (element.type === ElementType.effect) acc.effect.push(dndElement);
-                return acc;
-              },
-              { adversity: [], belief: [], consequence: [], disputation: [], effect: [] }
-            );
-
-            // 全ての要素を推測された要素として設定
-            setSuggestedElements(grouped);
-
-            // 選択された要素は空で初期化
-            setSelectedElements({
-              adversity: [],
-              belief: [],
-              consequence: [],
-              disputation: [],
-              effect: [],
-            });
-          }
-          setLoading(false);
-        },
-      });
-    };
-    fetchSuggestElements();
-  }, [resolvedParams.id]);
+    if (failure?.description) {
+      fetchSuggestElements(ElementType.adversity, failure?.description, []);
+    }
+  }, [failure?.description]);
 
   const handleDragStart = () => {
     setIsDragging(true);
   };
+
+  useEffect(() => {
+    console.log(selectedElements)
+  }, [selectedElements])
 
   const handleDragEnd = (result: DropResult) => {
     setIsDragging(false);
@@ -186,10 +187,46 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
     },
   ];
 
-  const handleNext = () => {
+  const handleNext = async () => {
     const currentIndex = steps.findIndex(step => step.type === activeStep);
     if (currentIndex < steps.length - 1) {
-      setActiveStep(steps[currentIndex + 1].type);
+      const nextStep = steps[currentIndex + 1].type;
+      setNextLoading(true);
+      
+      // 現在のselectedElementsを入力として次のステップの要素を取得
+      const currentElements = selectedElements[activeStep].map(dndElement => dndElement.element);
+      
+      await new Promise((resolve) => {
+        suggestElements({ 
+          data: {
+            type: nextStep,
+            text: "",
+            elements: currentElements
+          }
+        }, {
+          onSuccess: (data) => {
+            if (data) {
+              const dndElements = data.map(element => ({
+                element,
+                isSelected: false
+              }));
+              
+              setSuggestedElements(prev => ({
+                ...prev,
+                [nextStep]: dndElements
+              }));
+
+              setSelectedElements(prev => ({
+                ...prev,
+                [nextStep]: []
+              }));
+            }
+            setNextLoading(false);
+            setActiveStep(nextStep);
+            resolve(undefined);
+          },
+        });
+      });
     }
   };
 
@@ -203,7 +240,14 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
   if (isFailureLoading || loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <Loader color="black" size="lg" variant="dots" />
+        <HypnoticLoader 
+          size={250}
+          color="black"
+          secondaryColor="gray"
+          text="分析中"
+          isLoading={isFailureLoading || loading}
+          ringCount={5}
+        />
       </div>
     );
   }
@@ -251,7 +295,7 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
                         : 'bg-white border-gray-300 text-black'
                     }`}
                   >
-                    {index + 1}
+                    {String.fromCharCode(65 + index)}
                   </button>
                   <div className="mt-2 text-sm font-bold text-black">{step.label}</div>
                 </div>
@@ -288,9 +332,9 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...provided.dragHandleProps}
-                                  className="bg-white border rounded-lg p-2 mb-1 shadow-sm hover:shadow transition-shadow cursor-move h-[36px] flex items-center"
+                                  className="bg-white border rounded-lg p-2 mb-1 shadow-sm hover:shadow transition-shadow cursor-move min-h-[36px] flex items-center"
                                 >
-                                  <p className="text-black text-sm leading-snug truncate">{dndElement.element.description}</p>
+                                  <p className="text-black text-sm leading-normal break-words">{dndElement.element.description}</p>
                                 </div>
                               )}
                             </Draggable>
@@ -307,7 +351,7 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
                 </div>
                 <div className="border-t border-gray-200 my-3" />
                 <div>
-                  <h4 className="text-sm font-medium text-black mb-2">推測された要素</h4>
+                  <h4 className="text-sm font-medium text-black mb-2">入力候補</h4>
                   <Droppable droppableId={`suggested-${activeStep}`}>
                     {(provided: DroppableProvided) => (
                       <div
@@ -328,16 +372,16 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...provided.dragHandleProps}
-                                  className="bg-white border rounded-lg p-2 mb-1 shadow-sm hover:shadow transition-shadow cursor-move h-[36px] flex items-center"
+                                  className="bg-white border rounded-lg p-2 mb-1 shadow-sm hover:shadow transition-shadow cursor-move min-h-[36px] flex items-center"
                                 >
-                                  <p className="text-black text-sm leading-snug truncate">{dndElement.element.description}</p>
+                                  <p className="text-black text-sm leading-normal break-words">{dndElement.element.description}</p>
                                 </div>
                               )}
                             </Draggable>
                           ))
                         ) : !isDragging ? (
                           <div className="text-gray-400 text-sm p-2 h-[36px] flex items-center justify-center">
-                            推測された要素はありません
+                            入力候補はありません
                           </div>
                         ) : null}
                         {!isDragging && provided.placeholder}
@@ -345,6 +389,46 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
                     )}
                   </Droppable>
                 </div>
+              </div>
+              <div className="mt-3">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const input = e.currentTarget.elements.namedItem('element') as HTMLInputElement;
+                    if (input.value.trim()) {
+                      const newElement: Element = {
+                        id: 0,
+                        type: activeStep,
+                        description: input.value.trim(),
+                        created_at: new Date().toISOString(),
+                        failure_id: failure?.id ?? 0
+                      };
+                      const newDndElement: DndElement = {
+                        element: newElement,
+                        isSelected: true
+                      };
+                      setSelectedElements(prev => ({
+                        ...prev,
+                        [activeStep]: [...prev[activeStep], newDndElement]
+                      }));
+                      input.value = '';
+                    }
+                  }}
+                  className="flex gap-2"
+                >
+                  <input
+                    type="text"
+                    name="element"
+                    placeholder="新しい要素を入力"
+                    className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black text-sm text-black"
+                  />
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 text-sm w-20"
+                  >
+                    追加
+                  </button>
+                </form>
               </div>
             </div>
           </div>
@@ -367,31 +451,63 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
           {activeStep === ElementType.effect ? (
             <button
               onClick={() => {
-                // TODO: 保存の処理を実装
-                router.push('/failures');
+                if (!failure?.id) {
+                  return;
+                }
+                setSaveLoading(true);
+                console.log("###############################################")
+                console.log(selectedElements)
+                createElements({
+                  data: {
+                    failure_id: failure.id,
+                    elements: Object.values(selectedElements)
+                      .flatMap((elements: DndElement[]) => elements.map((dndElement: DndElement) => dndElement.element))
+                  }
+                }, {
+                  onSuccess: () => {
+                    setSaveLoading(false);
+                    router.push(`/failures/${failure.id}`);
+                  }
+                })
               }}
-              disabled={selectedElements[activeStep].length === 0}
+              disabled={selectedElements[activeStep].length === 0 || saveLoading}
               className={`px-4 py-2 rounded flex items-center gap-2 ${
-                selectedElements[activeStep].length === 0
+                selectedElements[activeStep].length === 0 || saveLoading
                   ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                   : 'bg-black text-white hover:bg-gray-800'
               }`}
             >
-              保存
-              <IconDeviceFloppy size={20} />
+              {saveLoading ? (
+                <div className="w-5 h-5 flex items-center justify-center">
+                  <Loader color="gray" variant="dots" size="xs" />
+                </div>
+              ) : (
+                <>
+                  保存
+                  <IconDeviceFloppy size={20} />
+                </>
+              )}
             </button>
           ) : (
             <button
               onClick={handleNext}
-              disabled={selectedElements[activeStep].length === 0}
+              disabled={selectedElements[activeStep].length === 0 || nextLoading}
               className={`px-4 py-2 rounded flex items-center gap-2 ${
-                selectedElements[activeStep].length === 0
+                selectedElements[activeStep].length === 0 || nextLoading
                   ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                   : 'bg-black text-white hover:bg-gray-800'
               }`}
             >
-              次へ
-              <IconArrowRight size={20} />
+              {nextLoading ? (
+                  <div className="w-5 h-5 flex items-center justify-center">
+                    <Loader color="gray" variant="dots" size="xs" />
+                  </div>
+              ) : (
+                <>
+                  次へ
+                  <IconArrowRight size={20} />
+                </>
+              )}
             </button>
           )}
         </div>

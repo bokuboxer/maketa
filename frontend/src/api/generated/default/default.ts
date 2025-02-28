@@ -27,7 +27,6 @@ import type {
   UseQueryResult
 } from '@tanstack/react-query'
 import type {
-  AnalyzeFailureFailuresFailureIdAnalyzePost200,
   CreateElementInput,
   CreateFailureInput,
   CreateUserInput,
@@ -35,7 +34,7 @@ import type {
   GetUserByFirebaseUidUserFirebaseUidGet200,
   HTTPValidationError,
   SuggestElementsElementsSuggestPost200,
-  SuggestElementsElementsSuggestPostParams
+  SuggestInput
 } from '../../model'
 import { customAxios } from '../../mutator';
 
@@ -476,79 +475,18 @@ export const useCreateFailureFailuresPost = <TError = HTTPValidationError,
       return useMutation(mutationOptions);
     }
     /**
- * @summary Analyze Failure
- */
-export const analyzeFailureFailuresFailureIdAnalyzePost = (
-    failureId: number,
- signal?: AbortSignal
-) => {
-      
-      
-      return customAxios<AnalyzeFailureFailuresFailureIdAnalyzePost200>(
-      {url: `/failures/${failureId}/analyze`, method: 'POST', signal
-    },
-      );
-    }
-  
-
-
-export const getAnalyzeFailureFailuresFailureIdAnalyzePostMutationOptions = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof analyzeFailureFailuresFailureIdAnalyzePost>>, TError,{failureId: number}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof analyzeFailureFailuresFailureIdAnalyzePost>>, TError,{failureId: number}, TContext> => {
-    
-const mutationKey = ['analyzeFailureFailuresFailureIdAnalyzePost'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof analyzeFailureFailuresFailureIdAnalyzePost>>, {failureId: number}> = (props) => {
-          const {failureId} = props ?? {};
-
-          return  analyzeFailureFailuresFailureIdAnalyzePost(failureId,)
-        }
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type AnalyzeFailureFailuresFailureIdAnalyzePostMutationResult = NonNullable<Awaited<ReturnType<typeof analyzeFailureFailuresFailureIdAnalyzePost>>>
-    
-    export type AnalyzeFailureFailuresFailureIdAnalyzePostMutationError = HTTPValidationError
-
-    /**
- * @summary Analyze Failure
- */
-export const useAnalyzeFailureFailuresFailureIdAnalyzePost = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof analyzeFailureFailuresFailureIdAnalyzePost>>, TError,{failureId: number}, TContext>, }
-): UseMutationResult<
-        Awaited<ReturnType<typeof analyzeFailureFailuresFailureIdAnalyzePost>>,
-        TError,
-        {failureId: number},
-        TContext
-      > => {
-
-      const mutationOptions = getAnalyzeFailureFailuresFailureIdAnalyzePostMutationOptions(options);
-
-      return useMutation(mutationOptions);
-    }
-    /**
  * @summary Suggest Elements
  */
 export const suggestElementsElementsSuggestPost = (
-    params: SuggestElementsElementsSuggestPostParams,
+    suggestInput: SuggestInput,
  signal?: AbortSignal
 ) => {
       
       
       return customAxios<SuggestElementsElementsSuggestPost200>(
       {url: `/elements/suggest`, method: 'POST',
-        params, signal
+      headers: {'Content-Type': 'application/json', },
+      data: suggestInput, signal
     },
       );
     }
@@ -556,8 +494,8 @@ export const suggestElementsElementsSuggestPost = (
 
 
 export const getSuggestElementsElementsSuggestPostMutationOptions = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof suggestElementsElementsSuggestPost>>, TError,{params: SuggestElementsElementsSuggestPostParams}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof suggestElementsElementsSuggestPost>>, TError,{params: SuggestElementsElementsSuggestPostParams}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof suggestElementsElementsSuggestPost>>, TError,{data: SuggestInput}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof suggestElementsElementsSuggestPost>>, TError,{data: SuggestInput}, TContext> => {
     
 const mutationKey = ['suggestElementsElementsSuggestPost'];
 const {mutation: mutationOptions} = options ?
@@ -569,10 +507,10 @@ const {mutation: mutationOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof suggestElementsElementsSuggestPost>>, {params: SuggestElementsElementsSuggestPostParams}> = (props) => {
-          const {params} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof suggestElementsElementsSuggestPost>>, {data: SuggestInput}> = (props) => {
+          const {data} = props ?? {};
 
-          return  suggestElementsElementsSuggestPost(params,)
+          return  suggestElementsElementsSuggestPost(data,)
         }
 
         
@@ -581,18 +519,18 @@ const {mutation: mutationOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type SuggestElementsElementsSuggestPostMutationResult = NonNullable<Awaited<ReturnType<typeof suggestElementsElementsSuggestPost>>>
-    
+    export type SuggestElementsElementsSuggestPostMutationBody = SuggestInput
     export type SuggestElementsElementsSuggestPostMutationError = HTTPValidationError
 
     /**
  * @summary Suggest Elements
  */
 export const useSuggestElementsElementsSuggestPost = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof suggestElementsElementsSuggestPost>>, TError,{params: SuggestElementsElementsSuggestPostParams}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof suggestElementsElementsSuggestPost>>, TError,{data: SuggestInput}, TContext>, }
 ): UseMutationResult<
         Awaited<ReturnType<typeof suggestElementsElementsSuggestPost>>,
         TError,
-        {params: SuggestElementsElementsSuggestPostParams},
+        {data: SuggestInput},
         TContext
       > => {
 

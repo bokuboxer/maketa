@@ -144,13 +144,14 @@ export default function Failures() {
                       </div>
                       <div className="flex flex-col items-end gap-2">
                         <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            router.push(`/failures/${failure.id}/analyze`);
-                          }}
-                          className="shrink-0 px-3 py-1.5 bg-black text-white rounded-lg hover:bg-gray-800 text-sm"
+                          onClick={() => router.push(
+                            failure.has_analyzed 
+                              ? `/failures/${failure.id}`
+                              : `/failures/${failure.id}/analyze`
+                          )}
+                          className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
                         >
-                          分析
+                          {failure.has_analyzed ? '詳細' : '分析'}
                         </button>
                         <span className="text-sm text-gray-500">
                           {new Date(failure.created_at).toLocaleDateString()}

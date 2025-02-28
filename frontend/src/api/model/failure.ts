@@ -12,5 +12,6 @@ export interface Failure {
   description: string;
   created_at: string;
   conclusion: FailureConclusion;
+  has_analyzed: boolean;
   elements: Element[];
 }

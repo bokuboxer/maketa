@@ -5,8 +5,10 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { Element } from './element';
+import type { ElementType } from './elementType';
 
-export interface CreateElementInput {
-  failure_id: number;
+export interface SuggestInput {
+  text: string;
   elements: Element[];
+  type: ElementType;
 }
