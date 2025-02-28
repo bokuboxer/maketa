@@ -20,6 +20,7 @@ class Failure(BaseModel):
     description: str
     created_at: datetime
     conclusion: str | None
+    has_analyzed: bool
     elements: list[Element]
 
     model_config = ConfigDict(from_attributes=True)
@@ -94,6 +95,7 @@ def to_schema_failure(model_failure: model.Failure) -> Failure:
         description=model_failure.description,
         created_at=model_failure.created_at,
         conclusion=model_failure.conclusion,
+        has_analyzed=model_failure.has_analyzed,
         elements=[
             to_schema_element(element) for element in (model_failure.elements or [])
         ],

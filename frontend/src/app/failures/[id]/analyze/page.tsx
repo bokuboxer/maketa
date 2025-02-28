@@ -92,6 +92,10 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
     setIsDragging(true);
   };
 
+  useEffect(() => {
+    console.log(selectedElements)
+  }, [selectedElements])
+
   const handleDragEnd = (result: DropResult) => {
     setIsDragging(false);
     if (!result.destination) return;
@@ -291,7 +295,7 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
                         : 'bg-white border-gray-300 text-black'
                     }`}
                   >
-                    {index + 1}
+                    {String.fromCharCode(65 + index)}
                   </button>
                   <div className="mt-2 text-sm font-bold text-black">{step.label}</div>
                 </div>
@@ -328,9 +332,9 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...provided.dragHandleProps}
-                                  className="bg-white border rounded-lg p-2 mb-1 shadow-sm hover:shadow transition-shadow cursor-move h-[36px] flex items-center"
+                                  className="bg-white border rounded-lg p-2 mb-1 shadow-sm hover:shadow transition-shadow cursor-move min-h-[36px] flex items-center"
                                 >
-                                  <p className="text-black text-sm leading-snug truncate">{dndElement.element.description}</p>
+                                  <p className="text-black text-sm leading-normal break-words">{dndElement.element.description}</p>
                                 </div>
                               )}
                             </Draggable>
@@ -347,7 +351,7 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
                 </div>
                 <div className="border-t border-gray-200 my-3" />
                 <div>
-                  <h4 className="text-sm font-medium text-black mb-2">推測された要素</h4>
+                  <h4 className="text-sm font-medium text-black mb-2">入力候補</h4>
                   <Droppable droppableId={`suggested-${activeStep}`}>
                     {(provided: DroppableProvided) => (
                       <div
@@ -368,16 +372,16 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...provided.dragHandleProps}
-                                  className="bg-white border rounded-lg p-2 mb-1 shadow-sm hover:shadow transition-shadow cursor-move h-[36px] flex items-center"
+                                  className="bg-white border rounded-lg p-2 mb-1 shadow-sm hover:shadow transition-shadow cursor-move min-h-[36px] flex items-center"
                                 >
-                                  <p className="text-black text-sm leading-snug truncate">{dndElement.element.description}</p>
+                                  <p className="text-black text-sm leading-normal break-words">{dndElement.element.description}</p>
                                 </div>
                               )}
                             </Draggable>
                           ))
                         ) : !isDragging ? (
                           <div className="text-gray-400 text-sm p-2 h-[36px] flex items-center justify-center">
-                            推測された要素はありません
+                            入力候補はありません
                           </div>
                         ) : null}
                         {!isDragging && provided.placeholder}
@@ -385,6 +389,46 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
                     )}
                   </Droppable>
                 </div>
+              </div>
+              <div className="mt-3">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const input = e.currentTarget.elements.namedItem('element') as HTMLInputElement;
+                    if (input.value.trim()) {
+                      const newElement: Element = {
+                        id: 0,
+                        type: activeStep,
+                        description: input.value.trim(),
+                        created_at: new Date().toISOString(),
+                        failure_id: failure?.id ?? 0
+                      };
+                      const newDndElement: DndElement = {
+                        element: newElement,
+                        isSelected: true
+                      };
+                      setSelectedElements(prev => ({
+                        ...prev,
+                        [activeStep]: [...prev[activeStep], newDndElement]
+                      }));
+                      input.value = '';
+                    }
+                  }}
+                  className="flex gap-2"
+                >
+                  <input
+                    type="text"
+                    name="element"
+                    placeholder="新しい要素を入力"
+                    className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black text-sm text-black"
+                  />
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 text-sm w-20"
+                  >
+                    追加
+                  </button>
+                </form>
               </div>
             </div>
           </div>
@@ -411,14 +455,18 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
                   return;
                 }
                 setSaveLoading(true);
+                console.log("###############################################")
+                console.log(selectedElements)
                 createElements({
                   data: {
                     failure_id: failure.id,
-                    elements: selectedElements[activeStep].map(dndElement => dndElement.element)
+                    elements: Object.values(selectedElements)
+                      .flatMap((elements: DndElement[]) => elements.map((dndElement: DndElement) => dndElement.element))
                   }
                 }, {
                   onSuccess: () => {
-                    router.push('/failures');
+                    setSaveLoading(false);
+                    router.push(`/failures/${failure.id}`);
                   }
                 })
               }}

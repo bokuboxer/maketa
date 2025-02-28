@@ -50,7 +50,10 @@ class FailureController:
 
     def get_by_id(self, failure_id: int) -> schema.Failure | None:
         failure: model.Failure | None = (
-            self.db.query(model.Failure).filter(model.Failure.id == failure_id).first()
+            self.db.query(model.Failure)
+            .options(joinedload(model.Failure.elements))
+            .filter(model.Failure.id == failure_id)
+            .first()
         )
         return schema.to_schema_failure(failure) if failure else None
 
@@ -70,7 +73,7 @@ class ElementController:
             model.Element(
                 description=element.description,
                 type=element.type,
-                failure_id=element.failure_id,
+                failure_id=input.failure_id,
             )
             for element in input.elements
         ]
@@ -81,7 +84,11 @@ class ElementController:
             self.db.refresh(element)
 
         # failureのhas_elementsをTrueにする
-        failure = self.db.query(model.Failure).filter(model.Failure.id == input.failure_id).first()
+        failure = (
+            self.db.query(model.Failure)
+            .filter(model.Failure.id == input.failure_id)
+            .first()
+        )
         if failure:
             failure.has_analyzed = True
             self.db.commit()
