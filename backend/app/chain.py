@@ -7,12 +7,6 @@ import app.schema as schema
 import app.model as model
 from app.model import ElementType
 
-# ADVERSITY = "adversity"
-# BELIEF = "belief"
-# CONSEQUENCE = "consequence"
-# DISPUTATION = "disputation"
-# EFFECT = "effect"
-
 adversity_template = """あなたは人間の行動と失敗の分析の専門家です。
 ユーザーが入力した失敗事例について、以下の質問に短く答えてください。
 回答は後述のPydanticスキーマに従い、JSON形式で出力してください。
@@ -31,7 +25,6 @@ adversity_template = """あなたは人間の行動と失敗の分析の専門�
 
 【回答形式】
 - 各要素のtypeは必ず"adversity"を指定してください
-- idは質問番号（1-6）を指定してください
 - descriptionは質問への回答を1-2行で簡潔に記述してください
 
 {format_instructions}
@@ -54,7 +47,6 @@ belief_template = """あなたは人間の行動と失敗の分析の専門家�
 
 【回答形式】
 - 各要素のtypeは必ず"belief"を指定してください
-- idは質問番号（1〜5）を指定してください
 - descriptionは質問への回答を1-2行で簡潔に記述してください
 
 {format_instructions}
@@ -75,7 +67,6 @@ consequence_template = """あなたは人間の行動と失敗の分析の専門
 
 【回答形式】
 - 各要素のtypeは必ず"consequence"を指定してください。
-- idは質問番号（1〜3）を指定してください。
 - descriptionは質問への回答を1～2行で簡潔に記述してください。
 
 {format_instructions}
@@ -96,7 +87,6 @@ dispute_template = """あなたは人間の行動と失敗の分析の専門家�
 
 【回答形式】
 - 各要素のtypeは必ず"disputation"を指定してください。
-- idは質問番号（1〜3）を指定してください。
 - descriptionは質問への回答を1～2行で簡潔に記述してください。
 
 {format_instructions}
@@ -116,7 +106,6 @@ energy_template = """あなたは人間の行動と失敗の分析の専門家�
 
 【回答形式】
 - 各要素のtypeは必ず"effect"を指定してください。
-- idは質問番号（1〜2）を指定してください。
 - descriptionは質問への回答を1～2行で簡潔に記述してください。
 
 {format_instructions}
