@@ -223,8 +223,18 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
         
         <div className="mb-6">
           <div className="border rounded-lg p-3 bg-white">
-            <h2 className="font-semibold mb-2 text-black">失敗の内容</h2>
-            <p className="text-black text-sm">{failure?.description}</p>
+            <h2 className="font-semibold mb-2 text-black">
+              {activeStep === ElementType.adversity 
+                ? '失敗の内容'
+                : steps.find(step => step.type === steps[steps.findIndex(s => s.type === activeStep) - 1].type)?.label}
+            </h2>
+            <p className="text-black text-sm">
+              {activeStep === ElementType.adversity 
+                ? failure?.description
+                : selectedElements[steps[steps.findIndex(s => s.type === activeStep) - 1].type]
+                    .map(element => element.element.description)
+                    .join('\n')}
+            </p>
           </div>
         </div>
 
@@ -235,7 +245,6 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
               {steps.map((step, index) => (
                 <div key={step.type} className="flex flex-col items-center">
                   <button
-                    onClick={() => setActiveStep(step.type)}
                     className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
                       step.type === activeStep
                         ? 'bg-black border-black text-white'
@@ -361,7 +370,12 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
                 // TODO: 保存の処理を実装
                 router.push('/failures');
               }}
-              className="px-4 py-2 rounded bg-black text-white hover:bg-gray-800 flex items-center gap-2"
+              disabled={selectedElements[activeStep].length === 0}
+              className={`px-4 py-2 rounded flex items-center gap-2 ${
+                selectedElements[activeStep].length === 0
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-black text-white hover:bg-gray-800'
+              }`}
             >
               保存
               <IconDeviceFloppy size={20} />
@@ -369,7 +383,12 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
           ) : (
             <button
               onClick={handleNext}
-              className="px-4 py-2 rounded bg-black text-white hover:bg-gray-800 flex items-center gap-2"
+              disabled={selectedElements[activeStep].length === 0}
+              className={`px-4 py-2 rounded flex items-center gap-2 ${
+                selectedElements[activeStep].length === 0
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-black text-white hover:bg-gray-800'
+              }`}
             >
               次へ
               <IconArrowRight size={20} />
