@@ -10,15 +10,6 @@ import app.schema as schema
 # DISPUTATION = "disputation"
 # EFFECT = "effect"
 
-template = """あなたは人間の行動と失敗の分析の専門家です。以下の失敗事例を分析し、要因を見つけ、5種類の要因「不利な事態」「信念」「結果」「論争」「感情」に分類してください。
-
-失敗事例：
-{text}
-
-回答形式：
-{format_instructions}
-"""
-
 adversity_template = """あなたは人間の行動と失敗の分析の専門家です。
 ユーザーが入力した失敗事例について、以下の質問に短く答えてください。
 回答は後述のPydanticスキーマに従い、JSON形式で出力してください。
@@ -43,13 +34,36 @@ adversity_template = """あなたは人間の行動と失敗の分析の専門�
 {format_instructions}
 """
 
+belief_template = """あなたは人間の行動と失敗の分析の専門家です。
+ユーザーが入力した出来事について、以下の質問に短く答えてください。
+回答は後述のPydanticスキーマに従い、JSON形式で出力してください。
+推測や創作は最小限に抑えてください。
 
-class AnalyzeChain:
+【ユーザーが入力した出来事】
+{text}
+
+【質問】
+1. その出来事を思い出したとき、真っ先に頭に浮かんだ考えや思い込みは何ですか？
+2. それらの考えは、あなたの感情や行動にどんな影響を与えていますか？
+3. あなたを前向きにする（プラスに働く）考えは何ですか？
+4. あなたを苦しめる（マイナスに働く）考えは何ですか？
+5. 上記の考えを振り返って、改めて気づいたことはありますか？
+
+【回答形式】
+- 各要素のtypeは必ず"belief"を指定してください
+- idは質問番号（1〜5）を指定してください
+- descriptionは質問への回答を1-2行で簡潔に記述してください
+
+{format_instructions}
+"""
+
+
+class AdversityChain:
     def __init__(self, llm: ChatOpenAI):
         self.llm = llm
         json_parser = PydanticOutputParser(pydantic_object=schema.AnalysisResult)
         self.prompt = PromptTemplate(
-            template=template,
+            template=adversity_template,
             input_variables=["text"],
             partial_variables={
                 "format_instructions": json_parser.get_format_instructions()
@@ -61,12 +75,12 @@ class AnalyzeChain:
         return self.chain
 
 
-class AdversityChain:
+class BeliefChain:
     def __init__(self, llm: ChatOpenAI):
         self.llm = llm
         json_parser = PydanticOutputParser(pydantic_object=schema.AnalysisResult)
         self.prompt = PromptTemplate(
-            template=adversity_template,
+            template=belief_template,
             input_variables=["text"],
             partial_variables={
                 "format_instructions": json_parser.get_format_instructions()
