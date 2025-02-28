@@ -78,6 +78,47 @@ consequence_template = """あなたは人間の行動と失敗の分析の専門
 {format_instructions}
 """
 
+dispute_template = """あなたは人間の行動と失敗の分析の専門家です。
+直前のフェーズで整理された「信念」の内容を踏まえて、以下の質問に短く答えてください。
+回答は後述のPydanticスキーマに従い、JSON形式で出力してください。
+推測や創作は最小限に抑え、実際に見受けられる事実や考えに基づいて回答してください。
+
+【前のステップで整理された信念】
+{text}
+
+【質問】
+1. この信念が本当だと考える根拠や証拠は何ですか？具体的な事実や理由を教えてください。
+2. この信念があなたにどんな影響を与えているか、役に立っている点と、逆に困らせている点を分けて書いてください。
+3. 現在の信念を置き換えるために、どのような前向きで自己向上的な考えを採用できますか？具体的に一つ挙げてください。
+
+【回答形式】
+- 各要素のtypeは必ず"disputation"を指定してください。
+- idは質問番号（1〜3）を指定してください。
+- descriptionは質問への回答を1～2行で簡潔に記述してください。
+
+{format_instructions}
+"""
+
+energy_template = """あなたは人間の行動と失敗の分析の専門家です。
+直前のDisputeフェーズで整理された新しい信念とその反応を踏まえて、以下の質問に短く答えてください。
+回答は後述のPydanticスキーマに従い、JSON形式で出力してください。
+推測や創作は最小限に抑え、実際に感じたことに基づいて回答してください。
+
+【前のステップで整理された新しい信念とその反応】
+{text}
+
+【質問】
+1. 新しい信念を受け入れた結果、あなたはどのような前向きな考え方を持てるようになりましたか？具体的な例を1つ挙げてください。
+2. 新しい信念に変わったことで、あなたの気持ちやエネルギーはどのように変わりましたか？（例：安心感、希望、活力が増したなど）
+
+【回答形式】
+- 各要素のtypeは必ず"effect"を指定してください。
+- idは質問番号（1〜2）を指定してください。
+- descriptionは質問への回答を1～2行で簡潔に記述してください。
+
+{format_instructions}
+"""
+
 
 class AdversityChain:
     def __init__(self, llm: ChatOpenAI):
@@ -119,6 +160,40 @@ class ConsequenceChain:
         json_parser = PydanticOutputParser(pydantic_object=schema.AnalysisResult)
         self.prompt = PromptTemplate(
             template=consequence_template,
+            input_variables=["text"],
+            partial_variables={
+                "format_instructions": json_parser.get_format_instructions()
+            },
+        )
+        self.chain = self.prompt | self.llm | json_parser
+
+    def get_chain(self):
+        return self.chain
+
+
+class DisputeChain:
+    def __init__(self, llm: ChatOpenAI):
+        self.llm = llm
+        json_parser = PydanticOutputParser(pydantic_object=schema.AnalysisResult)
+        self.prompt = PromptTemplate(
+            template=dispute_template,
+            input_variables=["text"],
+            partial_variables={
+                "format_instructions": json_parser.get_format_instructions()
+            },
+        )
+        self.chain = self.prompt | self.llm | json_parser
+
+    def get_chain(self):
+        return self.chain
+
+
+class EnergyChain:
+    def __init__(self, llm: ChatOpenAI):
+        self.llm = llm
+        json_parser = PydanticOutputParser(pydantic_object=schema.AnalysisResult)
+        self.prompt = PromptTemplate(
+            template=energy_template,
             input_variables=["text"],
             partial_variables={
                 "format_instructions": json_parser.get_format_instructions()
