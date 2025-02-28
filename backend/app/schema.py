@@ -40,6 +40,15 @@ class AnalyzeInput(BaseModel):
     text: str
 
 
+class SummarizeInput(BaseModel):
+    elements: list[Element]
+    analysis_type: model.ElementType
+
+
+class SummaryResult(BaseModel):
+    summary: str
+
+
 class CreateUserInput(BaseModel):
     firebase_uid: str
     email: str

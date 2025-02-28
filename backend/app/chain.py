@@ -4,6 +4,7 @@ from langchain_openai import ChatOpenAI
 from typing import List
 
 import app.schema as schema
+import app.model as model
 from app.model import ElementType
 
 # ADVERSITY = "adversity"
@@ -322,6 +323,21 @@ class ChainManager:
             }
         )
         return result, summary
+
+    def summarize(
+        self, elements: list[schema.Element], analysis_type: model.ElementType
+    ) -> str:
+        """
+        選択された要素を要約して一つの文章にまとめます。
+        """
+        elements_text = self.summary_chain.format_elements(elements)
+        summary = self.summary_chain.get_chain().invoke(
+            {
+                "analysis_type": analysis_type.value,
+                "elements_text": elements_text,
+            }
+        )
+        return summary
 
     def analyze_full_chain(
         self, initial_text: str
