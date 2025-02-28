@@ -2,7 +2,6 @@ from sqlalchemy.orm import Session, joinedload
 
 import app.model as model
 import app.schema as schema
-from app.chain import AnalyzeChain
 
 
 class UserController:
@@ -35,9 +34,8 @@ class UserController:
 
 
 class FailureController:
-    def __init__(self, db: Session, analyze_chain: AnalyzeChain):
+    def __init__(self, db: Session):
         self.db = db
-        self.analyze_chain = analyze_chain
 
     def create(self, input: schema.CreateFailureInput) -> None:
         failure: model.Failure = model.Failure(
@@ -56,41 +54,10 @@ class FailureController:
         )
         return schema.to_schema_failure(failure) if failure else None
 
-    def analyze(self, failure_id: int) -> schema.Failure | None:
-        failure: model.Failure | None = (
-            self.db.query(model.Failure)
-            .options(joinedload(model.Failure.elements))
-            .filter(model.Failure.id == failure_id)
-            .first()
-        )
-        if not failure:
-            return None
-
-        if failure.has_analyzed:
-            return schema.to_schema_failure(failure)
-
-        result = self.analyze_chain.get_chain().invoke({"text": failure.description})
-
-        # 分析結果から要素を作成
-        for element_data in result.elements:
-            element = model.Element(
-                description=element_data.description,
-                type=element_data.type,
-                failure_id=failure.id,
-            )
-            self.db.add(element)
-
-        failure.has_analyzed = True
-        self.db.commit()
-        self.db.refresh(failure)
-
-        return schema.to_schema_failure(failure)
-
 
 class ElementController:
-    def __init__(self, db: Session, analyze_chain: AnalyzeChain):
+    def __init__(self, db: Session):
         self.db = db
-        self.analyze_chain = analyze_chain
 
     def suggest(self, failure_id: int) -> list[schema.Element] | None:
         failure: model.Failure | None = (
@@ -100,11 +67,7 @@ class ElementController:
         if not failure:
             return None
 
-        result: schema.AnalysisResult = self.analyze_chain.get_chain().invoke(
-            {"text": failure.description}
-        )
-
-        return result.elements
+        return None
 
     def bulk_create(self, input: schema.CreateElementInput) -> None:
         elements = [

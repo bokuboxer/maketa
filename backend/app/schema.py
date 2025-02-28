@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 import app.model as model
 
@@ -12,8 +12,7 @@ class Element(BaseModel):
     created_at: datetime
     failure_id: int
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class Failure(BaseModel):
@@ -23,8 +22,7 @@ class Failure(BaseModel):
     conclusion: str | None
     elements: list[Element]
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class User(BaseModel):
@@ -35,12 +33,20 @@ class User(BaseModel):
     created_at: datetime
     failures: list[Failure]
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class AnalyzeInput(BaseModel):
     text: str
+
+
+class SummarizeInput(BaseModel):
+    elements: list[Element]
+    analysis_type: model.ElementType
+
+
+class SummaryResult(BaseModel):
+    summary: str
 
 
 class CreateUserInput(BaseModel):
