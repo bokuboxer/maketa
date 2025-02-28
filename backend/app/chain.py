@@ -57,6 +57,27 @@ belief_template = """あなたは人間の行動と失敗の分析の専門家�
 {format_instructions}
 """
 
+consequence_template = """あなたは人間の行動と失敗の分析の専門家です。
+直前のフェーズで整理された「信念」の内容を踏まえて、以下の質問に短く答えてください。
+回答は後述のPydanticスキーマに従い、JSON形式で出力してください。
+推測や創作は最小限に抑えてください。
+
+【前のステップで整理された信念】
+{text}
+
+【質問】
+1. この信念を感じたとき、どんな感情が湧きましたか？（例: 怒り、悲しみ、不安、フラストレーション、自哀など）
+2. その感情が、あなたの気分や行動にどのような影響を与えましたか？
+3. 信念に基づいた結果、どんな行動をとりましたか？（例: 飲酒、攻撃、沈み込み、引きこもりなど）
+
+【回答形式】
+- 各要素のtypeは必ず"consequence"を指定してください。
+- idは質問番号（1〜3）を指定してください。
+- descriptionは質問への回答を1～2行で簡潔に記述してください。
+
+{format_instructions}
+"""
+
 
 class AdversityChain:
     def __init__(self, llm: ChatOpenAI):
@@ -81,6 +102,23 @@ class BeliefChain:
         json_parser = PydanticOutputParser(pydantic_object=schema.AnalysisResult)
         self.prompt = PromptTemplate(
             template=belief_template,
+            input_variables=["text"],
+            partial_variables={
+                "format_instructions": json_parser.get_format_instructions()
+            },
+        )
+        self.chain = self.prompt | self.llm | json_parser
+
+    def get_chain(self):
+        return self.chain
+
+
+class ConsequenceChain:
+    def __init__(self, llm: ChatOpenAI):
+        self.llm = llm
+        json_parser = PydanticOutputParser(pydantic_object=schema.AnalysisResult)
+        self.prompt = PromptTemplate(
+            template=consequence_template,
             input_variables=["text"],
             partial_variables={
                 "format_instructions": json_parser.get_format_instructions()
