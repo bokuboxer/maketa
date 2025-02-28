@@ -36,6 +36,13 @@ class User(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class SuggestInput(BaseModel):
+    failure_id: int
+    text: str
+    elements: list[Element]
+    type: model.ElementType
+
+
 class AnalyzeInput(BaseModel):
     text: str
 

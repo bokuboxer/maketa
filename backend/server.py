@@ -1,10 +1,6 @@
 import app.schema as schema
-from app.controller import (
-    ElementController,
-    FailureController,
-    UserController,
-)
-from app.chain import ChainManager
+from app.chain import ChainManager, SuggestChain
+from app.controller import ElementController, FailureController, UserController
 from app.database import get_db
 from dotenv import load_dotenv
 from fastapi import FastAPI
@@ -29,10 +25,10 @@ app.add_middleware(
 
 db = get_db()
 chain_manager = ChainManager(llm)
-# analyze_chain = AnalyzeChain(llm)
+suggest_chain = SuggestChain(llm)
 user_controller = UserController(db)
 failure_controller = FailureController(db)
-element_controller = ElementController(db)
+element_controller = ElementController(db, suggest_chain)
 
 
 @app.post("/users")
@@ -58,8 +54,8 @@ async def create_failure(input: schema.CreateFailureInput) -> None:
 
 
 @app.post("/elements/suggest")
-async def suggest_elements(failure_id: int) -> list[schema.Element] | None:
-    return element_controller.suggest(failure_id)
+async def suggest_elements(input: schema.SuggestInput) -> list[schema.Element] | None:
+    return element_controller.suggest(input)
 
 
 @app.post("/elements")
@@ -67,34 +63,34 @@ async def bulk_create_elements(input: schema.CreateElementInput) -> None:
     return element_controller.bulk_create(input)
 
 
-@app.post("/chain/adversity/suggest")
-async def suggest_adversity(input: schema.AnalyzeInput) -> schema.AnalysisResult:
-    result, _ = chain_manager.analyze_adversity(input.text)
-    return result
+# @app.post("/chain/adversity/suggest")
+# async def suggest_adversity(input: schema.AnalyzeInput) -> schema.AnalysisResult:
+#     result, _ = chain_manager.analyze_adversity(input.text)
+#     return result
 
 
-@app.post("/chain/belief/suggest")
-async def suggest_belief(input: schema.AnalyzeInput) -> schema.AnalysisResult:
-    result, _ = chain_manager.analyze_belief(input.text)
-    return result
+# @app.post("/chain/belief/suggest")
+# async def suggest_belief(input: schema.AnalyzeInput) -> schema.AnalysisResult:
+#     result, _ = chain_manager.analyze_belief(input.text)
+#     return result
 
 
-@app.post("/chain/consequence/suggest")
-async def suggest_consequence(input: schema.AnalyzeInput) -> schema.AnalysisResult:
-    result, _ = chain_manager.analyze_consequence(input.text)
-    return result
+# @app.post("/chain/consequence/suggest")
+# async def suggest_consequence(input: schema.AnalyzeInput) -> schema.AnalysisResult:
+#     result, _ = chain_manager.analyze_consequence(input.text)
+#     return result
 
 
-@app.post("/chain/dispute/suggest")
-async def suggest_dispute(input: schema.AnalyzeInput) -> schema.AnalysisResult:
-    result, _ = chain_manager.analyze_dispute(input.text)
-    return result
+# @app.post("/chain/dispute/suggest")
+# async def suggest_dispute(input: schema.AnalyzeInput) -> schema.AnalysisResult:
+#     result, _ = chain_manager.analyze_dispute(input.text)
+#     return result
 
 
-@app.post("/chain/energy/suggest")
-async def suggest_energy(input: schema.AnalyzeInput) -> schema.AnalysisResult:
-    result, _ = chain_manager.analyze_energy(input.text)
-    return result
+# @app.post("/chain/energy/suggest")
+# async def suggest_energy(input: schema.AnalyzeInput) -> schema.AnalysisResult:
+#     result, _ = chain_manager.analyze_energy(input.text)
+#     return result
 
 
 @app.post("/chain/summarize")

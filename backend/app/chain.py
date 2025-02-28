@@ -1,145 +1,73 @@
-from langchain_core.output_parsers import PydanticOutputParser
-from langchain_core.prompts import PromptTemplate
-from langchain_openai import ChatOpenAI
 from typing import List
 
-import app.schema as schema
 import app.model as model
-from app.model import ElementType
+import app.schema as schema
+from app.template import (
+    adversity_template,
+    belief_template,
+    consequence_template,
+    dispute_template,
+    energy_template,
+    summary_template,
+)
+from langchain_core.output_parsers import PydanticOutputParser, StrOutputParser
+from langchain_core.prompts import PromptTemplate
+from langchain_openai import ChatOpenAI
 
-adversity_template = """あなたは人間の行動と失敗の分析の専門家です。
-ユーザーが入力した失敗事例について、以下の質問に短く答えてください。
-回答は後述のPydanticスキーマに従い、JSON形式で出力してください。
-推測や創作は最小限に抑えてください。
+template_map = {
+    model.ElementType.ADVERSITY: adversity_template,
+    model.ElementType.BELIEF: belief_template,
+    model.ElementType.CONSEQUENCE: consequence_template,
+    model.ElementType.DISPUTATION: dispute_template,
+    model.ElementType.EFFECT: energy_template,
+}
 
-【失敗事例】
-{text}
 
-【質問】
-1. 出来事を一言で表すと何ですか？
-2. 何が起こったのですか？
-3. 自分は何をしましたか？
-4. 他の人は何をしましたか？
-5. どんな考えが頭に浮かびましたか？
-6. どんな感情を感じていましたか？
+class SuggestChain:
+    def __init__(self, llm: ChatOpenAI):
+        self.llm = llm
+        self.json_parser = PydanticOutputParser(pydantic_object=schema.AnalysisResult)
+        self.summarize_prompt = PromptTemplate(
+            template=summary_template,
+            input_variables=["analysis_type", "elements_text"],
+            partial_variables={
+                "format_instructions": "出力は自然な文章形式でお願いします。引用符（「」）で囲んでください。"
+            },
+        )
+        self.summarize_chain = self.summarize_prompt | self.llm | StrOutputParser()
 
-【回答形式】
-- 各要素のtypeは必ず"adversity"を指定してください
-- descriptionは質問への回答を1-2行で簡潔に記述してください
+    def run(self, input: schema.SuggestInput) -> schema.AnalysisResult:
+        prompt = PromptTemplate(
+            template=template_map[input.type],
+            input_variables=["text"],
+            partial_variables={
+                "format_instructions": self.json_parser.get_format_instructions()
+            },
+        )
+        chain = prompt | self.llm | self.json_parser
 
-{format_instructions}
-"""
+        # Adversityの場合は、直接分析を行う
+        if input.type == model.ElementType.ADVERSITY:
+            return chain.invoke({"text": input.text})
 
-belief_template = """あなたは人間の行動と失敗の分析の専門家です。
-ユーザーが入力した出来事について、以下の質問に短く答えてください。
-回答は後述のPydanticスキーマに従い、JSON形式で出力してください。
-推測や創作は最小限に抑えてください。
+        # それ以外の場合は、要素を要約してから分析を行う
+        summarized_text = self.summarize_chain.invoke(
+            {
+                "analysis_type": input.type.value,
+                "elements_text": self.format_elements(input.elements),
+            }
+        )
+        summarize_and_suggest = self.summarize_chain | chain
 
-【ユーザーが入力した出来事】
-{text}
+        return summarize_and_suggest.invoke({"text": summarized_text})
 
-【質問】
-1. その出来事を思い出したとき、真っ先に頭に浮かんだ考えや思い込みは何ですか？
-2. それらの考えは、あなたの感情や行動にどんな影響を与えていますか？
-3. あなたを前向きにする（プラスに働く）考えは何ですか？
-4. あなたを苦しめる（マイナスに働く）考えは何ですか？
-5. 上記の考えを振り返って、改めて気づいたことはありますか？
-
-【回答形式】
-- 各要素のtypeは必ず"belief"を指定してください
-- descriptionは質問への回答を1-2行で簡潔に記述してください
-
-{format_instructions}
-"""
-
-consequence_template = """あなたは人間の行動と失敗の分析の専門家です。
-直前のフェーズで整理された「信念」の内容を踏まえて、以下の質問に短く答えてください。
-回答は後述のPydanticスキーマに従い、JSON形式で出力してください。
-推測や創作は最小限に抑えてください。
-
-【前のステップで整理された信念】
-{text}
-
-【質問】
-1. この信念を感じたとき、どんな感情が湧きましたか？（例: 怒り、悲しみ、不安、フラストレーション、自哀など）
-2. その感情が、あなたの気分や行動にどのような影響を与えましたか？
-3. 信念に基づいた結果、どんな行動をとりましたか？（例: 飲酒、攻撃、沈み込み、引きこもりなど）
-
-【回答形式】
-- 各要素のtypeは必ず"consequence"を指定してください。
-- descriptionは質問への回答を1～2行で簡潔に記述してください。
-
-{format_instructions}
-"""
-
-dispute_template = """あなたは人間の行動と失敗の分析の専門家です。
-直前のフェーズで整理された「信念」の内容を踏まえて、以下の質問に短く答えてください。
-回答は後述のPydanticスキーマに従い、JSON形式で出力してください。
-推測や創作は最小限に抑え、実際に見受けられる事実や考えに基づいて回答してください。
-
-【前のステップで整理された信念】
-{text}
-
-【質問】
-1. この信念が本当だと考える根拠や証拠は何ですか？具体的な事実や理由を教えてください。
-2. この信念があなたにどんな影響を与えているか、役に立っている点と、逆に困らせている点を分けて書いてください。
-3. 現在の信念を置き換えるために、どのような前向きで自己向上的な考えを採用できますか？具体的に一つ挙げてください。
-
-【回答形式】
-- 各要素のtypeは必ず"disputation"を指定してください。
-- descriptionは質問への回答を1～2行で簡潔に記述してください。
-
-{format_instructions}
-"""
-
-energy_template = """あなたは人間の行動と失敗の分析の専門家です。
-直前のDisputeフェーズで整理された新しい信念とその反応を踏まえて、以下の質問に短く答えてください。
-回答は後述のPydanticスキーマに従い、JSON形式で出力してください。
-推測や創作は最小限に抑え、実際に感じたことに基づいて回答してください。
-
-【前のステップで整理された新しい信念とその反応】
-{text}
-
-【質問】
-1. 新しい信念を受け入れた結果、あなたはどのような前向きな考え方を持てるようになりましたか？具体的な例を1つ挙げてください。
-2. 新しい信念に変わったことで、あなたの気持ちやエネルギーはどのように変わりましたか？（例：安心感、希望、活力が増したなど）
-
-【回答形式】
-- 各要素のtypeは必ず"effect"を指定してください。
-- descriptionは質問への回答を1～2行で簡潔に記述してください。
-
-{format_instructions}
-"""
-
-summary_template = """あなたは人間の行動と失敗の分析の専門家です。
-以下の分析結果を、次のステップで使いやすいように要約してください。
-各要素の関連性を考慮し、自然な文章としてまとめてください。
-
-【分析タイプ】
-{analysis_type}
-
-【分析結果】
-{elements_text}
-
-【回答形式】
-- 分析結果の要素を有機的につなげ、一連の流れのある文章として記述してください
-- 各要素の本質的な内容を損なわないように注意してください
-- 単なる箇条書きの言い換えは避け、要素間の関係性や因果関係が分かるように記述してください
-- 文章は3-4文程度で簡潔にまとめてください
-
-【出力例】
-（Adversityの場合）
-「重要な会議での提案に向けて十分な準備ができていなかったため、上司の前で慌てた説明となってしまいました。
-その結果、提案内容が適切に伝わらず、承認を得ることができませんでした。
-この状況で自分は不安と焦りを感じ、周囲からの評価も気になっていました。」
-
-（Beliefの場合）
-「この失敗により自分の能力不足を痛感し、プロフェッショナルとしての自信が揺らいでいます。
-昇進への影響も心配であり、もっと早くから準備すべきだったという後悔が残っています。
-一方で、この経験を次回の成功につなげたいという前向きな意識も芽生えています。」
-
-{format_instructions}
-"""
+    def format_elements(self, elements: List[schema.Element]) -> str:
+        # 要素を番号順にソート
+        sorted_elements = sorted(elements, key=lambda x: x.id)
+        # テキスト形式に整形
+        return "\n".join(
+            [f"{element.id}. {element.description}" for element in sorted_elements]
+        )
 
 
 class AdversityChain:

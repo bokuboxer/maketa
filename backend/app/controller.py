@@ -1,7 +1,7 @@
-from sqlalchemy.orm import Session, joinedload
-
 import app.model as model
 import app.schema as schema
+from app.chain import SuggestChain
+from sqlalchemy.orm import Session, joinedload
 
 
 class UserController:
@@ -56,18 +56,23 @@ class FailureController:
 
 
 class ElementController:
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, chain: SuggestChain):
         self.db = db
+        self.chain = chain
 
-    def suggest(self, failure_id: int) -> list[schema.Element] | None:
+    def suggest(self, input: schema.SuggestInput) -> list[schema.Element] | None:
         failure: model.Failure | None = (
-            self.db.query(model.Failure).filter(model.Failure.id == failure_id).first()
+            self.db.query(model.Failure)
+            .filter(model.Failure.id == input.failure_id)
+            .first()
         )
 
         if not failure:
             return None
 
-        return None
+        result = self.chain.run(input)
+
+        return result.elements
 
     def bulk_create(self, input: schema.CreateElementInput) -> None:
         elements = [
@@ -84,4 +89,5 @@ class ElementController:
         for element in elements:
             self.db.refresh(element)
 
+        return None
         return None
