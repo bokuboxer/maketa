@@ -116,7 +116,7 @@ export default function Failures() {
             <h1 className="text-2xl font-bold text-black">失敗カード一覧</h1>
             <button
               onClick={open}
-              className="px-3 py-1.5 bg-black text-white rounded-lg hover:bg-gray-800 text-sm"
+              className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
             >
               新規作成
             </button>
