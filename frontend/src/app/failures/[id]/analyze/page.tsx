@@ -5,7 +5,7 @@ import { Element } from '@/api/model/element';
 import { ElementType } from '@/api/model/elementType';
 import { DragDropContext, Draggable, DraggableProvided, DropResult, Droppable, DroppableProvided } from '@hello-pangea/dnd';
 import { Loader } from '@mantine/core';
-import { IconArrowLeft } from '@tabler/icons-react';
+import { IconArrowLeft, IconArrowRight, IconDeviceFloppy } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useState } from 'react';
 
@@ -346,25 +346,35 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
           <button
             onClick={handlePrev}
             disabled={activeStep === ElementType.adversity}
-            className={`px-4 py-2 rounded ${
+            className={`px-4 py-2 rounded flex items-center gap-2 ${
               activeStep === ElementType.adversity
                 ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                 : 'bg-black text-white hover:bg-gray-800'
             }`}
           >
+            <IconArrowLeft size={20} />
             前へ
           </button>
-          <button
-            onClick={handleNext}
-            disabled={activeStep === ElementType.effect}
-            className={`px-4 py-2 rounded ${
-              activeStep === ElementType.effect
-                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                : 'bg-black text-white hover:bg-gray-800'
-            }`}
-          >
-            次へ
-          </button>
+          {activeStep === ElementType.effect ? (
+            <button
+              onClick={() => {
+                // TODO: 保存の処理を実装
+                router.push('/failures');
+              }}
+              className="px-4 py-2 rounded bg-black text-white hover:bg-gray-800 flex items-center gap-2"
+            >
+              保存
+              <IconDeviceFloppy size={20} />
+            </button>
+          ) : (
+            <button
+              onClick={handleNext}
+              className="px-4 py-2 rounded bg-black text-white hover:bg-gray-800 flex items-center gap-2"
+            >
+              次へ
+              <IconArrowRight size={20} />
+            </button>
+          )}
         </div>
       </div>
     </div>
