@@ -8,7 +8,6 @@ import type { Element } from './element';
 import type { ElementType } from './elementType';
 
 export interface SuggestInput {
-  failure_id: number;
   text: string;
   elements: Element[];
   type: ElementType;

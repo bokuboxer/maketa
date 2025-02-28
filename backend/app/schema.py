@@ -37,7 +37,6 @@ class User(BaseModel):
 
 
 class SuggestInput(BaseModel):
-    failure_id: int
     text: str
     elements: list[Element]
     type: model.ElementType
@@ -71,6 +70,7 @@ class CreateFailureInput(BaseModel):
 
 
 class CreateElementInput(BaseModel):
+    failure_id: int
     elements: list[Element]
 
 

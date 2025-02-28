@@ -61,15 +61,6 @@ class ElementController:
         self.chain = chain
 
     def suggest(self, input: schema.SuggestInput) -> list[schema.Element] | None:
-        failure: model.Failure | None = (
-            self.db.query(model.Failure)
-            .filter(model.Failure.id == input.failure_id)
-            .first()
-        )
-
-        if not failure:
-            return None
-
         result = self.chain.run(input)
 
         return result.elements
@@ -89,5 +80,11 @@ class ElementController:
         for element in elements:
             self.db.refresh(element)
 
-        return None
+        # failureのhas_elementsをTrueにする
+        failure = self.db.query(model.Failure).filter(model.Failure.id == input.failure_id).first()
+        if failure:
+            failure.has_analyzed = True
+            self.db.commit()
+            self.db.refresh(failure)
+
         return None

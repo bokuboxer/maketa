@@ -1,6 +1,6 @@
 'use client';
 
-import { useGetFailureByIdFailureFailureIdGet, useSuggestElementsElementsSuggestPost } from '@/api/generated/default/default';
+import { useGetFailureByIdFailureFailureIdGet, useSuggestElementsElementsSuggestPost, useBulkCreateElementsElementsPost } from '@/api/generated/default/default';
 import { Element } from '@/api/model/element';
 import { ElementType } from '@/api/model/elementType';
 import { DragDropContext, Draggable, DraggableProvided, DropResult, Droppable, DroppableProvided } from '@hello-pangea/dnd';
@@ -8,7 +8,7 @@ import { Loader } from '@mantine/core';
 import { IconArrowLeft, IconArrowRight, IconDeviceFloppy } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useState } from 'react';
-
+import HypnoticLoader from '@/components/HypnoticLoader';
 interface PageParams {
 	id: string;
 }
@@ -30,6 +30,7 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
   const resolvedParams = use(params);
 	const { data: failure, isLoading: isFailureLoading } = useGetFailureByIdFailureFailureIdGet(Number(resolvedParams.id))
   const {mutate: suggestElements} = useSuggestElementsElementsSuggestPost()
+  const {mutate: createElements} = useBulkCreateElementsElementsPost()
 	const [loading, setLoading] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [activeStep, setActiveStep] = useState<ElementType>(ElementType.adversity);
@@ -48,48 +49,44 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
     effect: [],
   });
 	const router = useRouter();
+  const [nextLoading, setNextLoading] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
+
+  const fetchSuggestElements = async (element_type: ElementType, text: string, elements: Element[]) => {
+    suggestElements({ 
+      data: {
+        type: element_type,
+        text: text,
+        elements: elements
+      }
+    }, {
+      onSuccess: (data) => {
+        if (data) {
+          const dndElements = data.map(element => ({
+            element,
+            isSelected: false
+          }));
+          
+          setSuggestedElements(prev => ({
+            ...prev,
+            [element_type]: dndElements
+          }));
+
+          setSelectedElements(prev => ({
+            ...prev,
+            [element_type]: []
+          }));
+        }
+        setLoading(false);
+      },
+    });
+  };
 
   useEffect(() => {
-    const fetchSuggestElements = async () => {
-      suggestElements({ 
-        params: { failure_id: Number(resolvedParams.id) }
-      }, {
-        onSuccess: (data) => {
-          if (data) {
-            const grouped = data.reduce<GroupedElements>(
-              (acc, element) => {
-                const dndElement: DndElement = {
-                  element,
-                  isSelected: false
-                };
-                if (element.type === ElementType.adversity) acc.adversity.push(dndElement);
-                if (element.type === ElementType.belief) acc.belief.push(dndElement);
-                if (element.type === ElementType.consequence) acc.consequence.push(dndElement);
-                if (element.type === ElementType.disputation) acc.disputation.push(dndElement);
-                if (element.type === ElementType.effect) acc.effect.push(dndElement);
-                return acc;
-              },
-              { adversity: [], belief: [], consequence: [], disputation: [], effect: [] }
-            );
-
-            // 全ての要素を推測された要素として設定
-            setSuggestedElements(grouped);
-
-            // 選択された要素は空で初期化
-            setSelectedElements({
-              adversity: [],
-              belief: [],
-              consequence: [],
-              disputation: [],
-              effect: [],
-            });
-          }
-          setLoading(false);
-        },
-      });
-    };
-    fetchSuggestElements();
-  }, [resolvedParams.id]);
+    if (failure?.description) {
+      fetchSuggestElements(ElementType.adversity, failure?.description, []);
+    }
+  }, [failure?.description]);
 
   const handleDragStart = () => {
     setIsDragging(true);
@@ -186,10 +183,46 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
     },
   ];
 
-  const handleNext = () => {
+  const handleNext = async () => {
     const currentIndex = steps.findIndex(step => step.type === activeStep);
     if (currentIndex < steps.length - 1) {
-      setActiveStep(steps[currentIndex + 1].type);
+      const nextStep = steps[currentIndex + 1].type;
+      setNextLoading(true);
+      
+      // 現在のselectedElementsを入力として次のステップの要素を取得
+      const currentElements = selectedElements[activeStep].map(dndElement => dndElement.element);
+      
+      await new Promise((resolve) => {
+        suggestElements({ 
+          data: {
+            type: nextStep,
+            text: "",
+            elements: currentElements
+          }
+        }, {
+          onSuccess: (data) => {
+            if (data) {
+              const dndElements = data.map(element => ({
+                element,
+                isSelected: false
+              }));
+              
+              setSuggestedElements(prev => ({
+                ...prev,
+                [nextStep]: dndElements
+              }));
+
+              setSelectedElements(prev => ({
+                ...prev,
+                [nextStep]: []
+              }));
+            }
+            setNextLoading(false);
+            setActiveStep(nextStep);
+            resolve(undefined);
+          },
+        });
+      });
     }
   };
 
@@ -203,7 +236,14 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
   if (isFailureLoading || loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <Loader color="black" size="lg" variant="dots" />
+        <HypnoticLoader 
+          size={250}
+          color="black"
+          secondaryColor="gray"
+          text="分析中"
+          isLoading={isFailureLoading || loading}
+          ringCount={5}
+        />
       </div>
     );
   }
@@ -367,31 +407,59 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
           {activeStep === ElementType.effect ? (
             <button
               onClick={() => {
-                // TODO: 保存の処理を実装
-                router.push('/failures');
+                if (!failure?.id) {
+                  return;
+                }
+                setSaveLoading(true);
+                createElements({
+                  data: {
+                    failure_id: failure.id,
+                    elements: selectedElements[activeStep].map(dndElement => dndElement.element)
+                  }
+                }, {
+                  onSuccess: () => {
+                    router.push('/failures');
+                  }
+                })
               }}
-              disabled={selectedElements[activeStep].length === 0}
+              disabled={selectedElements[activeStep].length === 0 || saveLoading}
               className={`px-4 py-2 rounded flex items-center gap-2 ${
-                selectedElements[activeStep].length === 0
+                selectedElements[activeStep].length === 0 || saveLoading
                   ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                   : 'bg-black text-white hover:bg-gray-800'
               }`}
             >
-              保存
-              <IconDeviceFloppy size={20} />
+              {saveLoading ? (
+                <div className="w-5 h-5 flex items-center justify-center">
+                  <Loader color="gray" variant="dots" size="xs" />
+                </div>
+              ) : (
+                <>
+                  保存
+                  <IconDeviceFloppy size={20} />
+                </>
+              )}
             </button>
           ) : (
             <button
               onClick={handleNext}
-              disabled={selectedElements[activeStep].length === 0}
+              disabled={selectedElements[activeStep].length === 0 || nextLoading}
               className={`px-4 py-2 rounded flex items-center gap-2 ${
-                selectedElements[activeStep].length === 0
+                selectedElements[activeStep].length === 0 || nextLoading
                   ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                   : 'bg-black text-white hover:bg-gray-800'
               }`}
             >
-              次へ
-              <IconArrowRight size={20} />
+              {nextLoading ? (
+                  <div className="w-5 h-5 flex items-center justify-center">
+                    <Loader color="gray" variant="dots" size="xs" />
+                  </div>
+              ) : (
+                <>
+                  次へ
+                  <IconArrowRight size={20} />
+                </>
+              )}
             </button>
           )}
         </div>

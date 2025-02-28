@@ -34,9 +34,7 @@ import type {
   GetUserByFirebaseUidUserFirebaseUidGet200,
   HTTPValidationError,
   SuggestElementsElementsSuggestPost200,
-  SuggestInput,
-  SummarizeInput,
-  SummaryResult
+  SuggestInput
 } from '../../model'
 import { customAxios } from '../../mutator';
 
@@ -601,70 +599,6 @@ export const useBulkCreateElementsElementsPost = <TError = HTTPValidationError,
       > => {
 
       const mutationOptions = getBulkCreateElementsElementsPostMutationOptions(options);
-
-      return useMutation(mutationOptions);
-    }
-    /**
- * @summary Summarize Elements
- */
-export const summarizeElementsChainSummarizePost = (
-    summarizeInput: SummarizeInput,
- signal?: AbortSignal
-) => {
-      
-      
-      return customAxios<SummaryResult>(
-      {url: `/chain/summarize`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: summarizeInput, signal
-    },
-      );
-    }
-  
-
-
-export const getSummarizeElementsChainSummarizePostMutationOptions = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof summarizeElementsChainSummarizePost>>, TError,{data: SummarizeInput}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof summarizeElementsChainSummarizePost>>, TError,{data: SummarizeInput}, TContext> => {
-    
-const mutationKey = ['summarizeElementsChainSummarizePost'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof summarizeElementsChainSummarizePost>>, {data: SummarizeInput}> = (props) => {
-          const {data} = props ?? {};
-
-          return  summarizeElementsChainSummarizePost(data,)
-        }
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type SummarizeElementsChainSummarizePostMutationResult = NonNullable<Awaited<ReturnType<typeof summarizeElementsChainSummarizePost>>>
-    export type SummarizeElementsChainSummarizePostMutationBody = SummarizeInput
-    export type SummarizeElementsChainSummarizePostMutationError = HTTPValidationError
-
-    /**
- * @summary Summarize Elements
- */
-export const useSummarizeElementsChainSummarizePost = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof summarizeElementsChainSummarizePost>>, TError,{data: SummarizeInput}, TContext>, }
-): UseMutationResult<
-        Awaited<ReturnType<typeof summarizeElementsChainSummarizePost>>,
-        TError,
-        {data: SummarizeInput},
-        TContext
-      > => {
-
-      const mutationOptions = getSummarizeElementsChainSummarizePostMutationOptions(options);
 
       return useMutation(mutationOptions);
     }

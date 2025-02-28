@@ -7,5 +7,6 @@
 import type { Element } from './element';
 
 export interface CreateElementInput {
+  failure_id: number;
   elements: Element[];
 }
