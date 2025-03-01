@@ -158,31 +158,31 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
     { 
       type: ElementType.adversity, 
       label: '逆境', 
-      description: '失敗の原因となった状況や出来事を選択してください',
+      description: '失敗の詳細を入力してください',
       example: '例：\n・締め切りに間に合わなかった\n・顧客からのクレームを受けた\n・チームメンバーと意見が合わなかった'
     },
     { 
       type: ElementType.belief, 
       label: '信念', 
-      description: 'その状況で抱いた考えや思い込みを選択してください',
-      example: '例：\n・自分は無能だ\n・もう取り返しがつかない\n・誰も自分を信用してくれない'
+      description: '失敗に対する自分の意見を入力してください',
+      example: '例：\n・どこで、いつ起こったか？\n・自分は何をしたか？\n・他の人は何をしたか？\n・その他、客観的な情報や詳細はあるか？'
     },
     { 
       type: ElementType.consequence, 
       label: '結果', 
-      description: 'その考えによって引き起こされた行動や結果を選択してください',
+      description: '前のステップで入力した信念によって引き起こされた行動や結果を入力してください',
       example: '例：\n・落ち込んで仕事に手がつかなくなった\n・チームメンバーとの関係が悪化した\n・問題を先送りにしてしまった'
     },
     { 
       type: ElementType.disputation, 
       label: '反論', 
-      description: '考えの誤りに対する反論を選択してください',
+      description: '前のステップで入力した信念に対する反論を入力してください',
       example: '例：\n・一度の失敗で全てを判断するのは極端すぎる\n・誰にでもミスはある\n・この経験を次に活かすことができる'
     },
     { 
       type: ElementType.effect, 
-      label: '効果', 
-      description: '反論による新しい考え方や行動の変化を選択してください',
+      label: '活力', 
+      description: '前のステップで入力した反論による新しい考え方や行動の変化を入力してください',
       example: '例：\n・冷静に問題に向き合えるようになった\n・同僚に相談して解決策を見つけた\n・再発防止の仕組みを作った'
     },
   ];
@@ -249,7 +249,7 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
           size={250}
           color="black"
           secondaryColor="gray"
-          text="分析中"
+          text="分析の時間へ"
           isLoading={isFailureLoading || loading}
           ringCount={5}
         />

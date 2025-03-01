@@ -87,7 +87,7 @@ export default function Failures() {
               <textarea
                 className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-black focus:border-black text-black bg-white text-base leading-relaxed"
                 rows={5}
-                placeholder="失敗の詳細を記入してください"
+                placeholder="失敗の概要を記入してください"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
