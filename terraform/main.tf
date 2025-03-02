@@ -105,6 +105,11 @@ resource "azurerm_linux_web_app" "frontend" {
     "DOCKER_REGISTRY_SERVER_URL"          = "https://${azurerm_container_registry.acr.login_server}"
     "DOCKER_REGISTRY_SERVER_USERNAME"     = azurerm_container_registry.acr.admin_username
     "DOCKER_REGISTRY_SERVER_PASSWORD"     = azurerm_container_registry.acr.admin_password
+    "NEXT_PUBLIC_FIREBASE_API_KEY"        = var.firebase_api_key
+    "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN"    = "${var.project_name}.firebaseapp.com"
+    "NEXT_PUBLIC_FIREBASE_PROJECT_ID"     = var.project_name
+    "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET" = "${var.project_name}.appspot.com"
+    "NEXT_PUBLIC_FIREBASE_APP_ID"         = var.firebase_app_id
   }
 }
 
@@ -123,12 +128,12 @@ resource "azurerm_cognitive_account" "openai" {
 
 # Azure OpenAI Deployment
 resource "azurerm_cognitive_deployment" "gpt" {
-  name                 = "o3-mini"
+  name                 = "o1-mini"
   cognitive_account_id = azurerm_cognitive_account.openai.id
 
   model {
     format  = "OpenAI"
-    name    = "o3-mini"
+    name    = "o1-mini"
     version = "1"
   }
 

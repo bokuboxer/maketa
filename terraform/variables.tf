@@ -45,4 +45,14 @@ variable "client_secret" {
   description = "Azure client secret"
   type        = string
   sensitive   = true
+}
+
+variable "firebase_api_key" {
+  description = "Firebase API Key"
+  type        = string
+}
+
+variable "firebase_app_id" {
+  description = "Firebase App ID"
+  type        = string
 } 
