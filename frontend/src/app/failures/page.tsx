@@ -140,7 +140,7 @@ export default function Failures() {
                   <div className="flex flex-col">
                     <div className="flex justify-between items-start gap-3">
                       <div className="flex-grow">
-                        <p className="text-sm text-black leading-relaxed line-clamp-3">{failure.description}</p>
+                        <p className="text-sm text-black leading-relaxed line-clamp-3 w-fit">{failure.description}</p>
                       </div>
                       <div className="flex flex-col items-end gap-2">
                         <button
@@ -149,7 +149,7 @@ export default function Failures() {
                               ? `/failures/${failure.id}`
                               : `/failures/${failure.id}/analyze`
                           )}
-                          className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
+                          className="w-[60px] py-2 bg-black text-white rounded hover:bg-gray-800"
                         >
                           {failure.has_analyzed ? '詳細' : '分析'}
                         </button>
