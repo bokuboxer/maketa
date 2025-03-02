@@ -13,7 +13,7 @@ from app.template import (
 )
 from langchain_core.output_parsers import PydanticOutputParser, StrOutputParser
 from langchain_core.prompts import PromptTemplate
-from langchain_openai import ChatOpenAI
+from langchain_core.language_models import BaseChatModel
 
 template_map = {
     model.ElementType.ADVERSITY: adversity_template,
@@ -25,7 +25,7 @@ template_map = {
 
 
 class SuggestChain:
-    def __init__(self, llm: ChatOpenAI):
+    def __init__(self, llm: BaseChatModel):
         self.llm = llm
         self.json_parser = PydanticOutputParser(pydantic_object=schema.AnalysisResult)
         self.summarize_prompt = PromptTemplate(
