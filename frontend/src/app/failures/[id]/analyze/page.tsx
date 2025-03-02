@@ -4,8 +4,8 @@ import { useGetFailureByIdFailureFailureIdGet, useSuggestElementsElementsSuggest
 import { Element } from '@/api/model/element';
 import { ElementType } from '@/api/model/elementType';
 import { DragDropContext, Draggable, DraggableProvided, DropResult, Droppable, DroppableProvided } from '@hello-pangea/dnd';
-import { Loader } from '@mantine/core';
-import { IconArrowLeft, IconArrowRight, IconDeviceFloppy } from '@tabler/icons-react';
+import { Loader, Popover } from '@mantine/core';
+import { IconArrowLeft, IconArrowRight, IconDeviceFloppy, IconHelp } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useState } from 'react';
 import HypnoticLoader from '@/components/HypnoticLoader';
@@ -158,31 +158,36 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
     { 
       type: ElementType.adversity, 
       label: '逆境', 
-      description: '失敗の原因となった状況や出来事を選択してください',
+      description: '失敗の詳細を入力してください',
+      title: '<strong>A</strong>dversity（逆境）',
       example: '例：\n・締め切りに間に合わなかった\n・顧客からのクレームを受けた\n・チームメンバーと意見が合わなかった'
     },
     { 
       type: ElementType.belief, 
       label: '信念', 
-      description: 'その状況で抱いた考えや思い込みを選択してください',
+      description: '失敗に対する自分の意見を入力してください',
+      title: '<strong>B</strong>elief（信念）',
       example: '例：\n・自分は無能だ\n・もう取り返しがつかない\n・誰も自分を信用してくれない'
     },
     { 
       type: ElementType.consequence, 
       label: '結果', 
-      description: 'その考えによって引き起こされた行動や結果を選択してください',
+      description: '前のステップで入力した信念によって引き起こされた行動や結果を入力してください',
+      title: '<strong>C</strong>onsequence（結果）',
       example: '例：\n・落ち込んで仕事に手がつかなくなった\n・チームメンバーとの関係が悪化した\n・問題を先送りにしてしまった'
     },
     { 
       type: ElementType.disputation, 
       label: '反論', 
-      description: '考えの誤りに対する反論を選択してください',
+      description: '前のステップで入力した信念に対する反論を入力してください',
+      title: '<strong>D</strong>isputation（反論）',
       example: '例：\n・一度の失敗で全てを判断するのは極端すぎる\n・誰にでもミスはある\n・この経験を次に活かすことができる'
     },
     { 
       type: ElementType.effect, 
-      label: '効果', 
-      description: '反論による新しい考え方や行動の変化を選択してください',
+      label: '活力', 
+      description: '前のステップで入力した反論による新しい考え方や行動の変化を入力してください',
+      title: '<strong>E</strong>ffect（活力）',
       example: '例：\n・冷静に問題に向き合えるようになった\n・同僚に相談して解決策を見つけた\n・再発防止の仕組みを作った'
     },
   ];
@@ -249,7 +254,7 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
           size={250}
           color="black"
           secondaryColor="gray"
-          text="分析中"
+          text="分析の時間へ"
           isLoading={isFailureLoading || loading}
           ringCount={5}
         />
@@ -275,11 +280,17 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
             <h2 className="font-semibold mb-2 text-black">
               {activeStep === ElementType.adversity 
                 ? '失敗の内容'
+                : activeStep === ElementType.disputation
+                ? '信念'
                 : steps.find(step => step.type === steps[steps.findIndex(s => s.type === activeStep) - 1].type)?.label}
             </h2>
             <p className="text-black text-sm">
               {activeStep === ElementType.adversity 
                 ? failure?.description
+                : activeStep === ElementType.disputation
+                ? selectedElements[ElementType.belief]
+                    .map(element => element.element.description)
+                    .join('\n')
                 : selectedElements[steps[steps.findIndex(s => s.type === activeStep) - 1].type]
                     .map(element => element.element.description)
                     .join('\n')}
@@ -314,7 +325,22 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
             <div key={activeStep}>
               <div className="border rounded-lg p-3 bg-white">
                 <div className="mb-4">
-                  <p className="text-sm text-gray-600">{steps.find(step => step.type === activeStep)?.description}</p>
+                  <h3 className="text-lg font-medium mb-2" dangerouslySetInnerHTML={{ __html: steps.find(step => step.type === activeStep)?.title || '' }} />
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm text-gray-600">{steps.find(step => step.type === activeStep)?.description}</p>
+                    <Popover width={400} position="bottom" withArrow shadow="md">
+                      <Popover.Target>
+                        <button className="text-gray-400 hover:text-gray-600">
+                          <IconHelp size={16} />
+                        </button>
+                      </Popover.Target>
+                      <Popover.Dropdown>
+                        <div className="text-sm whitespace-pre-line">
+                          {steps.find(step => step.type === activeStep)?.example}
+                        </div>
+                      </Popover.Dropdown>
+                    </Popover>
+                  </div>
                 </div>
                 <div className="w-full">
                   <Droppable droppableId={`selected-${activeStep}`}>
