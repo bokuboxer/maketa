@@ -2,6 +2,7 @@ import axios, { AxiosRequestConfig } from 'axios';
 
 const axiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+  timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -11,21 +12,25 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (axios.isCancel(error)) {
+      console.log('Request canceled');
+      return Promise.reject(error);
+    }
     console.error('API Error:', error);
     return Promise.reject(error);
   }
 );
 
 export const customAxios = <T>(config: AxiosRequestConfig): Promise<T> => {
-  const source = axios.CancelToken.source();
+  const controller = new AbortController();
   const promise = axiosInstance({
     ...config,
-    cancelToken: source.token,
+    signal: config.signal || controller.signal,
   }).then(({ data }) => data);
 
   // @ts-ignore
   promise.cancel = () => {
-    source.cancel('Query was cancelled');
+    controller.abort();
   };
 
   return promise;
