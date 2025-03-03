@@ -92,7 +92,7 @@ jobs:
         run: |
           cd terraform
           terraform init
-          echo "database_url=${{ secrets.DATABASE_URL }}?ssl=true" >> $GITHUB_OUTPUT
+          echo "database_url=${{ secrets.DATABASE_URL }}?ssl_ca=/etc/ssl/certs/ca-certificates.crt" >> $GITHUB_OUTPUT
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -100,14 +100,11 @@ jobs:
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
       - name: Run Database Migrations
+        # SSL証明書のインストール
+        run: |
+          sudo apt-get update && sudo apt-get install -y ca-certificates
         env:
           DATABASE_URL: ${{ steps.db-url.outputs.database_url }}
-        run: |
-          echo "Using DATABASE_URL: $DATABASE_URL" | sed 's/:[^:]*@/@/g'  # パスワードを隠してデバッグ出力
-          cd backend
-          pip install poetry
-          poetry install
-          poetry run alembic upgrade head
 
   deploy_backend:
     needs: [terraform, deploy_database]
