@@ -11,11 +11,8 @@ RUN npm install
 # アプリケーションのコードをコピー
 COPY . .
 
-# ビルド
-RUN npm run build
-
 # ポートの公開
 EXPOSE 3000
 
-# 本番環境で実行
-CMD ["npm", "start"] 
+# 開発サーバーの起動
+CMD ["npm", "run", "dev"] 
