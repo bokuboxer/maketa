@@ -1,12 +1,16 @@
 import axios, { AxiosRequestConfig } from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   timeout: 60000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+if (!process.env.NEXT_PUBLIC_API_URL) {
+  throw new Error('NEXT_PUBLIC_API_URL is not defined');
+}
 
 // エラーハンドリング
 axiosInstance.interceptors.response.use(
