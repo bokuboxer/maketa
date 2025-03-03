@@ -91,34 +91,13 @@ jobs:
           cd terraform
           # MySQLサーバーのFQDNを直接取得
           MYSQL_FQDN=$(terraform state show azurerm_mysql_flexible_server.main | grep fqdn | awk '{print $3}' | tr -d '"')
-          echo "MYSQL_FQDN: ${MYSQL_FQDN}"  # デバッグ用
-          echo "MYSQL_FQDN=${MYSQL_FQDN}" >> $GITHUB_ENV
-        env:
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          TF_WORKSPACE: "default"
+          echo "Found MYSQL_FQDN: ${MYSQL_FQDN}"
+          # データベースURLを直接設定
+          echo "DATABASE_URL=mysql+pymysql://${{ secrets.DB_ADMIN_USERNAME }}:${{ secrets.DB_ADMIN_PASSWORD }}@${MYSQL_FQDN}:3306/${{ secrets.DB_NAME }}" >> $GITHUB_ENV
 
       - name: Run Database Migrations
-        env:
-          DATABASE_URL: mysql+pymysql://${{ secrets.DB_ADMIN_USERNAME }}:${{ secrets.DB_ADMIN_PASSWORD }}@${{ env.MYSQL_FQDN }}:3306/${{ secrets.DB_NAME }}
         run: |
-          # データベースが利用可能になるまで待機
-          echo "Waiting for database to be ready..."
-          for i in {1..30}; do
-            if mysqladmin ping -h ${{ env.MYSQL_FQDN }} -u ${{ secrets.DB_ADMIN_USERNAME }} -p${{ secrets.DB_ADMIN_PASSWORD }} --silent; then
-              echo "Database is ready!"
-              break
-            fi
-            echo "Attempt $i: Database not ready yet..."
-            sleep 10
-          done
-
-          cd backend
-          pip install poetry
-          poetry install
-          poetry run alembic upgrade head
+          echo "Using DATABASE_URL: $DATABASE_URL" | sed 's/:[^:]*@/@/g'  # パスワードを隠してデバッグ出力
 
   deploy_backend:
     needs: [terraform, deploy_database]
