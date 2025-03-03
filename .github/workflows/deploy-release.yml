@@ -94,10 +94,19 @@ jobs:
           echo "Found MYSQL_FQDN: ${MYSQL_FQDN}"
           # データベースURLを直接設定
           echo "DATABASE_URL=mysql+pymysql://${{ secrets.DB_ADMIN_USERNAME }}:${{ secrets.DB_ADMIN_PASSWORD }}@${MYSQL_FQDN}:3306/${{ secrets.DB_NAME }}" >> $GITHUB_ENV
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
       - name: Run Database Migrations
         run: |
           echo "Using DATABASE_URL: $DATABASE_URL" | sed 's/:[^:]*@/@/g'  # パスワードを隠してデバッグ出力
+          cd backend
+          pip install poetry
+          poetry install
+          poetry run alembic upgrade head
 
   deploy_backend:
     needs: [terraform, deploy_database]
