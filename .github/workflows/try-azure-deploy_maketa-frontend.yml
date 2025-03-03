@@ -37,10 +37,11 @@ jobs:
           npm install
           npm run build
           
-      - name: Zip artifact for deployment
+      - name: Prepare deployment package
         run: |
-          cd frontend/dist  # ビルド成果物のディレクトリに移動
-          zip -r ../../release.zip ./*
+          cd frontend
+          cp -r .next/standalone/* .next/static .next/server ./
+          zip -r ../release.zip ./*
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
