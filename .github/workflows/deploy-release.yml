@@ -66,6 +66,18 @@ jobs:
       - name: Terraform Init
         run: |
           cd terraform
+          # terraform.tfvarsファイルを作成
+          cat > terraform.tfvars << EOF
+          subscription_id = "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+          tenant_id = "${{ secrets.AZURE_TENANT_ID }}"
+          client_id = "${{ secrets.AZURE_CLIENT_ID }}"
+          client_secret = "${{ secrets.AZURE_CLIENT_SECRET }}"
+          db_admin_username = "${{ secrets.DB_ADMIN_USERNAME }}"
+          db_admin_password = "${{ secrets.DB_ADMIN_PASSWORD }}"
+          firebase_api_key = "${{ secrets.FIREBASE_API_KEY }}"
+          firebase_app_id = "${{ secrets.FIREBASE_APP_ID }}"
+          EOF
+
           terraform init
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -77,7 +89,8 @@ jobs:
         id: db-url
         run: |
           cd terraform
-          echo "DATABASE_URL=mysql+pymysql://${{ secrets.DB_ADMIN_USERNAME }}:${{ secrets.DB_ADMIN_PASSWORD }}@$(terraform output -raw database_url):3306/maketa" >> $GITHUB_ENV
+          DB_URL=$(terraform output -raw database_url)
+          echo "DATABASE_URL=mysql+pymysql://${{ secrets.DB_ADMIN_USERNAME }}:${{ secrets.DB_ADMIN_PASSWORD }}@${DB_URL}:3306/maketa" >> $GITHUB_ENV
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
