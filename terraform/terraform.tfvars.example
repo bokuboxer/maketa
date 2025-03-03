@@ -1,0 +1,13 @@
+# Azure認証情報
+subscription_id = "your_subscription_id"
+tenant_id       = "your_tenant_id"
+client_id       = "your_client_id"
+client_secret   = "your_client_secret"
+
+# データベース設定
+db_admin_username = "maketaadmin"
+db_admin_password = "your_secure_password"
+
+# Firebase設定
+firebase_api_key = "your_firebase_api_key"
+firebase_app_id  = "your_firebase_app_id" 

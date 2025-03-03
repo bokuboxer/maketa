@@ -75,12 +75,12 @@ resource "azurerm_service_plan" "main" {
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
   os_type            = "Linux"
-  sku_name           = "F1"
+  sku_name           = "B1"
 }
 
 # Backend Web App
-resource "azurerm_linux_web_app" "backend" {
-  name                = "${var.project_name}-backend"
+resource "azurerm_linux_web_app" "server" {
+  name                = "${var.project_name}-server"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
   service_plan_id     = azurerm_service_plan.main.id
@@ -112,7 +112,7 @@ resource "azurerm_linux_web_app" "backend" {
 
 # Frontend Web App
 resource "azurerm_linux_web_app" "frontend" {
-  name                = "${var.project_name}-frontend"
+  name                = "${var.project_name}-frontend-app"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
   service_plan_id     = azurerm_service_plan.main.id
@@ -121,15 +121,15 @@ resource "azurerm_linux_web_app" "frontend" {
     always_on = true
     application_stack {
       docker_image_name = "${azurerm_container_registry.acr.login_server}/frontend:latest"
+      docker_registry_url      = "https://${azurerm_container_registry.acr.login_server}"
+      docker_registry_username = azurerm_container_registry.acr.admin_username
+      docker_registry_password = azurerm_container_registry.acr.admin_password
     }
   }
 
   app_settings = {
     "WEBSITES_PORT" = "3000"
-    "NEXT_PUBLIC_API_URL" = "https://${azurerm_linux_web_app.backend.default_hostname}"
-    "DOCKER_REGISTRY_SERVER_URL"          = "https://${azurerm_container_registry.acr.login_server}"
-    "DOCKER_REGISTRY_SERVER_USERNAME"     = azurerm_container_registry.acr.admin_username
-    "DOCKER_REGISTRY_SERVER_PASSWORD"     = azurerm_container_registry.acr.admin_password
+    "NEXT_PUBLIC_API_URL" = "https://${azurerm_linux_web_app.server.default_hostname}"
     "NEXT_PUBLIC_FIREBASE_API_KEY"        = var.firebase_api_key
     "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN"    = "${var.project_name}.firebaseapp.com"
     "NEXT_PUBLIC_FIREBASE_PROJECT_ID"     = var.project_name
@@ -143,7 +143,7 @@ resource "azurerm_linux_web_app" "frontend" {
 # Azure OpenAI Service
 resource "azurerm_cognitive_account" "openai" {
   name                = "${var.project_name}-openai"
-  location            = "swedencentral"  # OpenAIリソースのみ別リージョン
+  location            = "swedencentral"
   resource_group_name = azurerm_resource_group.main.name
   kind                = "OpenAI"
   sku_name           = "S0"
