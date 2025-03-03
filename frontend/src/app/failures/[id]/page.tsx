@@ -6,15 +6,16 @@ import { IconArrowLeft } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { use } from 'react';
 import HypnoticLoader from '@/components/HypnoticLoader';
+import dynamic from 'next/dynamic';
 
 interface PageParams {
   id: string;
 }
 
-export default async function FailureDetailPage({ params }: { params: Promise<PageParams> }) {
-  // 動的レンダリングを強制
-  export const dynamic = 'force-dynamic';
-
+// クライアントサイドでのみレンダリング
+const FailureDetailPage = dynamic(() => Promise.resolve(({ params }: { params: Promise<PageParams> }) => {
+  const resolvedParams = use(params);
+  const { data: failure, isLoading } = useGetFailureByIdFailureFailureIdGet(Number(resolvedParams.id));
   const router = useRouter();
 
   const steps = [
@@ -24,8 +25,6 @@ export default async function FailureDetailPage({ params }: { params: Promise<Pa
     { type: ElementType.disputation, label: '反論' },
     { type: ElementType.effect, label: '効果' },
   ];
-
-  const { data: failure, isLoading } = useGetFailureByIdFailureFailureIdGet(Number(params.id));
 
   if (isLoading || !failure) {
     return (
@@ -84,4 +83,6 @@ export default async function FailureDetailPage({ params }: { params: Promise<Pa
       </div>
     </div>
   );
-}
+}), { ssr: false });
+
+export default FailureDetailPage;
