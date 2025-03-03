@@ -90,18 +90,6 @@ resource "azurerm_linux_web_app" "server" {
     application_stack {
       docker_image_name = "${azurerm_container_registry.acr.login_server}/backend:latest"
     }
-    ip_restriction {
-      name        = "Allow all"
-      priority    = 100
-      action      = "Allow"
-      ip_address  = "0.0.0.0/0"
-    }
-    scm_ip_restriction {
-      name        = "Allow all"
-      priority    = 100
-      action      = "Allow"
-      ip_address  = "0.0.0.0/0"
-    }
   }
 
   app_settings = {
