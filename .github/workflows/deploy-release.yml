@@ -55,16 +55,24 @@ jobs:
   deploy_database:
     needs: [terraform]
     runs-on: ubuntu-latest
+    if: always() && 
+        (needs.terraform.result == 'success' || needs.terraform.result == 'skipped') && 
+        contains(github.event.head_commit.modified, 'backend/migrations/')
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Azure Login
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Check for migration changes
+        id: migration-changed
+        run: |
+          if git diff --name-only HEAD~1 HEAD | grep -q "^backend/migrations/"; then
+            echo "::set-output name=changed::true"
+          else
+            echo "::set-output name=changed::false"
+          fi
 
       - name: Run Database Migrations
+        if: steps.migration-changed.outputs.changed == 'true'
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
@@ -76,6 +84,7 @@ jobs:
   deploy_backend:
     needs: [terraform, deploy_database]
     runs-on: ubuntu-latest
+    if: always() && (needs.terraform.result == 'success' || needs.terraform.result == 'skipped')
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
