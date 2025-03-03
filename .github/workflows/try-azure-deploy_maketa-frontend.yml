@@ -40,16 +40,18 @@ jobs:
       - name: Prepare deployment package
         run: |
           cd frontend
+          # デプロイ用の一時ディレクトリを作成
+          mkdir -p deploy
           # standaloneビルドの内容をコピー
-          cp -r .next/standalone/* ./
-          # 静的ファイルのディレクトリを作成
-          mkdir -p public
-          # 静的ファイルを public ディレクトリにコピー
-          cp -r .next/static ./public/
+          cp -r .next/standalone/* deploy/
+          # 静的ファイルのディレクトリを作成とコピー
+          mkdir -p deploy/public
+          cp -r .next/static deploy/public/
           # package.jsonをコピー
-          cp package.json ./
-          # 必要なファイルのみをzip化
-          zip -r ../release.zip ./* public -q
+          cp package.json deploy/
+          # デプロイディレクトリに移動してzip化
+          cd deploy
+          zip -r ../../release.zip . -q
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
