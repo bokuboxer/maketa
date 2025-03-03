@@ -94,30 +94,16 @@ jobs:
   deploy_backend:
     needs: [terraform, deploy_database]
     runs-on: ubuntu-latest
-    if: always() && (needs.terraform.result == 'success' || needs.terraform.result == 'skipped')
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 2 # 変更を検出するために履歴を2つ取得
-
-      - name: Check for backend changes
-        id: backend-changed
-        run: |
-          if git diff --name-only HEAD~1 HEAD | grep -q "^backend/"; then
-            echo "::set-output name=changed::true"
-          else
-            echo "::set-output name=changed::false"
-          fi
 
       - name: Azure Login
-        if: steps.backend-changed.outputs.changed == 'true'
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Build and push Docker image (backend)
-        if: steps.backend-changed.outputs.changed == 'true'
         uses: docker/build-push-action@v3
         with:
           context: ./backend
@@ -125,7 +111,6 @@ jobs:
           tags: ${{ secrets.ACR_LOGIN_SERVER }}/backend:${{ github.sha }}
 
       - name: Deploy to Azure Web App (backend)
-        if: steps.backend-changed.outputs.changed == 'true'
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ secrets.BACKEND_WEBAPP_NAME }}
@@ -137,26 +122,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 2 # 変更を検出するために履歴を2つ取得
-
-      - name: Check for frontend changes
-        id: frontend-changed
-        run: |
-          if git diff --name-only HEAD~1 HEAD | grep -q "^frontend/"; then
-            echo "::set-output name=changed::true"
-          else
-            echo "::set-output name=changed::false"
-          fi
 
       - name: Azure Login
-        if: steps.frontend-changed.outputs.changed == 'true'
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Build and push Docker image (frontend)
-        if: steps.frontend-changed.outputs.changed == 'true'
         uses: docker/build-push-action@v3
         with:
           context: ./frontend
@@ -164,7 +136,6 @@ jobs:
           tags: ${{ secrets.ACR_LOGIN_SERVER }}/frontend:${{ github.sha }}
 
       - name: Deploy to Azure Web App (frontend)
-        if: steps.frontend-changed.outputs.changed == 'true'
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ secrets.FRONTEND_WEBAPP_NAME }}
