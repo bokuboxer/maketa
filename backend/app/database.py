@@ -8,7 +8,7 @@ pymysql.install_as_MySQLdb()
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "mysql+pymysql://root:root@db:3306/app",
+    "mysql+pymysql://root:root@localhost:3306/app",  # ローカル開発用のデフォルト値
 )
 
 engine = create_engine(DATABASE_URL)
