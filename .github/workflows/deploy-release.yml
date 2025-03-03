@@ -89,8 +89,13 @@ jobs:
         id: db-url
         run: |
           cd terraform
+          # Initialize Terraform
+          terraform init
+          
+          # Import existing state
+          terraform state pull
+          
           # MySQLサーバーのFQDNを直接取得
-          terraform state show azurerm_mysql_flexible_server.main
           MYSQL_FQDN=$(terraform state show azurerm_mysql_flexible_server.main | grep fqdn | awk '{print $3}' | tr -d '"')
           echo "Found MYSQL_FQDN: ${MYSQL_FQDN}"
           echo "database_url=mysql+pymysql://${{ secrets.DB_ADMIN_USERNAME }}:${{ secrets.DB_ADMIN_PASSWORD }}@${MYSQL_FQDN}:3306/maketa" >> $GITHUB_OUTPUT
