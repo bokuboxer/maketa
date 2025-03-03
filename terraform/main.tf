@@ -22,6 +22,17 @@ resource "azurerm_container_registry" "acr" {
   admin_enabled      = true
 }
 
+# ACRの診断設定
+resource "azurerm_monitor_diagnostic_setting" "acr" {
+  name                       = "acr-diagnostics"
+  target_resource_id         = azurerm_container_registry.acr.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
+
+  enabled_log {
+    category_group = "audit"
+  }
+}
+
 # MySQL Database
 resource "azurerm_mysql_flexible_server" "main" {
   name                   = "${var.project_name}-mysql"
@@ -31,7 +42,7 @@ resource "azurerm_mysql_flexible_server" "main" {
   administrator_login    = var.db_admin_username
   administrator_password = var.db_admin_password
 
-  sku_name              = "B_Standard_B1s"
+  sku_name              = "B_Standard_B1ms"
   version               = "8.0.21"
 
   storage {
@@ -40,6 +51,10 @@ resource "azurerm_mysql_flexible_server" "main" {
 
   backup_retention_days = 7
   geo_redundant_backup_enabled = false
+
+  # パブリックアクセスを許可
+  delegated_subnet_id    = null
+  private_dns_zone_id    = null
 }
 
 resource "azurerm_mysql_flexible_database" "main" {
@@ -48,6 +63,10 @@ resource "azurerm_mysql_flexible_database" "main" {
   server_name         = azurerm_mysql_flexible_server.main.name
   charset             = "utf8"
   collation          = "utf8_unicode_ci"
+  depends_on = [
+    azurerm_mysql_flexible_server.main,
+    azurerm_mysql_flexible_server_firewall_rule.allow_azure
+  ]
 }
 
 # App Service Plan
@@ -76,13 +95,19 @@ resource "azurerm_linux_web_app" "backend" {
   app_settings = {
     "WEBSITES_PORT"   = "8000"
     "DATABASE_URL"    = "mysql+pymysql://${var.db_admin_username}:${var.db_admin_password}@${azurerm_mysql_flexible_server.main.fqdn}:3306/${var.db_name}"
-    "DOCKER_REGISTRY_SERVER_URL"          = "https://${azurerm_container_registry.acr.login_server}"
-    "DOCKER_REGISTRY_SERVER_USERNAME"     = azurerm_container_registry.acr.admin_username
-    "DOCKER_REGISTRY_SERVER_PASSWORD"     = azurerm_container_registry.acr.admin_password
+    "ACR_URL"          = "https://${azurerm_container_registry.acr.login_server}"
+    "ACR_USERNAME"     = azurerm_container_registry.acr.admin_username
+    "ACR_PASSWORD"     = azurerm_container_registry.acr.admin_password
     "AZURE_OPENAI_ENDPOINT" = azurerm_cognitive_account.openai.endpoint
     "AZURE_OPENAI_KEY"     = azurerm_cognitive_account.openai.primary_access_key
-    "AZURE_OPENAI_MODEL"   = "o3-mini"
+    "AZURE_OPENAI_MODEL"   = "gpt-4o-mini"
+    "HTTP_LOGGING_DAYS" = "7"
+    "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = "false"
+    "DOCKER_ENABLE_CI" = "true"
   }
+
+  https_only = true
+  depends_on = [azurerm_mysql_flexible_database.main]
 }
 
 # Frontend Web App
@@ -111,6 +136,8 @@ resource "azurerm_linux_web_app" "frontend" {
     "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET" = "${var.project_name}.appspot.com"
     "NEXT_PUBLIC_FIREBASE_APP_ID"         = var.firebase_app_id
   }
+
+  https_only = true
 }
 
 # Azure OpenAI Service
@@ -128,17 +155,35 @@ resource "azurerm_cognitive_account" "openai" {
 
 # Azure OpenAI Deployment
 resource "azurerm_cognitive_deployment" "gpt" {
-  name                 = "o1-mini"
+  name                 = "gpt-4o-mini"
   cognitive_account_id = azurerm_cognitive_account.openai.id
 
   model {
     format  = "OpenAI"
-    name    = "o1-mini"
-    version = "1"
+    name    = "gpt-4o-mini"
+    version = "0613"
   }
 
   sku {
     name     = "Standard"
     capacity = 1
   }
+}
+
+# Azure Servicesからのアクセスを許可
+resource "azurerm_mysql_flexible_server_firewall_rule" "allow_azure" {
+  name                = "allow-azure-services"
+  resource_group_name = azurerm_resource_group.main.name
+  server_name         = azurerm_mysql_flexible_server.main.name
+  start_ip_address    = "0.0.0.0"
+  end_ip_address      = "0.0.0.0"
+}
+
+# Log Analytics Workspace
+resource "azurerm_log_analytics_workspace" "main" {
+  name                = "${var.project_name}-law"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  sku                = "PerGB2018"
+  retention_in_days  = 30
 } 
