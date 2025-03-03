@@ -55,6 +55,7 @@ jobs:
   deploy_database:
     needs: [terraform]
     runs-on: ubuntu-latest
+    environment: production
     if: always() && (needs.terraform.result == 'success' || needs.terraform.result == 'skipped')
     steps:
       - name: Checkout code
@@ -121,6 +122,7 @@ jobs:
   deploy_backend:
     needs: [terraform, deploy_database]
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -146,6 +148,7 @@ jobs:
   deploy_frontend:
     needs: [terraform, deploy_backend]
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
