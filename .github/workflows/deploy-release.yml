@@ -57,7 +57,7 @@ jobs:
     needs: terraform
     runs-on: ubuntu-latest
     environment: release
-    if: always() && (needs.terraform.result == 'success' || needs.terraform.result == 'skipped') && contains(github.event.head_commit.modified, 'backend/migrations')
+    if: always() && (needs.terraform.result == 'success' || needs.terraform.result == 'skipped')
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
