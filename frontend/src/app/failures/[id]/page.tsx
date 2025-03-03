@@ -11,9 +11,10 @@ interface PageParams {
   id: string;
 }
 
-export default function FailureDetailPage({ params }: { params: Promise<PageParams> }) {
-  const resolvedParams = use(params);
-  const { data: failure, isLoading } = useGetFailureByIdFailureFailureIdGet(Number(resolvedParams.id));
+export default async function FailureDetailPage({ params }: { params: Promise<PageParams> }) {
+  // 動的レンダリングを強制
+  export const dynamic = 'force-dynamic';
+
   const router = useRouter();
 
   const steps = [
@@ -23,6 +24,8 @@ export default function FailureDetailPage({ params }: { params: Promise<PagePara
     { type: ElementType.disputation, label: '反論' },
     { type: ElementType.effect, label: '効果' },
   ];
+
+  const { data: failure, isLoading } = useGetFailureByIdFailureFailureIdGet(Number(params.id));
 
   if (isLoading || !failure) {
     return (
