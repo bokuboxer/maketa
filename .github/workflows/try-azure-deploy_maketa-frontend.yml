@@ -23,8 +23,21 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18.x'
+          cache: 'yarn'  # yarnのキャッシュを有効化
 
-      - name: npm install, build, and test
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v3
+        id: yarn-cache
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('frontend/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install and Build
         env:
           NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
           NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
@@ -34,29 +47,24 @@ jobs:
           NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
         run: |
           cd frontend
-          npm install
-          npm run build
-          
+          yarn install --frozen-lockfile
+          yarn build
+
       - name: Prepare deployment package
         run: |
           cd frontend
-          # デプロイ用の一時ディレクトリを作成
+          # 必要なファイルのみを一時ディレクトリにコピー
           mkdir -p deploy
-          # standaloneビルドの内容をコピー
           cp -r .next/standalone/* deploy/
-          # .nextディレクトリ全体をコピー（重要）
           cp -r .next deploy/
-          # 静的ファイルのディレクトリを作成とコピー
           mkdir -p deploy/public
           cp -r public/* deploy/public/ || true
-          # package.jsonをコピー
           cp package.json deploy/
-          # 本番依存関係をインストール
           cd deploy
-          npm install --omit=dev
-          # 不要なファイルを削除してzip化
-          rm -rf package-lock.json
-          zip -r ../../release.zip . -q
+          # 本番依存関係のみをインストール
+          yarn install --production --frozen-lockfile
+          # 不要なファイルを除外してzip化
+          zip -r ../../release.zip . -q -x "**/.git/**" "**/.next/cache/**"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -81,8 +89,8 @@ jobs:
           name: node-app
 
       - name: Unzip artifact for deployment
-        run: unzip release.zip
-      
+        run: unzip release.zip -q
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
