@@ -1,4 +1,3 @@
-import { getAnalytics } from "firebase/analytics";
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 
@@ -11,6 +10,15 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
+// アプリの初期化
 const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app); 
-const analytics = getAnalytics(app);
+export const auth = getAuth(app);
+
+// Analyticsはクライアントサイドでのみ初期化
+export const initializeAnalytics = async () => {
+  if (typeof window !== 'undefined') {
+    const { getAnalytics } = await import('firebase/analytics');
+    return getAnalytics(app);
+  }
+  return null;
+};
