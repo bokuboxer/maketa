@@ -111,10 +111,9 @@ jobs:
           DATABASE_URL: ${{ steps.db-url.outputs.database_url }}
 
   deploy_backend:
-    needs: deploy_database
     runs-on: ubuntu-latest
     environment: release
-    if: success()
+    if: always()
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -138,10 +137,9 @@ jobs:
           images: ${{ secrets.ACR_LOGIN_SERVER }}/backend:${{ github.sha }}
 
   deploy_frontend:
-    needs: deploy_backend
     runs-on: ubuntu-latest
     environment: release
-    if: success()
+    if: always()
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
