@@ -23,19 +23,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18.x'
-          cache: 'yarn'  # yarnのキャッシュを有効化
-
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-
-      - uses: actions/cache@v3
-        id: yarn-cache
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('frontend/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
+          cache: 'npm'  # npmのキャッシュを有効化
+          cache-dependency-path: 'frontend/package-lock.json'  # package-lock.jsonの場所を指定
 
       - name: Install and Build
         env:
@@ -47,13 +36,12 @@ jobs:
           NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
         run: |
           cd frontend
-          yarn install --frozen-lockfile
-          yarn build
+          npm ci  # yarn install --frozen-lockfileの代わり
+          npm run build
 
       - name: Prepare deployment package
         run: |
           cd frontend
-          # 必要なファイルのみを一時ディレクトリにコピー
           mkdir -p deploy
           cp -r .next/standalone/* deploy/
           cp -r .next deploy/
@@ -61,9 +49,7 @@ jobs:
           cp -r public/* deploy/public/ || true
           cp package.json deploy/
           cd deploy
-          # 本番依存関係のみをインストール
-          yarn install --production --frozen-lockfile
-          # 不要なファイルを除外してzip化
+          npm ci --omit=dev  # 本番依存関係のみをインストール
           zip -r ../../release.zip . -q -x "**/.git/**" "**/.next/cache/**"
 
       - name: Upload artifact for deployment job
