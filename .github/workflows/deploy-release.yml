@@ -103,6 +103,10 @@ jobs:
         # SSL証明書のインストール
         run: |
           sudo apt-get update && sudo apt-get install -y ca-certificates
+          cd backend
+          pip install poetry
+          poetry install
+          poetry run alembic upgrade head
         env:
           DATABASE_URL: ${{ steps.db-url.outputs.database_url }}
 
