@@ -8,15 +8,14 @@ from sqlalchemy import engine_from_config, pool
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from app.database import Base
+from app.database import DATABASE_URL
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
 # 環境変数からデータベースURLを取得
-database_url = os.getenv('DATABASE_URL')
-if database_url:  # 環境変数が設定されている場合のみ上書き
-    config.set_main_option('sqlalchemy.url', database_url)
+config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
