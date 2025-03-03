@@ -6,6 +6,14 @@ output "frontend_url" {
   value = "https://${azurerm_linux_web_app.frontend.default_hostname}"
 }
 
+output "frontend_webapp_name" {
+  value = azurerm_linux_web_app.frontend.name
+}
+
+output "backend_webapp_name" {
+  value = azurerm_linux_web_app.server.name
+}
+
 output "database_url" {
   value = azurerm_mysql_flexible_server.main.fqdn
   sensitive = true
