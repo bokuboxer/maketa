@@ -75,7 +75,7 @@ resource "azurerm_service_plan" "main" {
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
   os_type            = "Linux"
-  sku_name           = "B1"
+  sku_name           = "F1"
 }
 
 # Backend Web App
@@ -143,7 +143,7 @@ resource "azurerm_linux_web_app" "frontend" {
 # Azure OpenAI Service
 resource "azurerm_cognitive_account" "openai" {
   name                = "${var.project_name}-openai"
-  location            = azurerm_resource_group.main.location
+  location            = "swedencentral"  # OpenAIリソースのみ別リージョン
   resource_group_name = azurerm_resource_group.main.name
   kind                = "OpenAI"
   sku_name           = "S0"
@@ -161,7 +161,7 @@ resource "azurerm_cognitive_deployment" "gpt" {
   model {
     format  = "OpenAI"
     name    = "gpt-4o-mini"
-    version = "0613"
+    version = "2024-07-18"
   }
 
   sku {
