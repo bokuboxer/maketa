@@ -44,13 +44,18 @@ jobs:
           mkdir -p deploy
           # standaloneビルドの内容をコピー
           cp -r .next/standalone/* deploy/
+          # .nextディレクトリ全体をコピー（重要）
+          cp -r .next deploy/
           # 静的ファイルのディレクトリを作成とコピー
           mkdir -p deploy/public
-          cp -r .next/static deploy/public/
+          cp -r public/* deploy/public/ || true
           # package.jsonをコピー
           cp package.json deploy/
-          # デプロイディレクトリに移動してzip化
+          # 本番依存関係をインストール
           cd deploy
+          npm install --omit=dev
+          # 不要なファイルを削除してzip化
+          rm -rf package-lock.json
           zip -r ../../release.zip . -q
 
       - name: Upload artifact for deployment job
