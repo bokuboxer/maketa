@@ -92,7 +92,7 @@ jobs:
         run: |
           cd terraform
           terraform init
-          echo "database_url=${{ secrets.DATABASE_URL }}" >> $GITHUB_OUTPUT
+          echo "database_url=${{ secrets.DATABASE_URL }}?ssl=true" >> $GITHUB_OUTPUT
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
