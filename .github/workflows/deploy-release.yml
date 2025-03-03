@@ -149,12 +149,18 @@ jobs:
           cd terraform
           # MySQLサーバーのFQDNを直接取得
           MYSQL_FQDN=$(terraform state show azurerm_mysql_flexible_server.main | grep fqdn | awk '{print $3}' | tr -d '"')
-          echo "Found MYSQL_FQDN: ${MYSQL_FQDN}"  # デバッグ用
-          echo "MYSQL_FQDN=${MYSQL_FQDN}" >> $GITHUB_ENV
+          echo "MYSQL_FQDN: ${MYSQL_FQDN}"  # デバッグ用
+          echo "DATABASE_URL=mysql+pymysql://${{ secrets.DB_ADMIN_USERNAME }}:${{ secrets.DB_ADMIN_PASSWORD }}@${MYSQL_FQDN}:3306/maketa" >> $GITHUB_ENV
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          TF_WORKSPACE: "default"
 
       - name: Run Database Migrations
         env:
-          DATABASE_URL: mysql+pymysql://${{ secrets.DB_ADMIN_USERNAME }}:${{ secrets.DB_ADMIN_PASSWORD }}@${{ env.MYSQL_FQDN }}:3306/${{ secrets.DB_NAME }}
+          DATABASE_URL: mysql+pymysql://${{ secrets.DB_ADMIN_USERNAME }}:${{ secrets.DB_ADMIN_PASSWORD }}@${{ env.MYSQL_FQDN }}:3306/maketa
         run: |
           echo "Current directory: $(pwd)"
           echo "Checking backend/app/database.py:"
