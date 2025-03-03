@@ -104,7 +104,17 @@ jobs:
         env:
           DATABASE_URL: mysql+pymysql://${{ secrets.DB_ADMIN_USERNAME }}:${{ secrets.DB_ADMIN_PASSWORD }}@${{ env.MYSQL_FQDN }}:3306/${{ secrets.DB_NAME }}
         run: |
-          echo "Using DATABASE_URL: $DATABASE_URL"  # デバッグ用（パスワードは隠してください）
+          # データベースが利用可能になるまで待機
+          echo "Waiting for database to be ready..."
+          for i in {1..30}; do
+            if mysqladmin ping -h ${{ env.MYSQL_FQDN }} -u ${{ secrets.DB_ADMIN_USERNAME }} -p${{ secrets.DB_ADMIN_PASSWORD }} --silent; then
+              echo "Database is ready!"
+              break
+            fi
+            echo "Attempt $i: Database not ready yet..."
+            sleep 10
+          done
+
           cd backend
           pip install poetry
           poetry install
