@@ -89,18 +89,9 @@ jobs:
         id: db-url
         run: |
           cd terraform
-          # 状態ファイルをロード
-          terraform state pull > terraform.tfstate
-          
-          # 出力変数が存在するか確認
-          if terraform output -raw database_url 2>/dev/null; then
-            DB_URL=$(terraform output -raw database_url)
-            echo "DATABASE_URL=mysql+pymysql://${{ secrets.DB_ADMIN_USERNAME }}:${{ secrets.DB_ADMIN_PASSWORD }}@${DB_URL}:3306/maketa" >> $GITHUB_ENV
-          else
-            # 出力変数が存在しない場合は、直接MySQLサーバーのFQDNを取得
-            MYSQL_FQDN=$(terraform state show azurerm_mysql_flexible_server.main | grep fqdn | awk '{print $3}' | tr -d '"')
-            echo "DATABASE_URL=mysql+pymysql://${{ secrets.DB_ADMIN_USERNAME }}:${{ secrets.DB_ADMIN_PASSWORD }}@${MYSQL_FQDN}:3306/maketa" >> $GITHUB_ENV
-          fi
+          # MySQLサーバーのFQDNを直接取得
+          MYSQL_FQDN=$(terraform state show azurerm_mysql_flexible_server.main | grep fqdn | awk '{print $3}' | tr -d '"')
+          echo "DATABASE_URL=mysql+pymysql://${{ secrets.DB_ADMIN_USERNAME }}:${{ secrets.DB_ADMIN_PASSWORD }}@${MYSQL_FQDN}:3306/maketa" >> $GITHUB_ENV
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
