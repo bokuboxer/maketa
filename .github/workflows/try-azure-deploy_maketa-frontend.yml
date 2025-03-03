@@ -36,7 +36,7 @@ jobs:
           NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
         run: |
           cd frontend
-          npm ci  # yarn install --frozen-lockfileの代わり
+          npm install  # npm ciの代わりにnpm installを使用
           npm run build
 
       - name: Prepare deployment package
@@ -48,8 +48,9 @@ jobs:
           mkdir -p deploy/public
           cp -r public/* deploy/public/ || true
           cp package.json deploy/
+          cp package-lock.json deploy/  # package-lock.jsonもコピー
           cd deploy
-          npm ci --omit=dev  # 本番依存関係のみをインストール
+          npm install --omit=dev  # npm ci --omit=devの代わりにnpm install --omit=devを使用
           zip -r ../../release.zip . -q -x "**/.git/**" "**/.next/cache/**"
 
       - name: Upload artifact for deployment job
