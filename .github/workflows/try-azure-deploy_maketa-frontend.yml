@@ -42,13 +42,14 @@ jobs:
           cd frontend
           # standaloneビルドの内容をコピー
           cp -r .next/standalone/* ./
-          # 静的ファイルをコピー
-          mkdir -p .next/static
-          cp -r .next/static ./.next/
+          # 静的ファイルのディレクトリを作成
+          mkdir -p public
+          # 静的ファイルを public ディレクトリにコピー
+          cp -r .next/static ./public/
           # package.jsonをコピー
           cp package.json ./
           # 必要なファイルのみをzip化
-          zip -r ../release.zip ./* .next .next/static -q
+          zip -r ../release.zip ./* public -q
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
