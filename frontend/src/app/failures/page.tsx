@@ -55,6 +55,12 @@ export default function Failures() {
     return () => unsubscribe();
   }, [router]);
 
+  useEffect(() => {
+    if (!user) {
+      router.push('/signin');
+    }
+  }, [user]);
+
   if (isLoading || !user) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">

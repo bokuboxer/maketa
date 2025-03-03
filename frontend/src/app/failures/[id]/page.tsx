@@ -6,12 +6,14 @@ import { IconArrowLeft } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { use } from 'react';
 import HypnoticLoader from '@/components/HypnoticLoader';
+import dynamic from 'next/dynamic';
 
 interface PageParams {
   id: string;
 }
 
-export default function FailureDetailPage({ params }: { params: Promise<PageParams> }) {
+// クライアントサイドでのみレンダリング
+const FailureDetailPage = dynamic(() => Promise.resolve(({ params }: { params: Promise<PageParams> }) => {
   const resolvedParams = use(params);
   const { data: failure, isLoading } = useGetFailureByIdFailureFailureIdGet(Number(resolvedParams.id));
   const router = useRouter();
@@ -81,4 +83,6 @@ export default function FailureDetailPage({ params }: { params: Promise<PagePara
       </div>
     </div>
   );
-}
+}), { ssr: false });
+
+export default FailureDetailPage;

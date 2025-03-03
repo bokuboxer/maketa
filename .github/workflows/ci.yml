@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+      - release
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      # Biome（フロントエンド）
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install Biome
+        run: |
+          cd frontend
+          npm install --save-dev @biomejs/biome
+
+      - name: Run Biome
+        run: |
+          cd frontend
+          npx @biomejs/biome check .
+
+      # Ruff（バックエンド）
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        run: |
+          cd backend
+          pip install poetry
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          poetry install
+
+      - name: Run Ruff
+        run: |
+          cd backend
+          poetry run ruff check .
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run Backend Tests
+        run: |
+          cd backend
+          poetry run pytest
+
+      - name: Run Frontend Tests
+        run: |
+          cd frontend
+          npm test 
