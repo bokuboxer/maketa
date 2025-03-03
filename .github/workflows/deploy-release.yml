@@ -52,10 +52,68 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
-  deploy_database:
+  deploy_backend:
     needs: [terraform]
     runs-on: ubuntu-latest
-    if: always() && (needs.terraform.result == 'success' || needs.terraform.result == 'skipped')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Docker Login
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.ACR_LOGIN_SERVER }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Build and push Docker image (backend)
+        uses: docker/build-push-action@v3
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ secrets.ACR_LOGIN_SERVER }}/backend:${{ github.sha }}
+
+      - name: Deploy to Azure Web App (backend)
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ secrets.BACKEND_WEBAPP_NAME }}
+          images: ${{ secrets.ACR_LOGIN_SERVER }}/backend:${{ github.sha }}
+          configuration-file: backend/app_settings.json
+
+  deploy_frontend:
+    needs: [terraform, deploy_backend]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Build and push Docker image (frontend)
+        uses: docker/build-push-action@v3
+        with:
+          context: ./frontend
+          push: true
+          tags: ${{ secrets.ACR_LOGIN_SERVER }}/frontend:${{ github.sha }}
+
+      - name: Deploy to Azure Web App (frontend)
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ secrets.FRONTEND_WEBAPP_NAME }}
+          images: ${{ secrets.ACR_LOGIN_SERVER }}/frontend:${{ github.sha }}
+
+  deploy_database:
+    needs: [terraform, deploy_backend, deploy_frontend]
+    runs-on: ubuntu-latest
+    if: success() || (needs.terraform.result == 'skipped' && needs.deploy_backend.result == 'success' && needs.deploy_frontend.result == 'success')
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -106,53 +164,3 @@ jobs:
           pip install poetry
           poetry install
           poetry run alembic upgrade head
-
-  deploy_backend:
-    needs: [terraform, deploy_database]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Azure Login
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Build and push Docker image (backend)
-        uses: docker/build-push-action@v3
-        with:
-          context: ./backend
-          push: true
-          tags: ${{ secrets.ACR_LOGIN_SERVER }}/backend:${{ github.sha }}
-
-      - name: Deploy to Azure Web App (backend)
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: ${{ secrets.BACKEND_WEBAPP_NAME }}
-          images: ${{ secrets.ACR_LOGIN_SERVER }}/backend:${{ github.sha }}
-
-  deploy_frontend:
-    needs: [terraform, deploy_backend]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Azure Login
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Build and push Docker image (frontend)
-        uses: docker/build-push-action@v3
-        with:
-          context: ./frontend
-          push: true
-          tags: ${{ secrets.ACR_LOGIN_SERVER }}/frontend:${{ github.sha }}
-
-      - name: Deploy to Azure Web App (frontend)
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: ${{ secrets.FRONTEND_WEBAPP_NAME }}
-          images: ${{ secrets.ACR_LOGIN_SERVER }}/frontend:${{ github.sha }}
