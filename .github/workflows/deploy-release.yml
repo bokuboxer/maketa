@@ -92,8 +92,7 @@ jobs:
           # MySQLサーバーのFQDNを直接取得
           MYSQL_FQDN=$(terraform state show azurerm_mysql_flexible_server.main | grep fqdn | awk '{print $3}' | tr -d '"')
           echo "Found MYSQL_FQDN: ${MYSQL_FQDN}"
-          # データベースURLを直接設定
-          echo "DATABASE_URL=mysql+pymysql://${{ secrets.DB_ADMIN_USERNAME }}:${{ secrets.DB_ADMIN_PASSWORD }}@${MYSQL_FQDN}:3306/${{ secrets.DB_NAME }}" >> $GITHUB_ENV
+          echo "database_url=mysql+pymysql://${{ secrets.DB_ADMIN_USERNAME }}:${{ secrets.DB_ADMIN_PASSWORD }}@${MYSQL_FQDN}:3306/maketa" >> $GITHUB_OUTPUT
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -101,6 +100,8 @@ jobs:
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
       - name: Run Database Migrations
+        env:
+          DATABASE_URL: ${{ steps.db-url.outputs.database_url }}
         run: |
           echo "Using DATABASE_URL: $DATABASE_URL" | sed 's/:[^:]*@/@/g'  # パスワードを隠してデバッグ出力
           cd backend
