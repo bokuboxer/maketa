@@ -114,6 +114,7 @@ jobs:
     needs: deploy_database
     runs-on: ubuntu-latest
     environment: release
+    if: success()
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -140,6 +141,7 @@ jobs:
     needs: deploy_backend
     runs-on: ubuntu-latest
     environment: release
+    if: success()
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
