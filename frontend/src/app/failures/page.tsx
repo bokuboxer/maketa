@@ -1,6 +1,6 @@
-export const dynamic = 'force-dynamic';
-
 'use client';
+
+export const dynamic = 'force-dynamic';
 
 import { auth } from '@/lib/firebase';
 import { Loader, Modal } from '@mantine/core';
