@@ -6,5 +6,5 @@
  */
 
 export interface SummaryResult {
-  summary: string;
+	summary: string;
 }

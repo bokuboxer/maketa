@@ -5,14 +5,13 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type ElementType = typeof ElementType[keyof typeof ElementType];
-
+export type ElementType = (typeof ElementType)[keyof typeof ElementType];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const ElementType = {
-  adversity: 'adversity',
-  belief: 'belief',
-  consequence: 'consequence',
-  disputation: 'disputation',
-  effect: 'effect',
+	adversity: "adversity",
+	belief: "belief",
+	consequence: "consequence",
+	disputation: "disputation",
+	effect: "effect",
 } as const;
