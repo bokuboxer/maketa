@@ -10,8 +10,8 @@ load_dotenv()
 pymysql.install_as_MySQLdb()
 
 DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "mysql+pymysql://root:root@localhost:3306/app",  # ローカル開発用のデフォルト値
+    "DATABASE_URL"+"?ssl=true",
+    "mysql+pymysql://root:root@localhost:3306/app?ssl=true",  # ローカ開発用のデフォルト値
 )
 
 engine = create_engine(DATABASE_URL)
