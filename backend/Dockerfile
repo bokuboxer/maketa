@@ -4,12 +4,12 @@ WORKDIR /app
 
 # 依存関係のインストール
 COPY pyproject.toml poetry.lock ./
-COPY app ./app
 RUN pip install poetry && \
     poetry config virtualenvs.create false && \
     poetry install --only main
 
 # アプリケーションのコードをコピー
+COPY app ./app
 COPY migrations ./migrations
 COPY alembic.ini ./
 COPY server.py ./
