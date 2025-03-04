@@ -8,6 +8,7 @@ from sqlalchemy import engine_from_config, pool
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from app.database import Base
+from app.model import User, Failure, Element, ElementType  # 全てのモデルをインポート
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

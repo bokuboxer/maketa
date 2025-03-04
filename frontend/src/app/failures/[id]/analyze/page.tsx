@@ -21,9 +21,7 @@ type DndElement = {
 interface GroupedElements {
   adversity: DndElement[];
   belief: DndElement[];
-  consequence: DndElement[];
   disputation: DndElement[];
-  effect: DndElement[];
 }
 
 export default function AnalyzePage({ params }: { params: Promise<PageParams> }) {
@@ -37,16 +35,12 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
   const [selectedElements, setSelectedElements] = useState<GroupedElements>({
     adversity: [],
     belief: [],
-    consequence: [],
     disputation: [],
-    effect: [],
   });
   const [suggestedElements, setSuggestedElements] = useState<GroupedElements>({
     adversity: [],
     belief: [],
-    consequence: [],
     disputation: [],
-    effect: [],
   });
 	const router = useRouter();
   const [nextLoading, setNextLoading] = useState(false);
@@ -170,25 +164,11 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
       example: '例：\n・自分は無能だ\n・もう取り返しがつかない\n・誰も自分を信用してくれない'
     },
     { 
-      type: ElementType.consequence, 
-      label: '結果', 
-      description: '前のステップで入力した信念によって引き起こされた行動や結果を入力してください',
-      title: '<strong>C</strong>onsequence（結果）',
-      example: '例：\n・落ち込んで仕事に手がつかなくなった\n・チームメンバーとの関係が悪化した\n・問題を先送りにしてしまった'
-    },
-    { 
       type: ElementType.disputation, 
       label: '反論', 
       description: '前のステップで入力した信念に対する反論を入力してください',
       title: '<strong>D</strong>isputation（反論）',
       example: '例：\n・一度の失敗で全てを判断するのは極端すぎる\n・誰にでもミスはある\n・この経験を次に活かすことができる'
-    },
-    { 
-      type: ElementType.effect, 
-      label: '活力', 
-      description: '前のステップで入力した反論による新しい考え方や行動の変化を入力してください',
-      title: '<strong>E</strong>ffect（活力）',
-      example: '例：\n・冷静に問題に向き合えるようになった\n・同僚に相談して解決策を見つけた\n・再発防止の仕組みを作った'
     },
   ];
 
@@ -479,7 +459,7 @@ export default function AnalyzePage({ params }: { params: Promise<PageParams> })
             <IconArrowLeft size={20} />
             前へ
           </button>
-          {activeStep === ElementType.effect ? (
+          {activeStep === ElementType.disputation ? (
             <button
               onClick={() => {
                 if (!failure?.id) {
