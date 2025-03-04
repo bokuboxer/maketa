@@ -17,15 +17,21 @@ azure_key = os.getenv("AZURE_OPENAI_KEY")
 azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
 
 llm: BaseChatModel
-if azure_key and azure_endpoint:
-    llm = AzureChatOpenAI(
-        azure_endpoint=azure_endpoint,
-        api_key=SecretStr(azure_key),
-        api_version="2024-02-15-preview",
-        azure_deployment="o3-mini",
-        model="o3-mini",
-        temperature=0,
-    )
+if os.getenv("ENVIRONMENT") == "production":
+    if azure_key and azure_endpoint:
+        llm = AzureChatOpenAI(
+            azure_endpoint=azure_endpoint,
+            api_key=SecretStr(azure_key),
+            api_version="2024-02-15-preview",
+            azure_deployment="gpt-4o-mini",
+            model="gpt-4o-mini",
+            temperature=0,
+        )
+    else:
+        llm = ChatOpenAI(
+            model="gpt-4o-mini",
+            temperature=0,
+        )
 else:
     llm = ChatOpenAI(
         model="gpt-4o-mini",
@@ -34,10 +40,19 @@ else:
 
 app = FastAPI()
 
-# CORSミドルウェアの設定
+if os.getenv("ENVIRONMENT") == "production":
+    # 本番環境の設定
+    allow_origins = [os.getenv("FRONTEND_URL")]
+    debug = False
+else:
+    # ローカル環境の設定
+    allow_origins = ["*"]
+    debug = True
+
+# FastAPIのCORS設定
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 本番環境では適切なオリジンを指定してください
+    allow_origins=allow_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -13,6 +13,14 @@ RUN pip install poetry && \
 COPY migrations ./migrations
 COPY alembic.ini ./
 
+# ビルド時の環境変数を設定
+ENV ENVIRONMENT=production
+
+ARG DATABASE_URL
+ARG AZURE_OPENAI_KEY
+ARG AZURE_OPENAI_ENDPOINT
+ARG FRONTEND_URL
+
 EXPOSE 8000
 
 # 本番環境で実行
