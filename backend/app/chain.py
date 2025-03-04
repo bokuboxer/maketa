@@ -6,9 +6,7 @@ import app.schema as schema
 from app.template import (
     adversity_template,
     belief_template,
-    consequence_template,
     dispute_template,
-    energy_template,
     summary_template,
 )
 from langchain_core.output_parsers import PydanticOutputParser, StrOutputParser
@@ -18,9 +16,7 @@ from langchain_core.language_models import BaseChatModel
 template_map = {
     model.ElementType.ADVERSITY: adversity_template,
     model.ElementType.BELIEF: belief_template,
-    model.ElementType.CONSEQUENCE: consequence_template,
     model.ElementType.DISPUTATION: dispute_template,
-    model.ElementType.EFFECT: energy_template,
 }
 
 
