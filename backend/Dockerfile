@@ -2,17 +2,13 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
+# アプリケーションのコードをコピー
+COPY . .
+
 # 依存関係のインストール
-COPY pyproject.toml poetry.lock ./
 RUN pip install poetry && \
     poetry config virtualenvs.create false && \
     poetry install --only main
-
-# アプリケーションのコードをコピー
-COPY app ./app
-COPY migrations ./migrations
-COPY alembic.ini ./
-COPY server.py ./
 
 # ビルド時の環境変数を設定
 ENV ENVIRONMENT=production
