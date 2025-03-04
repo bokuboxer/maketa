@@ -16,7 +16,12 @@ DATABASE_URL = os.getenv(
 
 
 def get_db():
-    engine = create_engine(DATABASE_URL, connect_args={"ssl": {"ssl_mode": "REQUIRED"}})
+    engine = create_engine(
+        DATABASE_URL,
+        connect_args={
+            "ssl": {"ca": None, "check_hostname": False, "verify_mode": "NONE"}
+        },
+    )
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     db = SessionLocal()
     try:
@@ -35,5 +40,10 @@ class Base(DeclarativeBase):
 
 # データベースの初期化関数
 def init_db():
-    engine = create_engine(DATABASE_URL, connect_args={"ssl": {"ssl_mode": "REQUIRED"}})
+    engine = create_engine(
+        DATABASE_URL,
+        connect_args={
+            "ssl": {"ca": None, "check_hostname": False, "verify_mode": "NONE"}
+        },
+    )
     Base.metadata.create_all(bind=engine)
