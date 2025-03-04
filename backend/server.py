@@ -8,13 +8,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from langchain_openai import ChatOpenAI
 # from langchain_core.language_models import BaseChatModel
 # from pydantic import SecretStr
-import os
+# import os
 
 load_dotenv()
 
 # 環境変数からAzure OpenAIの設定を取得
-azure_key = os.getenv("AZURE_OPENAI_KEY")
-azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+# azure_key = os.getenv("AZURE_OPENAI_KEY")
+# azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
 
 # llm: BaseChatModel
 # if os.getenv("ENVIRONMENT") == "production":

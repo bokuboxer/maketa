@@ -141,6 +141,7 @@ jobs:
             AZURE_OPENAI_KEY=${{ secrets.AZURE_OPENAI_KEY }}
             AZURE_OPENAI_ENDPOINT=${{ secrets.AZURE_OPENAI_ENDPOINT }}
             FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+            OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
 
       - name: Deploy to Azure Web App (backend)
         uses: azure/webapps-deploy@v2
