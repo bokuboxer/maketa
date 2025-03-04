@@ -90,6 +90,10 @@ resource "azurerm_linux_web_app" "server" {
     application_stack {
       docker_image_name = "${azurerm_container_registry.acr.login_server}/backend:latest"
     }
+    cors {
+      allowed_origins     = ["https://maketa-frontend-app.azurewebsites.net"]
+      support_credentials = true
+    }
   }
 
   app_settings = {
