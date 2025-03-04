@@ -19,9 +19,7 @@ export default function FailureDetailPage({ params }: { params: Promise<PagePara
   const steps = [
     { type: ElementType.adversity, label: '逆境' },
     { type: ElementType.belief, label: '信念' },
-    { type: ElementType.consequence, label: '結果' },
     { type: ElementType.disputation, label: '反論' },
-    { type: ElementType.effect, label: '効果' },
   ];
 
   if (isLoading || !failure) {
