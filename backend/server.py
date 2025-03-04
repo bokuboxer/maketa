@@ -1,3 +1,5 @@
+import os
+
 import app.schema as schema
 from app.chain import SuggestChain
 from app.controller import ElementController, FailureController, UserController
@@ -6,6 +8,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from langchain_openai import ChatOpenAI
+from pydantic import SecretStr
 # from langchain_core.language_models import BaseChatModel
 # from pydantic import SecretStr
 # import os
@@ -36,6 +39,7 @@ load_dotenv()
 llm = ChatOpenAI(
     model="gpt-4o-mini",
     temperature=0,
+    api_key=SecretStr(os.getenv("OPENAI_API_KEY", "")),
 )
 
 app = FastAPI()
