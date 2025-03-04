@@ -137,6 +137,10 @@ jobs:
           context: ./backend
           push: true
           tags: ${{ secrets.ACR_LOGIN_SERVER }}/backend:${{ github.sha }}
+          build-args: |
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            AZURE_OPENAI_KEY=${{ secrets.AZURE_OPENAI_KEY }}
+            AZURE_OPENAI_ENDPOINT=${{ secrets.AZURE_OPENAI_ENDPOINT }}
 
       - name: Deploy to Azure Web App (backend)
         uses: azure/webapps-deploy@v2

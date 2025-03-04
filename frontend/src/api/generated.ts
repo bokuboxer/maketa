@@ -5,194 +5,282 @@
  * OpenAPI spec version: 0.1.0
  */
 import type {
-  DataTag,
-  DefinedInitialDataOptions,
-  DefinedUseQueryResult,
-  MutationFunction,
-  QueryFunction,
-  QueryKey,
-  UndefinedInitialDataOptions,
-  UseMutationOptions,
-  UseMutationResult,
-  UseQueryOptions,
-  UseQueryResult
-} from '@tanstack/react-query';
-import {
-  useMutation,
-  useQuery
-} from '@tanstack/react-query';
-import { customAxios } from './mutator';
+	DataTag,
+	DefinedInitialDataOptions,
+	DefinedUseQueryResult,
+	MutationFunction,
+	QueryFunction,
+	QueryKey,
+	UndefinedInitialDataOptions,
+	UseMutationOptions,
+	UseMutationResult,
+	UseQueryOptions,
+	UseQueryResult,
+} from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { customAxios } from "./mutator";
 export interface CreateUserInput {
-  firebase_uid: string;
-  email: string;
+	firebase_uid: string;
+	email: string;
 }
 
 export interface HTTPValidationError {
-  detail?: ValidationError[];
+	detail?: ValidationError[];
 }
 
 export type ValidationErrorLocItem = string | number;
 
 export interface ValidationError {
-  loc: ValidationErrorLocItem[];
-  msg: string;
-  type: string;
+	loc: ValidationErrorLocItem[];
+	msg: string;
+	type: string;
 }
-
-
-
-
 
 /**
  * @summary Create User
  */
 export const createUserUsersPost = (
-    createUserInput: CreateUserInput,
- signal?: AbortSignal
+	createUserInput: CreateUserInput,
+	signal?: AbortSignal,
 ) => {
-      
-      
-      return customAxios<unknown>(
-      {url: `/users`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: createUserInput, signal
-    },
-      );
-    }
-  
+	return customAxios<unknown>({
+		url: `/users`,
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		data: createUserInput,
+		signal,
+	});
+};
 
+export const getCreateUserUsersPostMutationOptions = <
+	TError = HTTPValidationError,
+	TContext = unknown,
+>(options?: {
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof createUserUsersPost>>,
+		TError,
+		{ data: CreateUserInput },
+		TContext
+	>;
+}): UseMutationOptions<
+	Awaited<ReturnType<typeof createUserUsersPost>>,
+	TError,
+	{ data: CreateUserInput },
+	TContext
+> => {
+	const mutationKey = ["createUserUsersPost"];
+	const { mutation: mutationOptions } = options
+		? options.mutation &&
+			"mutationKey" in options.mutation &&
+			options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey } };
 
-export const getCreateUserUsersPostMutationOptions = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createUserUsersPost>>, TError,{data: CreateUserInput}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof createUserUsersPost>>, TError,{data: CreateUserInput}, TContext> => {
-    
-const mutationKey = ['createUserUsersPost'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof createUserUsersPost>>,
+		{ data: CreateUserInput }
+	> = (props) => {
+		const { data } = props ?? {};
 
-      
+		return createUserUsersPost(data);
+	};
 
+	return { mutationFn, ...mutationOptions };
+};
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createUserUsersPost>>, {data: CreateUserInput}> = (props) => {
-          const {data} = props ?? {};
+export type CreateUserUsersPostMutationResult = NonNullable<
+	Awaited<ReturnType<typeof createUserUsersPost>>
+>;
+export type CreateUserUsersPostMutationBody = CreateUserInput;
+export type CreateUserUsersPostMutationError = HTTPValidationError;
 
-          return  createUserUsersPost(data,)
-        }
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type CreateUserUsersPostMutationResult = NonNullable<Awaited<ReturnType<typeof createUserUsersPost>>>
-    export type CreateUserUsersPostMutationBody = CreateUserInput
-    export type CreateUserUsersPostMutationError = HTTPValidationError
-
-    /**
+/**
  * @summary Create User
  */
-export const useCreateUserUsersPost = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createUserUsersPost>>, TError,{data: CreateUserInput}, TContext>, }
-): UseMutationResult<
-        Awaited<ReturnType<typeof createUserUsersPost>>,
-        TError,
-        {data: CreateUserInput},
-        TContext
-      > => {
+export const useCreateUserUsersPost = <
+	TError = HTTPValidationError,
+	TContext = unknown,
+>(options?: {
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof createUserUsersPost>>,
+		TError,
+		{ data: CreateUserInput },
+		TContext
+	>;
+}): UseMutationResult<
+	Awaited<ReturnType<typeof createUserUsersPost>>,
+	TError,
+	{ data: CreateUserInput },
+	TContext
+> => {
+	const mutationOptions = getCreateUserUsersPostMutationOptions(options);
 
-      const mutationOptions = getCreateUserUsersPostMutationOptions(options);
+	return useMutation(mutationOptions);
+};
 
-      return useMutation(mutationOptions);
-    }
-    
 /**
  * @summary Get User By Firebase Uid
  */
 export const getUserByFirebaseUidUsersFirebaseUidGet = (
-    firebaseUid: string,
- signal?: AbortSignal
+	firebaseUid: string,
+	signal?: AbortSignal,
 ) => {
-      
-      
-      return customAxios<unknown>(
-      {url: `/users/${firebaseUid}`, method: 'GET', signal
-    },
-      );
-    }
-  
+	return customAxios<unknown>({
+		url: `/users/${firebaseUid}`,
+		method: "GET",
+		signal,
+	});
+};
 
-export const getGetUserByFirebaseUidUsersFirebaseUidGetQueryKey = (firebaseUid: string,) => {
-    return [`/users/${firebaseUid}`] as const;
-    }
-
-    
-export const getGetUserByFirebaseUidUsersFirebaseUidGetQueryOptions = <TData = Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>, TError = HTTPValidationError>(firebaseUid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>, TError, TData>>, }
+export const getGetUserByFirebaseUidUsersFirebaseUidGetQueryKey = (
+	firebaseUid: string,
 ) => {
+	return [`/users/${firebaseUid}`] as const;
+};
 
-const {query: queryOptions} = options ?? {};
+export const getGetUserByFirebaseUidUsersFirebaseUidGetQueryOptions = <
+	TData = Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>,
+	TError = HTTPValidationError,
+>(
+	firebaseUid: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>,
+				TError,
+				TData
+			>
+		>;
+	},
+) => {
+	const { query: queryOptions } = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetUserByFirebaseUidUsersFirebaseUidGetQueryKey(firebaseUid);
+	const queryKey =
+		queryOptions?.queryKey ??
+		getGetUserByFirebaseUidUsersFirebaseUidGetQueryKey(firebaseUid);
 
-  
+	const queryFn: QueryFunction<
+		Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>
+	> = ({ signal }) =>
+		getUserByFirebaseUidUsersFirebaseUidGet(firebaseUid, signal);
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>> = ({ signal }) => getUserByFirebaseUidUsersFirebaseUidGet(firebaseUid, signal);
+	return {
+		queryKey,
+		queryFn,
+		enabled: !!firebaseUid,
+		...queryOptions,
+	} as UseQueryOptions<
+		Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+};
 
-      
+export type GetUserByFirebaseUidUsersFirebaseUidGetQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>
+>;
+export type GetUserByFirebaseUidUsersFirebaseUidGetQueryError =
+	HTTPValidationError;
 
-      
-
-   return  { queryKey, queryFn, enabled: !!(firebaseUid), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetUserByFirebaseUidUsersFirebaseUidGetQueryResult = NonNullable<Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>>
-export type GetUserByFirebaseUidUsersFirebaseUidGetQueryError = HTTPValidationError
-
-
-export function useGetUserByFirebaseUidUsersFirebaseUidGet<TData = Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>, TError = HTTPValidationError>(
- firebaseUid: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>,
-          TError,
-          Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>
-        > , 'initialData'
-      >, }
-
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetUserByFirebaseUidUsersFirebaseUidGet<TData = Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>, TError = HTTPValidationError>(
- firebaseUid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>,
-          TError,
-          Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>
-        > , 'initialData'
-      >, }
-
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetUserByFirebaseUidUsersFirebaseUidGet<TData = Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>, TError = HTTPValidationError>(
- firebaseUid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>, TError, TData>>, }
-
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetUserByFirebaseUidUsersFirebaseUidGet<
+	TData = Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>,
+	TError = HTTPValidationError,
+>(
+	firebaseUid: string,
+	options: {
+		query: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>,
+					TError,
+					Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>
+				>,
+				"initialData"
+			>;
+	},
+): DefinedUseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetUserByFirebaseUidUsersFirebaseUidGet<
+	TData = Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>,
+	TError = HTTPValidationError,
+>(
+	firebaseUid: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>,
+					TError,
+					Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>
+				>,
+				"initialData"
+			>;
+	},
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetUserByFirebaseUidUsersFirebaseUidGet<
+	TData = Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>,
+	TError = HTTPValidationError,
+>(
+	firebaseUid: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>,
+				TError,
+				TData
+			>
+		>;
+	},
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
 /**
  * @summary Get User By Firebase Uid
  */
 
-export function useGetUserByFirebaseUidUsersFirebaseUidGet<TData = Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>, TError = HTTPValidationError>(
- firebaseUid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>, TError, TData>>, }
+export function useGetUserByFirebaseUidUsersFirebaseUidGet<
+	TData = Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>,
+	TError = HTTPValidationError,
+>(
+	firebaseUid: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof getUserByFirebaseUidUsersFirebaseUidGet>>,
+				TError,
+				TData
+			>
+		>;
+	},
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+} {
+	const queryOptions = getGetUserByFirebaseUidUsersFirebaseUidGetQueryOptions(
+		firebaseUid,
+		options,
+	);
 
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData, TError>;
+	};
 
-  const queryOptions = getGetUserByFirebaseUidUsersFirebaseUidGetQueryOptions(firebaseUid,options)
+	query.queryKey = queryOptions.queryKey;
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  query.queryKey = queryOptions.queryKey ;
-
-  return query;
+	return query;
 }
-
-
-
-

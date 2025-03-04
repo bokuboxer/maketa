@@ -4,12 +4,12 @@
  * FastAPI
  * OpenAPI spec version: 0.1.0
  */
-import type { ElementType } from './elementType';
+import type { ElementType } from "./elementType";
 
 export interface Element {
-  id: number;
-  description: string;
-  type: ElementType;
-  created_at: string;
-  failure_id: number;
+	id: number;
+	description: string;
+	type: ElementType;
+	created_at: string;
+	failure_id: number;
 }
