@@ -24,12 +24,13 @@ export default function Failures() {
 		data: user,
 		refetch,
 		isLoading,
+		error,
 	} = useGetUserByFirebaseUidUserFirebaseUidGet(
-		uid ?? "", // 空文字列を渡すのではなく
+		uid ?? "",
 		{
 			query: {
-				enabled: !!uid, // uidが存在する場合のみクエリを実行
-			},
+				enabled: !!uid
+			}
 		},
 	);
 
@@ -66,18 +67,22 @@ export default function Failures() {
 	}, [router]);
 
 	useEffect(() => {
-		if (!user) {
+		if (error) {
 			router.push("/");
 			auth.signOut();
 		}
-	}, [user]);
+	}, [error, router]);
 
-	if (isLoading || !user) {
+	if (isLoading) {
 		return (
 			<div className="min-h-screen bg-white flex items-center justify-center">
 				<Loader color="black" size="lg" variant="dots" />
 			</div>
 		);
+	}
+
+	if (!user || error) {
+		return null;
 	}
 
 	return (

@@ -1,9 +1,10 @@
 import os
+import ssl
 
 import pymysql
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 load_dotenv()
 
@@ -14,15 +15,14 @@ DATABASE_URL = os.getenv(
     "mysql+pymysql://root:root@localhost:3306/app",  # ローカル開発用のデフォルト値
 )
 
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# Azure MySQL用のSSL設定
+ssl_context = ssl.create_default_context(cafile="/etc/ssl/certs/ca-certificates.crt")
+ssl_context.verify_mode = ssl.CERT_REQUIRED
 
 
-class Base(DeclarativeBase):
-    pass
-
-
-def get_db() -> Session:
+def get_db():
+    engine = create_engine(DATABASE_URL, connect_args={"ssl": ssl_context})
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     db = SessionLocal()
     try:
         return db
@@ -34,6 +34,11 @@ def get_db() -> Session:
         db.close()
 
 
+class Base(DeclarativeBase):
+    pass
+
+
 # データベースの初期化関数
 def init_db():
+    engine = create_engine(DATABASE_URL, connect_args={"ssl": ssl_context})
     Base.metadata.create_all(bind=engine)

@@ -1,17 +1,24 @@
-FROM python:3.12-slim
+FROM python:3.11-slim
 
 WORKDIR /app
 
-# 依存関係のインストール
+# poetryのインストール
+RUN pip install poetry
+
+# 依存関係ファイルをコピー
 COPY pyproject.toml poetry.lock ./
-RUN pip install poetry && \
-    poetry config virtualenvs.create false && \
-    poetry install
+
+# poetryの設定（仮想環境を作成しない）
+RUN poetry config virtualenvs.create false
+
+# 依存関係のインストール（詳細な出力を有効化）
+RUN poetry install --only main --no-root --verbose
 
 # アプリケーションのコードをコピー
 COPY . .
 
+# ポートの公開
 EXPOSE 8000
 
-# 開発環境で実行（ホットリロード有効）
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"] 
+# アプリケーションの起動
+CMD ["poetry", "run", "uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000"]

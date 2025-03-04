@@ -4,14 +4,14 @@
  * FastAPI
  * OpenAPI spec version: 0.1.0
  */
-import type { FailureConclusion } from "./failureConclusion";
-import type { Element } from "./element";
+import type { FailureConclusion } from './failureConclusion';
+import type { Element } from './element';
 
 export interface Failure {
-	id: number;
-	description: string;
-	created_at: string;
-	conclusion: FailureConclusion;
-	has_analyzed: boolean;
-	elements: Element[];
+  id: number;
+  description: string;
+  created_at: string;
+  conclusion: FailureConclusion;
+  has_analyzed: boolean;
+  elements: Element[];
 }

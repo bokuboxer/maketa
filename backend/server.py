@@ -1,3 +1,5 @@
+import os
+
 import app.schema as schema
 from app.chain import SuggestChain
 from app.controller import ElementController, FailureController, UserController
@@ -5,42 +7,57 @@ from app.database import get_db
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from langchain_openai import ChatOpenAI, AzureChatOpenAI
-from langchain_core.language_models import BaseChatModel
+from langchain_openai import ChatOpenAI
 from pydantic import SecretStr
-import os
+# from langchain_core.language_models import BaseChatModel
+# from pydantic import SecretStr
+# import os
 
 load_dotenv()
 
 # 環境変数からAzure OpenAIの設定を取得
-azure_key = os.getenv("AZURE_OPENAI_KEY")
-azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+# azure_key = os.getenv("AZURE_OPENAI_KEY")
+# azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
 
-llm: BaseChatModel
-if azure_key and azure_endpoint:
-    llm = AzureChatOpenAI(
-        azure_endpoint=azure_endpoint,
-        api_key=SecretStr(azure_key),
-        api_version="2024-02-15-preview",
-        azure_deployment="o3-mini",
-        model="o3-mini",
-        temperature=0,
-    )
-else:
-    llm = ChatOpenAI(
-        model="gpt-4o-mini",
-        temperature=0,
-    )
+# llm: BaseChatModel
+# if os.getenv("ENVIRONMENT") == "production":
+#     if azure_key and azure_endpoint:
+#         llm = AzureChatOpenAI(
+#             azure_endpoint=azure_endpoint,
+#             api_key=SecretStr(azure_key),
+#             api_version="2024-02-15-preview",
+#             azure_deployment="gpt-4o-mini",
+#             model="gpt-4o-mini",
+#             temperature=0,
+#         )
+#     else:
+#         llm = ChatOpenAI(
+#             model="gpt-4o-mini",
+#             temperature=0,
+#         )
+# else:
+llm = ChatOpenAI(
+    model="gpt-4o-mini",
+    temperature=0,
+    api_key=SecretStr(os.getenv("OPENAI_API_KEY", "")),
+)
 
 app = FastAPI()
 
-# CORSミドルウェアの設定
+# FastAPIのCORS設定
+origins = [
+    "https://maketa-frontend-app.azurewebsites.net",
+    "http://localhost:3000",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 本番環境では適切なオリジンを指定してください
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["*"],
+    max_age=600,
 )
 
 db = get_db()
