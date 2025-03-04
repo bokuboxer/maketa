@@ -46,9 +46,7 @@ class Failure(Base):
 class ElementType(PyEnum):
     ADVERSITY = "adversity"
     BELIEF = "belief"
-    CONSEQUENCE = "consequence"
     DISPUTATION = "disputation"
-    EFFECT = "effect"
 
 
 class Element(Base):

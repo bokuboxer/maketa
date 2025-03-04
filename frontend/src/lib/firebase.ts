@@ -13,7 +13,8 @@ const firebaseConfig = {
 	measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-// クライアントサイドでのみ初期化
-export const app =
-	getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-export const auth = getAuth(app);
+const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app); 
+
+// Analytics can only be initialized on the client side
+export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
