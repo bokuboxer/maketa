@@ -184,23 +184,23 @@ export default function AnalyzePage({
   const steps = [
     { 
       type: ElementType.adversity, 
-      label: '逆境', 
-      description: '失敗の詳細を入力してください',
-      title: '<strong>A</strong>dversity（逆境）',
+      label: '失敗の詳細', 
+      description: '失敗の詳細を入力しよう',
+      title: '<strong>A</strong>dversity',
       example: '例：\n・締め切りに間に合わなかった\n・顧客からのクレームを受けた\n・チームメンバーと意見が合わなかった'
     },
     { 
       type: ElementType.belief, 
-      label: '信念', 
-      description: '失敗に対する自分の意見を入力してください',
-      title: '<strong>B</strong>elief（信念）',
+      label: '意見の整理', 
+      description: 'あなたの意見を整理しよう',
+      title: '<strong>B</strong>elief',
       example: '例：\n・自分は無能だ\n・もう取り返しがつかない\n・誰も自分を信用してくれない'
     },
     { 
       type: ElementType.disputation, 
-      label: '反論', 
+      label: '視点の探索', 
       description: '前のステップで入力した信念に対する反論を入力してください',
-      title: '<strong>D</strong>isputation（反論）',
+      title: '<strong>D</strong>isputation',
       example: '例：\n・一度の失敗で全てを判断するのは極端すぎる\n・誰にでもミスはある\n・この経験を次に活かすことができる'
     },
   ];

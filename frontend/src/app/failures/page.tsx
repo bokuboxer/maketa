@@ -65,12 +65,12 @@ export default function Failures() {
 		return () => unsubscribe();
 	}, [router]);
 
-	useEffect(() => {
-		if (!user) {
-			router.push("/");
-			auth.signOut();
-		}
-	}, [user]);
+	// useEffect(() => {
+	// 	// if (!user) {
+	// 	// 	router.push("/");
+	// 	// 	auth.signOut();
+	// 	// }
+	// }, [user]);
 
 	if (isLoading || !user) {
 		return (
