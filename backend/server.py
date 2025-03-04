@@ -40,19 +40,10 @@ else:
 
 app = FastAPI()
 
-if os.getenv("ENVIRONMENT") == "production":
-    # 本番環境の設定
-    allow_origins = [os.getenv("FRONTEND_URL")]
-    debug = False
-else:
-    # ローカル環境の設定
-    allow_origins = ["*"]
-    debug = True
-
 # FastAPIのCORS設定
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allow_origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
