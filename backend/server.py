@@ -5,12 +5,32 @@ from app.database import get_db
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from langchain_openai import ChatOpenAI
+from langchain_openai import ChatOpenAI, AzureChatOpenAI
+from langchain_core.language_models import BaseChatModel
+from pydantic import SecretStr
+import os
 
 load_dotenv()
 
-db = get_db()
-llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+# 環境変数からAzure OpenAIの設定を取得
+azure_key = os.getenv("AZURE_OPENAI_KEY")
+azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+
+llm: BaseChatModel
+if azure_key and azure_endpoint:
+    llm = AzureChatOpenAI(
+        azure_endpoint=azure_endpoint,
+        api_key=SecretStr(azure_key),
+        api_version="2024-02-15-preview",
+        azure_deployment="o3-mini",
+        model="o3-mini",
+        temperature=0,
+    )
+else:
+    llm = ChatOpenAI(
+        model="gpt-4o-mini",
+        temperature=0,
+    )
 
 app = FastAPI()
 
@@ -24,7 +44,7 @@ app.add_middleware(
 )
 
 db = get_db()
-# chain_manager = ChainManager(llm)
+
 suggest_chain = SuggestChain(llm)
 user_controller = UserController(db)
 failure_controller = FailureController(db)

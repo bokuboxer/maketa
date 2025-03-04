@@ -6,5 +6,5 @@
  */
 
 export type SuggestElementsElementsSuggestPostParams = {
-failure_id: number;
+	failure_id: number;
 };

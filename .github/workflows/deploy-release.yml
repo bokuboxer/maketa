@@ -1,0 +1,189 @@
+name: Deploy Release
+
+on:
+  push:
+    branches:
+      - 'release/**'  # releaseディレクトリを含むブランチ
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    environment: release
+    if: contains(github.event.head_commit.modified, 'terraform/')
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - name: Check for terraform changes
+        id: terraform-changed
+        run: |
+          if git diff --name-only HEAD~1 HEAD | grep -q "^terraform/"; then
+            echo "::set-output name=changed::true"
+          else
+            echo "::set-output name=changed::false"
+          fi
+
+      - name: Setup Terraform
+        if: steps.terraform-changed.outputs.changed == 'true'
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        if: steps.terraform-changed.outputs.changed == 'true'
+        run: |
+          cd terraform
+          terraform init
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID  }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+      - name: Terraform Apply
+        if: steps.terraform-changed.outputs.changed == 'true'
+        run: |
+          cd terraform
+          terraform apply -auto-approve
+        env:
+          TF_VAR_db_admin_username: ${{ secrets.DB_ADMIN_USERNAME }}
+          TF_VAR_db_admin_password: ${{ secrets.DB_ADMIN_PASSWORD }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+  deploy_database:
+    needs: terraform
+    runs-on: ubuntu-latest
+    environment: release
+    if: always() && (needs.terraform.result == 'success' || needs.terraform.result == 'skipped')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        run: |
+          cd terraform
+          # terraform.tfvarsファイルを作成
+          cat > terraform.tfvars << EOF
+          subscription_id = "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+          tenant_id = "${{ secrets.AZURE_TENANT_ID }}"
+          client_id = "${{ secrets.AZURE_CLIENT_ID }}"
+          client_secret = "${{ secrets.AZURE_CLIENT_SECRET }}"
+          db_admin_username = "${{ secrets.DB_ADMIN_USERNAME }}"
+          db_admin_password = "${{ secrets.DB_ADMIN_PASSWORD }}"
+          firebase_api_key = "${{ secrets.FIREBASE_API_KEY }}"
+          firebase_app_id = "${{ secrets.FIREBASE_APP_ID }}"
+          EOF
+
+          terraform init
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+      - name: Get Database URL
+        id: db-url
+        run: |
+          cd terraform
+          terraform init
+          echo "database_url=${{ secrets.DATABASE_URL }}?ssl_ca=/etc/ssl/certs/ca-certificates.crt" >> $GITHUB_OUTPUT
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+      - name: Run Database Migrations
+        # SSL証明書のインストール
+        run: |
+          sudo apt-get update && sudo apt-get install -y ca-certificates
+          cd backend
+          pip install poetry
+          poetry install
+          poetry run alembic upgrade head
+        env:
+          DATABASE_URL: ${{ steps.db-url.outputs.database_url }}
+
+  deploy_backend:
+    needs: terraform
+    runs-on: ubuntu-latest
+    environment: release
+    if: always() && (needs.terraform.result == 'success' || needs.terraform.result == 'skipped')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Docker Login
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.ACR_LOGIN_SERVER }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Build and push Docker image (backend)
+        uses: docker/build-push-action@v3
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ secrets.ACR_LOGIN_SERVER }}/backend:${{ github.sha }}
+          build-args: |
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            AZURE_OPENAI_KEY=${{ secrets.AZURE_OPENAI_KEY }}
+            AZURE_OPENAI_ENDPOINT=${{ secrets.AZURE_OPENAI_ENDPOINT }}
+
+      - name: Deploy to Azure Web App (backend)
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ secrets.BACKEND_WEBAPP_NAME }}
+          images: ${{ secrets.ACR_LOGIN_SERVER }}/backend:${{ github.sha }}
+
+  deploy_frontend:
+    needs: terraform
+    runs-on: ubuntu-latest
+    environment: release
+    if: always() && (needs.terraform.result == 'success' || needs.terraform.result == 'skipped')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Docker Login
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.ACR_LOGIN_SERVER }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Build and push Docker image (frontend)
+        uses: docker/build-push-action@v3
+        with:
+          context: ./frontend
+          push: true
+          tags: ${{ secrets.ACR_LOGIN_SERVER }}/frontend:${{ github.sha }}
+          build-args: |
+            NEXT_PUBLIC_FIREBASE_API_KEY=${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
+            NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
+            NEXT_PUBLIC_FIREBASE_PROJECT_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
+            NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}
+            NEXT_PUBLIC_FIREBASE_APP_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
+            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+
+      - name: Deploy to Azure Web App (frontend)
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ secrets.FRONTEND_WEBAPP_NAME }}
+          images: ${{ secrets.ACR_LOGIN_SERVER }}/frontend:${{ github.sha }}
