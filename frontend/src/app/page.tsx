@@ -41,7 +41,9 @@ export default function AuthPage() {
 			<div className="w-full max-w-md mx-4 space-y-8">
 				<div className="text-center space-y-2">
 					<h1 className="text-5xl font-bold tracking-tight">Maketa</h1>
-					<p className="text-base text-gray-600">失敗から学び、成長するためのアプリ</p>
+					<p className="text-base text-gray-600">
+						失敗から学び、成長するためのアプリ
+					</p>
 				</div>
 
 				<div className="space-y-6 p-6 pt-2 bg-white rounded-lg shadow-lg">

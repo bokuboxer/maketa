@@ -16,11 +16,11 @@ export const useAuth = () => {
 						await currentUser.delete();
 					}
 				} catch (deleteError) {
-					console.error('Firebaseユーザーのクリーンアップに失敗:', deleteError);
+					console.error("Firebaseユーザーのクリーンアップに失敗:", deleteError);
 				}
-				throw new Error('ユーザー登録に失敗しました。もう一度お試しください。');
+				throw new Error("ユーザー登録に失敗しました。もう一度お試しください。");
 			},
-		}
+		},
 	});
 
 	return {
@@ -28,13 +28,17 @@ export const useAuth = () => {
 			await signInWithEmailAndPassword(auth, email, password);
 		},
 		signUp: async (email: string, password: string) => {
-			const result = await createUserWithEmailAndPassword(auth, email, password);
+			const result = await createUserWithEmailAndPassword(
+				auth,
+				email,
+				password,
+			);
 			await createUser({
 				data: {
 					firebase_uid: result.user.uid,
 					email: result.user.email!,
 				},
 			});
-		}
+		},
 	};
 };
