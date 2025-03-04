@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Run PR Agent
     if: ${{ github.event.sender.type != 'Bot' }}
+    environment: release
     steps:
       - id: pr-agent
         uses: Codium-ai/pr-agent@main

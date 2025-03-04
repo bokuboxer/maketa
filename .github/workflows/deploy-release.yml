@@ -3,8 +3,7 @@ name: Deploy Release
 on:
   push:
     branches:
-      - release
-      - feat/deploy-process
+      - 'release/**'  # releaseディレクトリを含むブランチ
 
 jobs:
   terraform:
