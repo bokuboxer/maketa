@@ -57,7 +57,7 @@ export default function Failures() {
 	useEffect(() => {
 		const unsubscribe = onAuthStateChanged(auth, (user) => {
 			if (!user) {
-				router.push("/signin");
+				router.push("/");
 			} else {
 				setUid(user.uid);
 			}
@@ -67,7 +67,8 @@ export default function Failures() {
 
 	useEffect(() => {
 		if (!user) {
-			router.push("/signin");
+			router.push("/");
+			auth.signOut();
 		}
 	}, [user]);
 

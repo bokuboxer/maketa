@@ -5,46 +5,40 @@ import {
 	signInWithEmailAndPassword,
 } from "firebase/auth";
 
-export const useSignUp = () => {
-	const { mutate: createUser } = useCreateUserUsersPost();
+export const useAuth = () => {
+	const { mutate: createUser } = useCreateUserUsersPost({
+		mutation: {
+			onError: async (error) => {
+				try {
+					const currentUser = auth.currentUser;
+					if (currentUser) {
+						await auth.signOut();
+						await currentUser.delete();
+					}
+				} catch (deleteError) {
+					console.error("Firebaseユーザーのクリーンアップに失敗:", deleteError);
+				}
+				throw new Error("ユーザー登録に失敗しました。もう一度お試しください。");
+			},
+		},
+	});
 
-	const signUp = async (email: string, password: string) => {
-		try {
+	return {
+		signIn: async (email: string, password: string) => {
+			await signInWithEmailAndPassword(auth, email, password);
+		},
+		signUp: async (email: string, password: string) => {
 			const result = await createUserWithEmailAndPassword(
 				auth,
 				email,
 				password,
 			);
-			try {
-				await createUser({
-					data: {
-						firebase_uid: result.user.uid,
-						email: result.user.email!,
-					},
-				});
-			} catch (error) {
-				await result.user.delete();
-				console.error("バックエンドエラー:", error);
-				throw error;
-			}
-		} catch (error) {
-			console.error("Firebase認証エラー:", error);
-			throw error;
-		}
+			await createUser({
+				data: {
+					firebase_uid: result.user.uid,
+					email: result.user.email!,
+				},
+			});
+		},
 	};
-
-	return { signUp };
-};
-
-export const useSignIn = () => {
-	const signIn = async (email: string, password: string) => {
-		try {
-			await signInWithEmailAndPassword(auth, email, password);
-		} catch (error) {
-			console.error("ログインエラー:", error);
-			throw error;
-		}
-	};
-
-	return { signIn };
 };
