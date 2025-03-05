@@ -1,6 +1,5 @@
 import os
 import logging
-import logging.config
 
 import app.schema as schema
 from app.chain import SuggestChain
@@ -105,8 +104,6 @@ try:
 
 finally:
     if "db" in locals():
-        logger.info("Closing database connection")
         db.close()
     if "vectordb" in locals():
-        logger.info("Closing vector database connection")
         vectordb.close()
