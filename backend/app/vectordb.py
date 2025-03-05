@@ -46,7 +46,12 @@ class VectorDB:
                 host = weaviate_url.replace("https://", "").replace("http://", "")
                 secure = weaviate_url.startswith("https://")
 
-                client = weaviate.WeaviateClient(additional_headers=headers)
+                client = weaviate.WeaviateClient(
+                    connection_params=wcon.ConnectionParams.from_url(
+                        url=weaviate_url, grpc_port=self.grpc_port, grpc_secure=secure
+                    ),
+                    additional_headers=headers,
+                )
             else:
                 # 開発環境（Docker Compose）
                 logger.info("Using development Weaviate configuration")
