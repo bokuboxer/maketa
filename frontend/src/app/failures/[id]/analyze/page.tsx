@@ -217,9 +217,13 @@ export default function AnalyzePage({
 
 			if (activeStep === ElementType.adversity) {
 				// AからBへの遷移
-				let currentElements = selectedElements[activeStep].map(
-					(dndElement) => dndElement.element
-				);
+				let currentElements = [{
+					id: selectedElements[activeStep][0].element.id,
+					type: ElementType.adversity,
+					description: selectedElements[activeStep][0].element.description,
+					failure_id: failure?.id,
+					created_at: new Date().toISOString(),
+				}];
 				await suggestNextElements(ElementType.belief, currentElements);
 				setActiveStep(ElementType.belief);
 				setActiveSubType('selection');

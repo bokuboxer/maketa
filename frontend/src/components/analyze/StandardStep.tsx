@@ -1,5 +1,5 @@
 import { ElementType } from "@/api/model/elementType";
-import { StandardStepComponentProps } from "./types";
+import { StandardStepComponentProps, ExtendedElement } from "./types";
 import { StepHeader } from "./StepHeader";
 
 // Belief Selection Component
@@ -95,26 +95,52 @@ export const StandardStepComponent = ({
     }
   };
 
-  const handleElementClick = (element: any, isSuggested: boolean) => {
-    if (isSuggested) {
-      setSuggestedElements((prev) => ({
-        ...prev,
-        [activeStep]: prev[activeStep].filter(e => e.element.id !== element.element.id)
-      }));
+  const handleSuggestionClick = (suggestionText: string) => {
+    if (selectedElements[activeStep].length === 0) {
+      // 最初の要素を追加
+      const newElement: ExtendedElement = {
+        id: Date.now(),
+        type: activeStep,
+        description: suggestionText,
+        failure_id: 0, // This will be set when saving
+        created_at: new Date().toISOString(),
+      };
+      
       setSelectedElements((prev) => ({
         ...prev,
-        [activeStep]: [...prev[activeStep], element]
+        [activeStep]: [{
+          element: newElement,
+          isSelected: true,
+        }]
       }));
     } else {
+      // 既存の要素の説明に追加
       setSelectedElements((prev) => ({
         ...prev,
-        [activeStep]: prev[activeStep].filter(e => e.element.id !== element.element.id)
-      }));
-      setSuggestedElements((prev) => ({
-        ...prev,
-        [activeStep]: [...prev[activeStep], element]
+        [activeStep]: prev[activeStep].map((item) => ({
+          ...item,
+          element: {
+            ...item.element,
+            description: item.element.description
+              ? `${item.element.description}\n${suggestionText}`
+              : suggestionText,
+          },
+        }))
       }));
     }
+  };
+
+  const handleDescriptionChange = (newDescription: string) => {
+    setSelectedElements((prev) => ({
+      ...prev,
+      [activeStep]: prev[activeStep].map((item) => ({
+        ...item,
+        element: {
+          ...item.element,
+          description: newDescription,
+        },
+      }))
+    }));
   };
 
   return (
@@ -131,17 +157,17 @@ export const StandardStepComponent = ({
         <>
           <div className="w-full space-y-2">
             {selectedElements[activeStep].length === 0 ? (
-              <div className="text-gray-500 text-sm p-3 bg-gray-50 rounded-lg">要素をここにドロップ</div>
+              <div className="text-gray-500 text-sm p-3 bg-gray-50 rounded-lg">
+                説明を入力または候補から選択してください
+              </div>
             ) : (
-              selectedElements[activeStep].map((element) => (
-                <button
-                  key={element.element.id}
-                  onClick={() => handleElementClick(element, false)}
-                  className="w-full p-3 rounded-lg text-left bg-black text-white text-sm"
-                >
-                  {element.element.description}
-                </button>
-              ))
+              <textarea
+                className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-sm"
+                rows={5}
+                placeholder="詳しく説明してください"
+                value={selectedElements[activeStep][0]?.element.description || ""}
+                onChange={(e) => handleDescriptionChange(e.target.value)}
+              />
             )}
           </div>
           <div className="border-t border-gray-200 my-3" />
@@ -156,7 +182,7 @@ export const StandardStepComponent = ({
                 suggestedElements[activeStep].map((element) => (
                   <button
                     key={element.element.id}
-                    onClick={() => handleElementClick(element, true)}
+                    onClick={() => handleSuggestionClick(element.element.description)}
                     className="w-full p-3 rounded-lg text-left bg-gray-50 hover:bg-gray-100 text-sm"
                   >
                     {element.element.description}
