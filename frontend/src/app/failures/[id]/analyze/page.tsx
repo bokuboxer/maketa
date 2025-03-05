@@ -254,9 +254,19 @@ export default function AnalyzePage({
 	};
 
 	const handlePrev = () => {
-		const currentIndex = steps.findIndex((step) => step.type === activeStep);
-		if (currentIndex > 0) {
-			setActiveStep(steps[currentIndex - 1].type);
+		const currentStep = steps.find(step => 
+			step.type === activeStep && (!step.subType || step.subType === activeSubType)
+		);
+		const currentIndex = steps.indexOf(currentStep!);
+
+		if (activeStep === ElementType.belief && activeSubType === 'explanation') {
+			// B-2からB-1への遷移
+			setActiveSubType('selection');
+		} else if (currentIndex > 0) {
+			// 通常の前のステップへの遷移
+			const prevStep = steps[currentIndex - 1];
+			setActiveStep(prevStep.type);
+			setActiveSubType(prevStep.subType || null);
 		}
 	};
 
