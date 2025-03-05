@@ -1,6 +1,6 @@
 "use client";
 
-import { useGetFailureByIdFailureFailureIdGet } from "@/api/generated/default/default";
+import { useGetFailureByIdFailureFailureIdGet, useGetHeroesHeroesGet } from "@/api/generated/default/default";
 import { ElementType } from "@/api/model/elementType";
 import { IconArrowLeft } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
@@ -20,6 +20,17 @@ const FailureDetailPage = dynamic(
 			const { data: failure, isLoading } = useGetFailureByIdFailureFailureIdGet(
 				Number(resolvedParams.id),
 			);
+			const { data: heros, isLoading: isHeroLoading } = useGetHeroesHeroesGet(
+				{
+					search_query: failure?.description ?? "",
+					limit: 1
+				},
+				{
+					query: {
+						enabled: Boolean(failure?.description) // description があるときのみ実行
+					}
+				}
+			);
 			const router = useRouter();
 
   const steps = [
@@ -28,7 +39,7 @@ const FailureDetailPage = dynamic(
     { type: ElementType.disputation, label: '反論' },
   ];
 
-			if (isLoading || !failure) {
+			if (isLoading || isHeroLoading || !failure) {
 				return (
 					<div className="min-h-screen bg-white flex items-center justify-center">
 						<HypnoticLoader
@@ -90,6 +101,25 @@ const FailureDetailPage = dynamic(
 									</div>
 								);
 							})}
+
+							{/* 似ている偉人の失敗 */}
+							{heros && heros.length > 0 && (
+								<div className="border rounded-lg p-4 bg-white">
+									<h2 className="font-semibold mb-2 text-black">似ている偉人の失敗</h2>
+									{heros.map((hero) => (
+										<div key={hero.name} className="space-y-2">
+											<div className="flex justify-between items-center">
+												<div className="text-sm font-medium text-black">{hero.name} - {hero.description}</div>
+												<div className="text-sm text-gray-500">
+													類似度: {Math.round(hero.certainty * 100)}%
+												</div>
+											</div>
+											<p className="text-sm text-gray-600">{hero.failure}</p>
+											<p className="text-xs text-gray-400">出典: {hero.source}</p>
+										</div>
+									))}
+								</div>
+							)}
 						</div>
 					</div>
 				</div>

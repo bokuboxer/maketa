@@ -82,29 +82,36 @@ class VectorDB:
                 )
 
     def query_collection(self, search_query: str, limit: int) -> list[Hero] | None:
-        response = self.client.collections.get("Hero").query.near_text(
-            query=search_query,
-            limit=limit,
-            return_metadata=wq.MetadataQuery(
-                certainty=True,
-                distance=True,
-            ),
-            return_properties=["name", "description", "failure", "source"],
-            include_vector=True,
-        )
+        try:
+            if not self.client.is_connected():
+                self.client.connect()
 
-        heroes = []
-        for o in response.objects:
-            heroes.append(
-                Hero(
-                    name=o.properties["name"],
-                    description=o.properties["description"],
-                    failure=o.properties["failure"],
-                    source=o.properties["source"],
-                    certainty=o.metadata.certainty,
-                )
+            response = self.client.collections.get("Hero").query.near_text(
+                query=search_query,
+                limit=limit,
+                return_metadata=wq.MetadataQuery(
+                    certainty=True,
+                    distance=True,
+                ),
+                return_properties=["name", "description", "failure", "source"],
+                include_vector=True,
             )
-        return heroes
+
+            heroes = []
+            for o in response.objects:
+                heroes.append(
+                    Hero(
+                        name=o.properties["name"],
+                        description=o.properties["description"],
+                        failure=o.properties["failure"],
+                        source=o.properties["source"],
+                        certainty=o.metadata.certainty,
+                    )
+                )
+            return heroes
+        except Exception as e:
+            print(f"Error querying collection: {e}")
+            return None
 
     def close(self):
         if hasattr(self, "client"):

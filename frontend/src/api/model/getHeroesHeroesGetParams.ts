@@ -7,5 +7,4 @@
 
 export type GetHeroesHeroesGetParams = {
 search_query: string;
-limit?: number;
 };
