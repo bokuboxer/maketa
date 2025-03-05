@@ -55,16 +55,12 @@ class VectorDB:
                 connection_params=wcon.ConnectionParams(
                     http={
                         "host": host,
-                        "port": None
-                        if os.getenv("ENVIRONMENT") == "production"
-                        else self.port,
+                        "port": self.port,
                         "secure": secure,
                     },
                     grpc={
                         "host": host,
-                        "port": None
-                        if os.getenv("ENVIRONMENT") == "production"
-                        else self.grpc_port,
+                        "port": self.grpc_port,
                         "secure": secure,
                     },
                 ),

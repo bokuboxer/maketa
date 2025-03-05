@@ -27,7 +27,8 @@ ENV OPENAI_API_KEY=${OPENAI_API_KEY}
 ENV PYTHONUNBUFFERED=1
 ENV LOG_LEVEL=INFO
 
+# ヘルスチェック用のポートを公開
 EXPOSE 8000
 
 # 本番環境で実行
-CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4", "--log-level", "info"] 
+CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4", "--log-level", "info", "--timeout-keep-alive", "75"] 
