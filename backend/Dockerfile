@@ -24,7 +24,10 @@ ENV AZURE_OPENAI_KEY=${AZURE_OPENAI_KEY}
 ENV AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT}
 ENV FRONTEND_URL=${FRONTEND_URL}
 ENV OPENAI_API_KEY=${OPENAI_API_KEY}
+ENV PYTHONUNBUFFERED=1
+ENV LOG_LEVEL=INFO
+
 EXPOSE 8000
 
 # 本番環境で実行
-CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"] 
+CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4", "--log-level", "info"] 
