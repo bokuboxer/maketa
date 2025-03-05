@@ -31,6 +31,8 @@ import type {
   CreateFailureInput,
   CreateUserInput,
   GetFailureByIdFailureFailureIdGet200,
+  GetHeroesHeroesGet200,
+  GetHeroesHeroesGetParams,
   GetUserByFirebaseUidUserFirebaseUidGet200,
   HTTPValidationError,
   SuggestElementsElementsSuggestPost200,
@@ -602,4 +604,157 @@ export const useBulkCreateElementsElementsPost = <TError = HTTPValidationError,
 
       return useMutation(mutationOptions);
     }
+    /**
+ * @summary Get Heroes
+ */
+export const getHeroesHeroesGet = (
+    params: GetHeroesHeroesGetParams,
+ signal?: AbortSignal
+) => {
+      
+      
+      return customAxios<GetHeroesHeroesGet200>(
+      {url: `/heroes`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+  
+
+export const getGetHeroesHeroesGetQueryKey = (params: GetHeroesHeroesGetParams,) => {
+    return [`/heroes`, ...(params ? [params]: [])] as const;
+    }
+
     
+export const getGetHeroesHeroesGetInfiniteQueryOptions = <TData = InfiniteData<Awaited<ReturnType<typeof getHeroesHeroesGet>>, GetHeroesHeroesGetParams['offset']>, TError = HTTPValidationError>(params: GetHeroesHeroesGetParams, options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getHeroesHeroesGet>>, TError, TData, Awaited<ReturnType<typeof getHeroesHeroesGet>>, QueryKey, GetHeroesHeroesGetParams['offset']>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetHeroesHeroesGetQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getHeroesHeroesGet>>, QueryKey, GetHeroesHeroesGetParams['offset']> = ({ signal, pageParam }) => getHeroesHeroesGet({...params, offset: pageParam || params?.['offset']}, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseInfiniteQueryOptions<Awaited<ReturnType<typeof getHeroesHeroesGet>>, TError, TData, Awaited<ReturnType<typeof getHeroesHeroesGet>>, QueryKey, GetHeroesHeroesGetParams['offset']> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetHeroesHeroesGetInfiniteQueryResult = NonNullable<Awaited<ReturnType<typeof getHeroesHeroesGet>>>
+export type GetHeroesHeroesGetInfiniteQueryError = HTTPValidationError
+
+
+export function useGetHeroesHeroesGetInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getHeroesHeroesGet>>, GetHeroesHeroesGetParams['offset']>, TError = HTTPValidationError>(
+ params: GetHeroesHeroesGetParams, options: { query:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getHeroesHeroesGet>>, TError, TData, Awaited<ReturnType<typeof getHeroesHeroesGet>>, QueryKey, GetHeroesHeroesGetParams['offset']>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getHeroesHeroesGet>>,
+          TError,
+          Awaited<ReturnType<typeof getHeroesHeroesGet>>, QueryKey
+        > , 'initialData'
+      >, }
+
+  ):  DefinedUseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetHeroesHeroesGetInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getHeroesHeroesGet>>, GetHeroesHeroesGetParams['offset']>, TError = HTTPValidationError>(
+ params: GetHeroesHeroesGetParams, options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getHeroesHeroesGet>>, TError, TData, Awaited<ReturnType<typeof getHeroesHeroesGet>>, QueryKey, GetHeroesHeroesGetParams['offset']>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getHeroesHeroesGet>>,
+          TError,
+          Awaited<ReturnType<typeof getHeroesHeroesGet>>, QueryKey
+        > , 'initialData'
+      >, }
+
+  ):  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetHeroesHeroesGetInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getHeroesHeroesGet>>, GetHeroesHeroesGetParams['offset']>, TError = HTTPValidationError>(
+ params: GetHeroesHeroesGetParams, options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getHeroesHeroesGet>>, TError, TData, Awaited<ReturnType<typeof getHeroesHeroesGet>>, QueryKey, GetHeroesHeroesGetParams['offset']>>, }
+
+  ):  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get Heroes
+ */
+
+export function useGetHeroesHeroesGetInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getHeroesHeroesGet>>, GetHeroesHeroesGetParams['offset']>, TError = HTTPValidationError>(
+ params: GetHeroesHeroesGetParams, options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getHeroesHeroesGet>>, TError, TData, Awaited<ReturnType<typeof getHeroesHeroesGet>>, QueryKey, GetHeroesHeroesGetParams['offset']>>, }
+
+  ):  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetHeroesHeroesGetInfiniteQueryOptions(params,options)
+
+  const query = useInfiniteQuery(queryOptions) as  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+export const getGetHeroesHeroesGetQueryOptions = <TData = Awaited<ReturnType<typeof getHeroesHeroesGet>>, TError = HTTPValidationError>(params: GetHeroesHeroesGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHeroesHeroesGet>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetHeroesHeroesGetQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getHeroesHeroesGet>>> = ({ signal }) => getHeroesHeroesGet(params, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getHeroesHeroesGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetHeroesHeroesGetQueryResult = NonNullable<Awaited<ReturnType<typeof getHeroesHeroesGet>>>
+export type GetHeroesHeroesGetQueryError = HTTPValidationError
+
+
+export function useGetHeroesHeroesGet<TData = Awaited<ReturnType<typeof getHeroesHeroesGet>>, TError = HTTPValidationError>(
+ params: GetHeroesHeroesGetParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHeroesHeroesGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getHeroesHeroesGet>>,
+          TError,
+          Awaited<ReturnType<typeof getHeroesHeroesGet>>
+        > , 'initialData'
+      >, }
+
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetHeroesHeroesGet<TData = Awaited<ReturnType<typeof getHeroesHeroesGet>>, TError = HTTPValidationError>(
+ params: GetHeroesHeroesGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHeroesHeroesGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getHeroesHeroesGet>>,
+          TError,
+          Awaited<ReturnType<typeof getHeroesHeroesGet>>
+        > , 'initialData'
+      >, }
+
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetHeroesHeroesGet<TData = Awaited<ReturnType<typeof getHeroesHeroesGet>>, TError = HTTPValidationError>(
+ params: GetHeroesHeroesGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHeroesHeroesGet>>, TError, TData>>, }
+
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get Heroes
+ */
+
+export function useGetHeroesHeroesGet<TData = Awaited<ReturnType<typeof getHeroesHeroesGet>>, TError = HTTPValidationError>(
+ params: GetHeroesHeroesGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHeroesHeroesGet>>, TError, TData>>, }
+
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetHeroesHeroesGetQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+

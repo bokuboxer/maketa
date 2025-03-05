@@ -27,10 +27,12 @@ llm = ChatOpenAI(
 app = FastAPI()
 
 # FastAPIのCORS設定
+# 本番環境
 origins = [
     "https://maketa-frontend-app.azurewebsites.net",
-    "http://localhost:3000",
 ]
+
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
