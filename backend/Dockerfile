@@ -10,9 +10,6 @@ RUN pip install poetry && \
     poetry config virtualenvs.create false && \
     poetry install --only main
 
-# ビルド時の環境変数を設定
-ENV ENVIRONMENT=production
-
 # ビルド引数を環境変数として設定
 ARG DATABASE_URL
 ARG AZURE_OPENAI_KEY
@@ -20,6 +17,8 @@ ARG AZURE_OPENAI_ENDPOINT
 ARG FRONTEND_URL
 ARG OPENAI_API_KEY
 
+# 環境変数を設定
+ENV ENVIRONMENT=production
 ENV DATABASE_URL=${DATABASE_URL}
 ENV AZURE_OPENAI_KEY=${AZURE_OPENAI_KEY}
 ENV AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT}

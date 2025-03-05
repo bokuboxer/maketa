@@ -1,4 +1,5 @@
 import os
+import logging
 
 import app.schema as schema
 from app.chain import SuggestChain
@@ -15,6 +16,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from langchain_openai import ChatOpenAI
 from pydantic import SecretStr
+
+# ロギングの設定
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -49,13 +54,16 @@ try:
     db = get_db()
     vectordb = VectorDB()
     csv_path = "./data/output.csv"
+    logger.info("Importing data from CSV...")
     vectordb.import_data(csv_path)
+    logger.info("Data import completed")
 
     suggest_chain = SuggestChain(llm)
     user_controller = UserController(db)
     failure_controller = FailureController(db)
     element_controller = ElementController(db, suggest_chain)
     hero_controller = HeroController(vectordb)
+    logger.info("All controllers initialized successfully")
 
     @app.post("/users")
     async def create_user(input: schema.CreateUserInput) -> None:
