@@ -50,6 +50,8 @@ app.add_middleware(
     max_age=600,
 )
 
+logger.info("Starting server...")
+
 try:
     db = get_db()
     vectordb = VectorDB()

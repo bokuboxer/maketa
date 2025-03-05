@@ -121,6 +121,7 @@ class VectorDB:
 
     def query_collection(self, search_query: str, limit: int) -> list[Hero] | None:
         try:
+            logger.info(f"Searching for {search_query} with limit {limit}")
             response = (
                 self.client.query.get(
                     "Hero", ["name", "description", "failure", "source"]
@@ -130,6 +131,8 @@ class VectorDB:
                 .with_additional(["certainty"])
                 .do()
             )
+
+            logger.info(response)
 
             if (
                 "data" not in response

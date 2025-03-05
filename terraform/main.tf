@@ -249,8 +249,74 @@ resource "azurerm_container_app" "weaviate" {
         value = "node1"
       }
       env {
+        name  = "REST_ENABLED"
+        value = "true"
+      }
+      env {
         name  = "GRPC_ENABLED"
         value = "false"
+      }
+      env {
+        name  = "PERSISTENCE_LSM_ACCESS_STRATEGY"
+        value = "roaring"
+      }
+      env {
+        name  = "DISABLE_TELEMETRY"
+        value = "true"
+      }
+      env {
+        name  = "PERSISTENCE_MINIMUM_AGE_SECONDS"
+        value = "0"
+      }
+      env {
+        name  = "PERSISTENCE_MEMTABLES_FLUSH_IDLE_AFTER_SECONDS"
+        value = "30"
+      }
+      env {
+        name  = "PERSISTENCE_MEMTABLES_MAX_SIZE_MB"
+        value = "512"
+      }
+      env {
+        name  = "PERSISTENCE_MEMTABLES_TOTAL_SIZE_MB"
+        value = "1024"
+      }
+      env {
+        name  = "PERSISTENCE_LSM_WRITE_BUFFER_SIZE_MB"
+        value = "32"
+      }
+      env {
+        name  = "LOG_LEVEL"
+        value = "debug"
+      }
+
+      liveness_probe {
+        transport = "HTTP"
+        port      = 8080
+        path      = "/v1/.well-known/ready"
+        initial_delay = 30
+        interval      = 10
+        timeout       = 5
+        retries       = 3
+      }
+
+      readiness_probe {
+        transport = "HTTP"
+        port      = 8080
+        path      = "/v1/.well-known/ready"
+        initial_delay = 30
+        interval      = 10
+        timeout       = 5
+        retries       = 3
+      }
+
+      startup_probe {
+        transport = "HTTP"
+        port      = 8080
+        path      = "/v1/.well-known/ready"
+        initial_delay = 30
+        interval      = 10
+        timeout       = 5
+        retries       = 3
       }
     }
 
