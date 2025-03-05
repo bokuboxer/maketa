@@ -1,6 +1,7 @@
 import weaviate
 import weaviate.classes.config as wc
 import weaviate.classes.query as wq
+import weaviate.connect as wcon
 import os
 from weaviate.util import generate_uuid5
 import pandas as pd
@@ -15,14 +16,32 @@ class VectorDB:
         self.port = port
         self.grpc_port = grpc_port
         self.client = self._create_client()
+        self.client.connect()
         self._create_collection()
 
     def _create_client(self):
         api_key = os.environ.get("OPENAI_API_KEY", "")
         headers = {"X-OpenAI-Api-Key": api_key}
-        return weaviate.connect_to_local(
-            port=self.port, grpc_port=self.grpc_port, headers=headers
+
+        # Docker環境ではサービス名で接続
+        host = "weaviate" if os.getenv("ENVIRONMENT") == "development" else "localhost"
+
+        client = weaviate.WeaviateClient(
+            connection_params=wcon.ConnectionParams(
+                http={
+                    "host": host,
+                    "port": self.port,
+                    "secure": False,  # 開発環境ではHTTPを使用
+                },
+                grpc={
+                    "host": host,
+                    "port": self.grpc_port,
+                    "secure": False,  # 開発環境ではgRPCも非セキュア
+                },
+            ),
+            additional_headers=headers,
         )
+        return client
 
     def _create_collection(self):
         if not self.client.collections.exists("Hero"):
@@ -96,7 +115,7 @@ class VectorDB:
 
 
 if __name__ == "__main__":
-    csv_path = "/Users/kimotonorihiro/dev/llm/maketa/backend/data/output.csv"
+    csv_path = "../data/output.csv"
     db = VectorDB()
     try:
         db.import_data(csv_path)

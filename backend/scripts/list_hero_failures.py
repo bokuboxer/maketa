@@ -89,7 +89,7 @@ if __name__ == "__main__":
         "ヘンリー・フォード",  # 経済・技術
         "マハトマ・ガンディー",  # 社会運動
     ]
-    
+
     for name in names:
         try:
             result = get_hero_failures(name)
@@ -97,11 +97,8 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"エラーが発生しました: {e}")
 
-    data = [
-        [hero.name, hero.description, hero.failure, hero.source]
-        for hero in heroes
-    ]
-    with open("output.csv", mode="w", newline="") as file:
+    data = [[hero.name, hero.description, hero.failure, hero.source] for hero in heroes]
+    with open("../data/output.csv", mode="w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
         columns = ["Name", "Description", "Failure", "Source"]
         writer.writerow(columns)

@@ -45,7 +45,7 @@ app.add_middleware(
 try:
     db = get_db()
     vectordb = VectorDB()
-    csv_path = "/Users/kimotonorihiro/dev/llm/maketa/backend/data/output.csv"
+    csv_path = "./data/output.csv"
     vectordb.import_data(csv_path)
 
     suggest_chain = SuggestChain(llm)
