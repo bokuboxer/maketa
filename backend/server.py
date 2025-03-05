@@ -28,11 +28,12 @@ app = FastAPI()
 
 # FastAPIのCORS設定
 # 本番環境
-origins = [
-    "https://maketa-frontend-app.azurewebsites.net",
-]
-
-origins = ["*"]
+if os.getenv("ENV") == "production":
+    origins = [
+        "https://maketa-frontend-app.azurewebsites.net",
+    ]
+else:
+    origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
