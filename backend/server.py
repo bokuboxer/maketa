@@ -2,6 +2,7 @@ import os
 import logging
 
 import app.schema as schema
+import app.vectordb as vectordb
 from app.chain import SuggestChain
 from app.controller import (
     ElementController,
@@ -10,7 +11,6 @@ from app.controller import (
     HeroController,
 )
 from app.database import get_db
-from app.vectordb import VectorDB
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -52,60 +52,54 @@ app.add_middleware(
 
 logger.info("Starting server...")
 
-try:
-    db = get_db()
-    vectordb = VectorDB()
-    csv_path = "./data/output.csv"
-    logger.info("Importing data from CSV...")
-    vectordb.import_data(csv_path)
-    logger.info("Data import completed")
 
-    suggest_chain = SuggestChain(llm)
-    user_controller = UserController(db)
-    failure_controller = FailureController(db)
-    element_controller = ElementController(db, suggest_chain)
-    hero_controller = HeroController(vectordb)
-    logger.info("All controllers initialized successfully")
+db = get_db()
+vectordb.create_collection()
+csv_path = "./data/output.csv"
+vectordb.import_data(csv_path)
+logger.info("Importing data from CSV...")
+logger.info("Data import completed")
 
-    @app.post("/users")
-    async def create_user(input: schema.CreateUserInput) -> None:
-        return user_controller.create(input)
+suggest_chain = SuggestChain(llm)
+user_controller = UserController(db)
+failure_controller = FailureController(db)
+element_controller = ElementController(db, suggest_chain)
+hero_controller = HeroController()
+logger.info("All controllers initialized successfully")
 
-    @app.get("/user/{firebase_uid}")
-    async def get_user_by_firebase_uid(
-        firebase_uid: str,
-    ) -> schema.User | None:
-        return user_controller.get_by_firebase_uid(firebase_uid)
+@app.post("/users")
+async def create_user(input: schema.CreateUserInput) -> None:
+    return user_controller.create(input)
 
-    @app.get("/failure/{failure_id}")
-    async def get_failure_by_id(failure_id: int) -> schema.Failure | None:
-        return failure_controller.get_by_id(failure_id)
+@app.get("/user/{firebase_uid}")
+async def get_user_by_firebase_uid(
+    firebase_uid: str,
+) -> schema.User | None:
+    return user_controller.get_by_firebase_uid(firebase_uid)
 
-    @app.post("/failures")
-    async def create_failure(input: schema.CreateFailureInput) -> None:
-        return failure_controller.create(input)
+@app.get("/failure/{failure_id}")
+async def get_failure_by_id(failure_id: int) -> schema.Failure | None:
+    return failure_controller.get_by_id(failure_id)
 
-    @app.post("/elements/suggest")
-    async def suggest_elements(
-        input: schema.SuggestInput,
-    ) -> list[schema.Element] | None:
-        return element_controller.suggest(input)
+@app.post("/failures")
+async def create_failure(input: schema.CreateFailureInput) -> None:
+    return failure_controller.create(input)
 
-    @app.post("/elements")
-    async def bulk_create_elements(input: schema.CreateElementInput) -> None:
-        return element_controller.bulk_create(input)
+@app.post("/elements/suggest")
+async def suggest_elements(
+    input: schema.SuggestInput,
+) -> list[schema.Element] | None:
+    return element_controller.suggest(input)
 
-    @app.post("/heroes")
-    async def get_heroes(input: schema.GetHeroesInput) -> list[schema.Hero] | None:
-        return hero_controller.list(input)
+@app.post("/elements")
+async def bulk_create_elements(input: schema.CreateElementInput) -> None:
+    return element_controller.bulk_create(input)
 
-    if __name__ == "__main__":
-        import uvicorn
+@app.post("/heroes")
+async def get_heroes(input: schema.GetHeroesInput) -> list[schema.Hero] | None:
+    return hero_controller.list(input)
 
-        uvicorn.run(app, host="0.0.0.0", port=8000)
+if __name__ == "__main__":
+    import uvicorn
 
-finally:
-    if "db" in locals():
-        db.close()
-    if "vectordb" in locals():
-        vectordb.close()
+    uvicorn.run(app, host="0.0.0.0", port=8000)
