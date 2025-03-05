@@ -102,5 +102,7 @@ class HeroController:
     def __init__(self, vectordb: VectorDB):
         self.vectordb = vectordb
 
-    def list(self, search_query: str, limit: int = 5) -> list[schema.Hero] | None:
-        return self.vectordb.query_collection(search_query, limit)
+    def list(self, input: schema.GetHeroesInput) -> list[schema.Hero] | None:
+        # 複数の偉人を取得したいときにlimitを変更
+        limit = 1
+        return self.vectordb.query_collection(input.query, limit)

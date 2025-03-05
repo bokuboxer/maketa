@@ -85,9 +85,9 @@ try:
     async def bulk_create_elements(input: schema.CreateElementInput) -> None:
         return element_controller.bulk_create(input)
 
-    @app.get("/heroes")
-    async def get_heroes(search_query: str) -> list[schema.Hero] | None:
-        return hero_controller.list(search_query, 1)
+    @app.post("/heroes")
+    async def get_heroes(input: schema.GetHeroesInput) -> list[schema.Hero] | None:
+        return hero_controller.list(input)
 
     if __name__ == "__main__":
         import uvicorn

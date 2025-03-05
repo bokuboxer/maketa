@@ -2,12 +2,13 @@
 
 import {
 	useGetFailureByIdFailureFailureIdGet,
-	useGetHeroesHeroesGet,
+	useGetHeroesHeroesPost,
 } from "@/api/generated/default/default";
 import { ElementType } from "@/api/model/elementType";
+import { Hero } from "@/api/model/hero";
 import { IconArrowLeft } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
-import { use } from "react";
+import { use, useEffect, useState } from "react";
 import HypnoticLoader from "@/components/HypnoticLoader";
 import dynamic from "next/dynamic";
 
@@ -19,21 +20,14 @@ interface PageParams {
 const FailureDetailPage = dynamic(
 	() =>
 		Promise.resolve(({ params }: { params: Promise<PageParams> }) => {
+			const [heros, setHeroes] = useState<Hero[] | null>(null);
+			const [isHeroLoading, setIsHeroLoading] = useState(false);
+
 			const resolvedParams = use(params);
 			const { data: failure, isLoading } = useGetFailureByIdFailureFailureIdGet(
 				Number(resolvedParams.id),
 			);
-			const { data: heros, isLoading: isHeroLoading } = useGetHeroesHeroesGet(
-				{
-					search_query: failure?.description ?? "",
-					limit: 1,
-				},
-				{
-					query: {
-						enabled: Boolean(failure?.description), // description があるときのみ実行
-					},
-				},
-			);
+			const { mutate: getHeroes } = useGetHeroesHeroesPost();
 			const router = useRouter();
 
 			const steps = [
@@ -42,8 +36,24 @@ const FailureDetailPage = dynamic(
 				{ type: ElementType.disputation, label: "反論" },
 			];
 
+			useEffect(() => {
+				if (failure) {
+					setIsHeroLoading(true);
+					getHeroes({
+						data: {
+							query: failure.description ?? "",
+						},
+					}, {
+						onSuccess: (data) => {
+							setHeroes(data);
+							setIsHeroLoading(false);
+						},
+					});
+				}
+			}, [failure]);
+
 			if (isLoading || isHeroLoading || !failure) {
-				return (
+				return ( 
 					<div className="min-h-screen bg-white flex items-center justify-center">
 						<HypnoticLoader
 							size={250}
