@@ -22,8 +22,8 @@ export const steps: StepConfig[] = [
     type: ElementType.belief,
     subType: 'explanation',
     label: '原因の説明', 
-    description: '選択した原因ラベルについて詳しく説明してください',
-    title: '<strong>B</strong>elief（原因の説明）',
+    description: '原因の詳細を書き出そう',
+    title: '<strong>B</strong>elief',
     example: '例：\n・なぜその原因が重要だと考えたのか\n・具体的にどのような影響があったのか\n・関連する事実は何か'
   },
   { 

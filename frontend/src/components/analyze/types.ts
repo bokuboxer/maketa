@@ -65,6 +65,7 @@ export interface StepHeaderProps {
 export interface BeliefExplanationComponentProps {
   selectedElements: GroupedElements;
   setSelectedElements: Dispatch<SetStateAction<GroupedElements>>;
+  steps: StepConfig[];
 }
 
 export interface StandardStepComponentProps {

@@ -345,7 +345,8 @@ export default function AnalyzePage({
 							{activeStep === ElementType.belief && activeSubType === 'explanation' ? (
 								<BeliefExplanationComponent 
 									selectedElements={selectedElements} 
-									setSelectedElements={setSelectedElements} 
+									setSelectedElements={setSelectedElements}
+									steps={steps}
 								/>
 							) : (
 								<StandardStepComponent 
