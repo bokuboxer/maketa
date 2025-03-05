@@ -29,4 +29,4 @@ ENV OPENAI_API_KEY=${OPENAI_API_KEY}
 EXPOSE 8000
 
 # 本番環境で実行
-CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000"] 
+CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000", "--log-level", "info"] 
