@@ -141,15 +141,15 @@ export default function Failures() {
 						<h1 className="text-2xl font-bold tracking-tight text-black">Maketa</h1>
 						<button
 							onClick={() => auth.signOut()}
-							className="p-2.5 text-gray-600 hover:bg-gray-100 rounded-full transition-all duration-200"
+							className="hover:bg-gray-100 rounded-full transition-all duration-200"
 							title="ログアウト"
 						>
 							<ArrowRightStartOnRectangleIcon className="w-5 h-5" />
 						</button>
 					</div>
 				</header>
-				<div className="p-4 py-8">
-					<div className="container mx-auto">
+				<div className="p-4 pb-24">
+					<div className="container mx-auto max-w-5xl">
 						{user?.failures.length === 0 ? (
 							<div className="text-center py-10">
 								<p className="text-black text-lg">
@@ -201,7 +201,7 @@ export default function Failures() {
 				{/* Floating Action Button */}
 				<button
 					onClick={open}
-					className="fixed bottom-8 right-8 w-14 h-14 bg-black text-white rounded-full shadow-lg hover:bg-gray-800 transition-all hover:scale-110 flex items-center justify-center"
+					className="fixed bottom-6 right-6 w-14 h-14 bg-black text-white rounded-full shadow-lg hover:bg-gray-800 transition-all hover:scale-110 flex items-center justify-center"
 					title="新しい失敗を記録"
 				>
 					<PlusIcon className="w-6 h-6" />
