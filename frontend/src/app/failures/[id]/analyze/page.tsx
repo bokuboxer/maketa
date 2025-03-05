@@ -7,44 +7,27 @@ import {
 } from "@/api/generated/default/default";
 import { Element } from "@/api/model/element";
 import { ElementType } from "@/api/model/elementType";
-import {
-	DragDropContext,
-	Draggable,
-	DraggableProvided,
-	DropResult,
-	Droppable,
-	DroppableProvided,
-} from "@hello-pangea/dnd";
-import { Loader, Popover } from "@mantine/core";
-import {
-	IconArrowLeft,
-	IconArrowRight,
-	IconDeviceFloppy,
-	IconHelp,
-} from "@tabler/icons-react";
+import { DragDropContext, DropResult } from "@hello-pangea/dnd";
 import { useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
 import HypnoticLoader from "@/components/HypnoticLoader";
+import { 
+	GroupedElements, 
+	StepperComponent, 
+	PreviousStepSummary, 
+	NavigationButtons, 
+	BeliefExplanationComponent, 
+	StandardStepComponent,
+	steps,
+	DndElement
+} from "@/components/analyze";
+import { IconArrowLeft } from "@tabler/icons-react";
 
 interface PageParams {
 	id: string;
 }
 
-interface ExtendedElement extends Element {
-	explanation?: string;
-}
-
-type DndElement = {
-	element: ExtendedElement;
-	isSelected: boolean;
-};
-
-type ElementTypeKey = keyof typeof ElementType;
-
-interface GroupedElements {
-	[key: string]: DndElement[];
-}
-
+// Main component
 export default function AnalyzePage({
 	params,
 }: { params: Promise<PageParams> }) {
@@ -117,10 +100,6 @@ export default function AnalyzePage({
 	const handleDragStart = () => {
 		setIsDragging(true);
 	};
-
-	useEffect(() => {
-		console.log(selectedElements);
-	}, [selectedElements]);
 
 	const handleDragEnd = (result: DropResult) => {
 		setIsDragging(false);
@@ -223,39 +202,6 @@ export default function AnalyzePage({
 		});
 	};
 
-	const steps = [
-		{ 
-			type: ElementType.adversity, 
-			label: '失敗の詳細', 
-			description: '失敗の詳細を入力しよう',
-			title: '<strong>A</strong>dversity',
-			example: '例：\n・締め切りに間に合わなかった\n・顧客からのクレームを受けた\n・チームメンバーと意見が合わなかった'
-		},
-		{ 
-			type: ElementType.belief, 
-			subType: 'selection',
-			label: '意見の選択', 
-			description: 'あなたの意見を選択しよう（最大3つまで）',
-			title: '<strong>B</strong>elief Selection',
-			example: '例：\n・自分は無能だ\n・もう取り返しがつかない\n・誰も自分を信用してくれない'
-		},
-		{ 
-			type: ElementType.belief,
-			subType: 'explanation',
-			label: '意見の説明', 
-			description: '選択した意見について詳しく説明しよう',
-			title: '<strong>B</strong>elief Explanation',
-			example: '例：\n・なぜそう考えたのか\n・どのような影響があったか\n・具体的な事実は何か'
-		},
-		{ 
-			type: ElementType.disputation, 
-			label: '視点の探索', 
-			description: '前のステップで入力した信念に対する反論を入力してください',
-			title: '<strong>D</strong>isputation',
-			example: '例：\n・一度の失敗で全てを判断するのは極端すぎる\n・誰にでもミスはある\n・この経験を次に活かすことができる'
-		},
-	];
-
 	const handleNext = async () => {
 		const currentStep = steps.find(step => 
 			step.type === activeStep && (!step.subType || step.subType === activeSubType)
@@ -311,39 +257,26 @@ export default function AnalyzePage({
 		}
 	};
 
-	// Beliefフェーズの説明入力用コンポーネント
-	const BeliefExplanationInput = () => {
-		return (
-			<div className="space-y-4">
-				{selectedElements[ElementType.belief].map((dndElement: DndElement, index: number) => (
-					<div key={index} className="border rounded-lg p-4 bg-white">
-						<h4 className="font-medium mb-2">{dndElement.element.description}</h4>
-						<textarea
-							className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-							placeholder="この意見について詳しく説明してください"
-							rows={3}
-							value={dndElement.element.explanation || ''}
-							onChange={(e) => {
-								const newSelectedElements = [...selectedElements[ElementType.belief]];
-								newSelectedElements[index] = {
-									...dndElement,
-									element: {
-										...dndElement.element,
-										explanation: e.target.value
-									}
-								};
-								setSelectedElements(prev => ({
-									...prev,
-									[ElementType.belief]: newSelectedElements
-								}));
-							}}
-						/>
-					</div>
-				))}
-			</div>
-		);
+	const handleSave = () => {
+		if (!failure?.id) {
+			return;
+		}
+		setSaveLoading(true);
+		createElements({
+			data: {
+				failure_id: failure.id,
+				elements: Object.values(selectedElements)
+					.flatMap((elements) => elements.map((dndElement) => dndElement.element))
+			}
+		}, {
+			onSuccess: () => {
+				setSaveLoading(false);
+				router.push(`/failures/${failure.id}`);
+			}
+		});
 	};
 
+	// Render loading state
 	if (isFailureLoading || loading) {
 		return (
 			<div className="min-h-screen bg-white flex items-center justify-center">
@@ -359,9 +292,11 @@ export default function AnalyzePage({
 		);
 	}
 
+	// Render main content
 	return (
 		<div className="min-h-screen bg-white">
 			<div className="container mx-auto px-4 py-8">
+				{/* Header */}
 				<div className="flex items-center mb-4">
 					<button
 						onClick={() => router.back()}
@@ -372,72 +307,22 @@ export default function AnalyzePage({
 					<h1 className="text-2xl font-bold text-black">詳細分析</h1>
 				</div>
 
-				<div className="mb-6">
-					<div className="border rounded-lg p-3 bg-white">
-						<h2 className="font-semibold mb-2 text-black">
-							{activeStep === ElementType.adversity
-								? "失敗の内容"
-								: activeStep === ElementType.disputation
-									? "信念"
-									: steps.find(
-											(step) =>
-												step.type ===
-												steps[steps.findIndex((s) => s.type === activeStep) - 1]
-													.type,
-										)?.label}
-						</h2>
-						<p className="text-black text-sm">
-							{activeStep === ElementType.adversity
-								? failure?.description
-								: activeStep === ElementType.disputation
-									? selectedElements[ElementType.belief]
-											.map((element) => element.element.description)
-											.join("\n")
-									: selectedElements[
-											steps[steps.findIndex((s) => s.type === activeStep) - 1]
-												.type
-										]
-											.map((element) => element.element.description)
-											.join("\n")}
-						</p>
-					</div>
-				</div>
+				{/* Previous step summary */}
+				<PreviousStepSummary 
+					activeStep={activeStep} 
+					failure={failure} 
+					selectedElements={selectedElements} 
+					steps={steps}
+				/>
 
 				{/* Stepper */}
-				<div className="mb-4">
-					<div className="relative flex items-center justify-between">
-						<div className="relative z-10 flex w-full justify-between">
-							{steps
-								.filter((step, index, self) => 
-									// 同じtypeのステップの場合、最初に出現したものだけを表示
-									index === self.findIndex(s => s.type === step.type)
-								)
-								.map((step, index) => (
-									<div key={`${step.type}-${step.subType || 'main'}`} className="flex flex-col items-center">
-										<button
-											className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
-												step.type === activeStep
-													? "bg-black border-black text-white"
-													: "bg-white border-gray-300 text-black"
-											}`}
-										>
-											{String.fromCharCode(65 + index)}
-										</button>
-										<div className="mt-2 text-sm font-bold text-black">
-											{step.label}
-											{step.type === ElementType.belief && (
-												<div className="text-xs font-normal text-gray-500">
-													{activeSubType === 'selection' ? '(ラベル選択)' : 
-													 activeSubType === 'explanation' ? '(説明入力)' : ''}
-												</div>
-											)}
-										</div>
-									</div>
-								))}
-						</div>
-					</div>
-				</div>
+				<StepperComponent 
+					activeStep={activeStep} 
+					activeSubType={activeSubType} 
+					steps={steps}
+				/>
 
+				{/* Main content area */}
 				<DragDropContext
 					onDragEnd={handleDragEnd}
 					onDragStart={handleDragStart}
@@ -445,218 +330,33 @@ export default function AnalyzePage({
 					<div className="space-y-4">
 						<div key={`${activeStep}-${activeSubType}`}>
 							{activeStep === ElementType.belief && activeSubType === 'explanation' ? (
-								<BeliefExplanationInput />
+								<BeliefExplanationComponent 
+									selectedElements={selectedElements} 
+									setSelectedElements={setSelectedElements} 
+								/>
 							) : (
-								<div className="border rounded-lg p-3 bg-white">
-									<div className="mb-4">
-										<h3
-											className="text-lg font-medium mb-2"
-											dangerouslySetInnerHTML={{
-												__html:
-													steps.find((step) => step.type === activeStep)?.title ||
-													"",
-											}}
-										/>
-										<div className="flex items-center gap-2">
-											<p className="text-sm text-gray-600">
-												{
-													steps.find((step) => step.type === activeStep)
-														?.description
-												}
-											</p>
-											<Popover
-												width={400}
-												position="bottom"
-												withArrow
-												shadow="md"
-											>
-												<Popover.Target>
-													<button className="text-gray-400 hover:text-gray-600">
-														<IconHelp size={16} />
-													</button>
-												</Popover.Target>
-												<Popover.Dropdown>
-													<div className="text-sm whitespace-pre-line">
-														{
-															steps.find((step) => step.type === activeStep)
-																?.example
-														}
-													</div>
-												</Popover.Dropdown>
-											</Popover>
-										</div>
-									</div>
-									<div className="w-full">
-										<Droppable droppableId={`selected-${activeStep}`}>
-											{(provided: DroppableProvided) => (
-												<div
-													ref={provided.innerRef}
-													{...provided.droppableProps}
-													className="w-full"
-													style={{ minHeight: 36 }}
-												>
-													{selectedElements[activeStep].length > 0 ? (
-														selectedElements[activeStep].map(
-															(dndElement, index) => (
-																<Draggable
-																	key={`${dndElement.element.id}-selected`}
-																	draggableId={`${dndElement.element.id}-selected`}
-																	index={index}
-																>
-																	{(provided: DraggableProvided) => (
-																		<div
-																			ref={provided.innerRef}
-																			{...provided.draggableProps}
-																			{...provided.dragHandleProps}
-																			className="bg-white border rounded-lg p-2 mb-1 shadow-sm hover:shadow transition-shadow cursor-move min-h-[36px] flex items-center"
-																		>
-																			<p className="text-black text-sm leading-normal break-words">
-																				{dndElement.element.description}
-																			</p>
-																		</div>
-																	)}
-																</Draggable>
-															),
-														)
-													) : !isDragging ? (
-														<div className="text-gray-400 text-sm p-2 border border-dashed border-gray-300 rounded bg-white h-[36px] flex items-center justify-center">
-															要素をここにドロップ
-														</div>
-													) : null}
-													{!isDragging && provided.placeholder}
-												</div>
-											)}
-										</Droppable>
-									</div>
-									<div className="border-t border-gray-200 my-3" />
-									<div>
-										<h4 className="text-sm font-medium text-black mb-2">
-											入力候補
-										</h4>
-										<Droppable droppableId={`suggested-${activeStep}`}>
-											{(provided: DroppableProvided) => (
-												<div
-													ref={provided.innerRef}
-													{...provided.droppableProps}
-													className="w-full"
-													style={{ minHeight: 36 }}
-												>
-													{suggestedElements[activeStep].length > 0 ? (
-														suggestedElements[activeStep].map(
-															(dndElement, index) => (
-																<Draggable
-																	key={`${dndElement.element.id}-suggested`}
-																	draggableId={`${dndElement.element.id}-suggested`}
-																	index={index}
-																>
-																	{(provided: DraggableProvided) => (
-																		<div
-																			ref={provided.innerRef}
-																			{...provided.draggableProps}
-																			{...provided.dragHandleProps}
-																			className="bg-white border rounded-lg p-2 mb-1 shadow-sm hover:shadow transition-shadow cursor-move min-h-[36px] flex items-center"
-																		>
-																			<p className="text-black text-sm leading-normal break-words">
-																				{dndElement.element.description}
-																			</p>
-																		</div>
-																	)}
-																</Draggable>
-															),
-														)
-													) : !isDragging ? (
-														<div className="text-gray-400 text-sm p-2 h-[36px] flex items-center justify-center">
-															入力候補はありません
-														</div>
-													) : null}
-													{!isDragging && provided.placeholder}
-												</div>
-											)}
-										</Droppable>
-									</div>
-								</div>
+								<StandardStepComponent 
+									activeStep={activeStep}
+									isDragging={isDragging}
+									selectedElements={selectedElements}
+									suggestedElements={suggestedElements}
+									steps={steps}
+								/>
 							)}
 						</div>
 					</div>
 				</DragDropContext>
 
 				{/* Navigation buttons */}
-				<div className="flex justify-between mt-8">
-					<button
-						onClick={handlePrev}
-						disabled={activeStep === ElementType.adversity}
-						className={`px-4 py-2 rounded flex items-center gap-2 ${
-							activeStep === ElementType.adversity
-								? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-								: 'bg-black text-white hover:bg-gray-800'
-						}`}
-					>
-						<IconArrowLeft size={20} />
-						前へ
-					</button>
-					{activeStep === ElementType.disputation ? (
-						<button
-							onClick={() => {
-								if (!failure?.id) {
-									return;
-								}
-								setSaveLoading(true);
-								console.log("###############################################")
-								console.log(selectedElements)
-								createElements({
-									data: {
-										failure_id: failure.id,
-										elements: Object.values(selectedElements)
-											.flatMap((elements: DndElement[]) => elements.map((dndElement: DndElement) => dndElement.element))
-									}
-								}, {
-									onSuccess: () => {
-										setSaveLoading(false);
-										router.push(`/failures/${failure.id}`);
-									}
-								})
-							}}
-							disabled={selectedElements[activeStep].length === 0 || saveLoading}
-							className={`px-4 py-2 rounded flex items-center gap-2 ${
-								selectedElements[activeStep].length === 0 || saveLoading
-									? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-									: 'bg-black text-white hover:bg-gray-800'
-							}`}
-						>
-							{saveLoading ? (
-								<div className="w-5 h-5 flex items-center justify-center">
-									<Loader color="gray" variant="dots" size="xs" />
-								</div>
-							) : (
-								<>
-									保存
-									<IconDeviceFloppy size={20} />
-								</>
-							)}
-						</button>
-					) : (
-						<button
-							onClick={handleNext}
-							disabled={selectedElements[activeStep].length === 0 || nextLoading}
-							className={`px-4 py-2 rounded flex items-center gap-2 ${
-								selectedElements[activeStep].length === 0 || nextLoading
-									? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-									: 'bg-black text-white hover:bg-gray-800'
-							}`}
-						>
-							{nextLoading ? (
-								<div className="w-5 h-5 flex items-center justify-center">
-									<Loader color="gray" variant="dots" size="xs" />
-								</div>
-							) : (
-								<>
-									次へ
-									<IconArrowRight size={20} />
-								</>
-							)}
-						</button>
-					)}
-				</div>
+				<NavigationButtons 
+					activeStep={activeStep}
+					selectedElements={selectedElements}
+					handlePrev={handlePrev}
+					handleNext={handleNext}
+					handleSave={handleSave}
+					nextLoading={nextLoading}
+					saveLoading={saveLoading}
+				/>
 			</div>
 		</div>
 	);
