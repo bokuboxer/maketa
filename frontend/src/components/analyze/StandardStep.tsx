@@ -1,7 +1,6 @@
 import { ElementType } from "@/api/model/elementType";
 import { StandardStepComponentProps } from "./types";
 import { StepHeader } from "./StepHeader";
-import { DraggableElementList } from "./DraggableElementList";
 
 // Belief Selection Component
 const BeliefSelectionComponent = ({
@@ -70,7 +69,6 @@ const BeliefSelectionComponent = ({
 // Standard step component (for Adversity, Belief Selection, and Disputation)
 export const StandardStepComponent = ({ 
   activeStep, 
-  isDragging, 
   selectedElements, 
   suggestedElements,
   steps,
@@ -97,6 +95,28 @@ export const StandardStepComponent = ({
     }
   };
 
+  const handleElementClick = (element: any, isSuggested: boolean) => {
+    if (isSuggested) {
+      setSuggestedElements((prev) => ({
+        ...prev,
+        [activeStep]: prev[activeStep].filter(e => e.element.id !== element.element.id)
+      }));
+      setSelectedElements((prev) => ({
+        ...prev,
+        [activeStep]: [...prev[activeStep], element]
+      }));
+    } else {
+      setSelectedElements((prev) => ({
+        ...prev,
+        [activeStep]: prev[activeStep].filter(e => e.element.id !== element.element.id)
+      }));
+      setSuggestedElements((prev) => ({
+        ...prev,
+        [activeStep]: [...prev[activeStep], element]
+      }));
+    }
+  };
+
   return (
     <div className="border rounded-lg p-3 bg-white">
       <StepHeader currentStep={currentStep} />
@@ -109,27 +129,41 @@ export const StandardStepComponent = ({
         />
       ) : (
         <>
-          <div className="w-full">
-            <DraggableElementList 
-              elementType={activeStep}
-              elements={selectedElements[activeStep]}
-              droppableId={`selected-${activeStep}`}
-              emptyMessage="要素をここにドロップ"
-              isDragging={isDragging}
-            />
+          <div className="w-full space-y-2">
+            {selectedElements[activeStep].length === 0 ? (
+              <div className="text-gray-500 text-sm p-3 bg-gray-50 rounded-lg">要素をここにドロップ</div>
+            ) : (
+              selectedElements[activeStep].map((element) => (
+                <button
+                  key={element.element.id}
+                  onClick={() => handleElementClick(element, false)}
+                  className="w-full p-3 rounded-lg text-left bg-black text-white text-sm"
+                >
+                  {element.element.description}
+                </button>
+              ))
+            )}
           </div>
           <div className="border-t border-gray-200 my-3" />
           <div>
             <h4 className="text-sm font-medium text-black mb-2">
               入力候補
             </h4>
-            <DraggableElementList 
-              elementType={activeStep}
-              elements={suggestedElements[activeStep]}
-              droppableId={`suggested-${activeStep}`}
-              emptyMessage="入力候補はありません"
-              isDragging={isDragging}
-            />
+            <div className="space-y-2">
+              {suggestedElements[activeStep].length === 0 ? (
+                <div className="text-gray-500 text-sm p-3 bg-gray-50 rounded-lg">入力候補はありません</div>
+              ) : (
+                suggestedElements[activeStep].map((element) => (
+                  <button
+                    key={element.element.id}
+                    onClick={() => handleElementClick(element, true)}
+                    className="w-full p-3 rounded-lg text-left bg-gray-50 hover:bg-gray-100 text-sm"
+                  >
+                    {element.element.description}
+                  </button>
+                ))
+              )}
+            </div>
           </div>
         </>
       )}

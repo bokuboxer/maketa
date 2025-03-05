@@ -37,7 +37,6 @@ export default function AnalyzePage({
 	const { mutate: suggestElements } = useSuggestElementsElementsSuggestPost();
 	const { mutate: createElements } = useBulkCreateElementsElementsPost();
 	const [loading, setLoading] = useState(true);
-	const [isDragging, setIsDragging] = useState(false);
 	const [activeStep, setActiveStep] = useState<ElementType>(ElementType.adversity);
 	const [activeSubType, setActiveSubType] = useState<string | null>(null);
 	const [selectedElements, setSelectedElements] = useState<GroupedElements>({
@@ -98,7 +97,7 @@ export default function AnalyzePage({
 	}, [failure?.description]);
 
 	const handleDragStart = () => {
-		setIsDragging(true);
+		setLoading(true);
 	};
 
 	const handleDragEnd = (result: DropResult) => {
@@ -106,7 +105,7 @@ export default function AnalyzePage({
 			return; // Ignore drag and drop for belief selection
 		}
 
-		setIsDragging(false);
+		setLoading(false);
 		if (!result.destination) return;
 
 		const sourceType = result.source.droppableId.split("-")[0];
@@ -230,6 +229,33 @@ export default function AnalyzePage({
 					setNextLoading(false);
 					return;
 				}
+				// 説明の候補を取得
+				suggestElements(
+					{
+						data: {
+							type: ElementType.belief,
+							text: failure?.description || "",
+							elements: [],
+							selected_labels: selectedElements[ElementType.belief].map(
+								(dndElement) => dndElement.element
+							),
+						},
+					},
+					{
+						onSuccess: (data) => {
+							if (data?.belief_analysis?.labels) {
+								const dndElements = data.belief_analysis.labels.map((element) => ({
+									element,
+									isSelected: false,
+								}));
+								setSuggestedElements((prev) => ({
+									...prev,
+									[ElementType.belief]: dndElements,
+								}));
+							}
+						},
+					},
+				);
 				setActiveSubType('explanation');
 				setNextLoading(false);
 			} else if (activeStep === ElementType.belief && activeSubType === 'explanation') {
@@ -336,32 +362,27 @@ export default function AnalyzePage({
 				/>
 
 				{/* Main content area */}
-				<DragDropContext
-					onDragEnd={handleDragEnd}
-					onDragStart={handleDragStart}
-				>
-					<div className="space-y-4">
-						<div key={`${activeStep}-${activeSubType}`}>
-							{activeStep === ElementType.belief && activeSubType === 'explanation' ? (
-								<BeliefExplanationComponent 
-									selectedElements={selectedElements} 
-									setSelectedElements={setSelectedElements}
-									steps={steps}
-								/>
-							) : (
-								<StandardStepComponent 
-									activeStep={activeStep}
-									isDragging={isDragging}
-									selectedElements={selectedElements}
-									suggestedElements={suggestedElements}
-									steps={steps}
-									setSelectedElements={setSelectedElements}
-									setSuggestedElements={setSuggestedElements}
-								/>
-							)}
-						</div>
+				<div className="space-y-4">
+					<div key={`${activeStep}-${activeSubType}`}>
+						{activeStep === ElementType.belief && activeSubType === 'explanation' ? (
+							<BeliefExplanationComponent 
+								selectedElements={selectedElements} 
+								setSelectedElements={setSelectedElements}
+								suggestedElements={suggestedElements}
+								steps={steps}
+							/>
+						) : (
+							<StandardStepComponent 
+								activeStep={activeStep}
+								selectedElements={selectedElements}
+								suggestedElements={suggestedElements}
+								steps={steps}
+								setSelectedElements={setSelectedElements}
+								setSuggestedElements={setSuggestedElements}
+							/>
+						)}
 					</div>
-				</DragDropContext>
+				</div>
 
 				{/* Navigation buttons */}
 				<NavigationButtons 

@@ -55,7 +55,6 @@ export interface DraggableElementListProps {
   elements: DndElement[];
   droppableId: string;
   emptyMessage: string;
-  isDragging: boolean;
 }
 
 export interface StepHeaderProps {
@@ -65,12 +64,12 @@ export interface StepHeaderProps {
 export interface BeliefExplanationComponentProps {
   selectedElements: GroupedElements;
   setSelectedElements: Dispatch<SetStateAction<GroupedElements>>;
+  suggestedElements: GroupedElements;
   steps: StepConfig[];
 }
 
 export interface StandardStepComponentProps {
   activeStep: ElementType;
-  isDragging: boolean;
   selectedElements: GroupedElements;
   suggestedElements: GroupedElements;
   steps: StepConfig[];
