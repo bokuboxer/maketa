@@ -73,4 +73,10 @@ variable "firebase_storage_bucket" {
   description = "Firebase Storage Bucket"
   type        = string
   default     = "maketa.appspot.com"
+}
+
+variable "openai_api_key" {
+  description = "OpenAI API key for Weaviate"
+  type        = string
+  sensitive   = true
 } 
