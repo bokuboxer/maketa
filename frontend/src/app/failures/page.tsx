@@ -7,7 +7,10 @@ import { useDisclosure } from "@mantine/hooks";
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { PlusIcon, ArrowRightStartOnRectangleIcon } from "@heroicons/react/24/outline";
+import {
+	PlusIcon,
+	ArrowRightStartOnRectangleIcon,
+} from "@heroicons/react/24/outline";
 import {
 	useCreateFailureFailuresPost,
 	useGetUserByFirebaseUidUserFirebaseUidGet,
@@ -26,14 +29,11 @@ export default function Failures() {
 		refetch,
 		isLoading,
 		error,
-	} = useGetUserByFirebaseUidUserFirebaseUidGet(
-		uid ?? "",
-		{
-			query: {
-				enabled: !!uid
-			}
+	} = useGetUserByFirebaseUidUserFirebaseUidGet(uid ?? "", {
+		query: {
+			enabled: !!uid,
 		},
-	);
+	});
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
@@ -138,7 +138,9 @@ export default function Failures() {
 			<div className="min-h-screen bg-white">
 				<header className="bg-white border-b border-gray-200 py-3 px-6 sticky top-0 z-50 shadow-sm backdrop-blur-sm bg-white/80">
 					<div className="container mx-auto flex justify-between items-center max-w-5xl">
-						<h1 className="text-2xl font-bold tracking-tight text-black">Maketa</h1>
+						<h1 className="text-2xl font-bold tracking-tight text-black">
+							Maketa
+						</h1>
 						<button
 							onClick={() => auth.signOut()}
 							className="hover:bg-gray-100 rounded-full transition-all duration-200"

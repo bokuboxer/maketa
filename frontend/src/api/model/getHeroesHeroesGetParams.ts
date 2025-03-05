@@ -6,5 +6,5 @@
  */
 
 export type GetHeroesHeroesGetParams = {
-search_query: string;
+	search_query: string;
 };

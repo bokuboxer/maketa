@@ -1,6 +1,9 @@
 "use client";
 
-import { useGetFailureByIdFailureFailureIdGet, useGetHeroesHeroesGet } from "@/api/generated/default/default";
+import {
+	useGetFailureByIdFailureFailureIdGet,
+	useGetHeroesHeroesGet,
+} from "@/api/generated/default/default";
 import { ElementType } from "@/api/model/elementType";
 import { IconArrowLeft } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
@@ -23,21 +26,21 @@ const FailureDetailPage = dynamic(
 			const { data: heros, isLoading: isHeroLoading } = useGetHeroesHeroesGet(
 				{
 					search_query: failure?.description ?? "",
-					limit: 1
+					limit: 1,
 				},
 				{
 					query: {
-						enabled: Boolean(failure?.description) // description があるときのみ実行
-					}
-				}
+						enabled: Boolean(failure?.description), // description があるときのみ実行
+					},
+				},
 			);
 			const router = useRouter();
 
-  const steps = [
-    { type: ElementType.adversity, label: '逆境' },
-    { type: ElementType.belief, label: '信念' },
-    { type: ElementType.disputation, label: '反論' },
-  ];
+			const steps = [
+				{ type: ElementType.adversity, label: "逆境" },
+				{ type: ElementType.belief, label: "信念" },
+				{ type: ElementType.disputation, label: "反論" },
+			];
 
 			if (isLoading || isHeroLoading || !failure) {
 				return (
@@ -105,17 +108,23 @@ const FailureDetailPage = dynamic(
 							{/* 似ている偉人の失敗 */}
 							{heros && heros.length > 0 && (
 								<div className="border rounded-lg p-4 bg-white">
-									<h2 className="font-semibold mb-2 text-black">似ている偉人の失敗</h2>
+									<h2 className="font-semibold mb-2 text-black">
+										似ている偉人の失敗
+									</h2>
 									{heros.map((hero) => (
 										<div key={hero.name} className="space-y-2">
 											<div className="flex justify-between items-center">
-												<div className="text-sm font-medium text-black">{hero.name} - {hero.description}</div>
+												<div className="text-sm font-medium text-black">
+													{hero.name} - {hero.description}
+												</div>
 												<div className="text-sm text-gray-500">
 													類似度: {Math.round(hero.certainty * 100)}%
 												</div>
 											</div>
 											<p className="text-sm text-gray-600">{hero.failure}</p>
-											<p className="text-xs text-gray-400">出典: {hero.source}</p>
+											<p className="text-xs text-gray-400">
+												出典: {hero.source}
+											</p>
 										</div>
 									))}
 								</div>
