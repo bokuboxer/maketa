@@ -6,31 +6,40 @@ export const steps: StepConfig[] = [
   { 
     type: ElementType.adversity, 
     label: '失敗の詳細', 
-    description: '失敗の詳細を入力しよう',
-    title: '<strong>A</strong>dversity',
-    example: '例：\n・締め切りに間に合わなかった\n・顧客からのクレームを受けた\n・チームメンバーと意見が合わなかった'
+    description: '失敗の詳細を入力してください',
+    title: '<strong>A</strong>dversity（失敗の詳細）',
+    example: '例：\n・いつ\n・どこで\n・何が起きたか\n・誰が関係していたか\n・どのような状況だったか'
   },
   { 
     type: ElementType.belief, 
     subType: 'selection',
-    label: '意見の選択', 
-    description: 'あなたの意見を選択しよう（最大3つまで）',
-    title: '<strong>B</strong>elief Selection',
-    example: '例：\n・自分は無能だ\n・もう取り返しがつかない\n・誰も自分を信用してくれない'
+    label: '原因ラベル選択', 
+    description: '提案された原因ラベルから最大3つを選択してください',
+    title: '<strong>B</strong>elief（原因ラベル選択）',
+    example: '例：\n・内的要因（自己）：\n - 準備不足だった\n - 経験が足りなかった\n・外的要因（環境・他者）：\n - 時間が足りなかった\n - チーム内のコミュニケーション不足'
   },
   { 
     type: ElementType.belief,
     subType: 'explanation',
-    label: '意見の説明', 
-    description: '選択した意見について詳しく説明しよう',
-    title: '<strong>B</strong>elief Explanation',
-    example: '例：\n・なぜそう考えたのか\n・どのような影響があったか\n・具体的な事実は何か'
+    label: '原因の説明', 
+    description: '選択した原因ラベルについて詳しく説明してください',
+    title: '<strong>B</strong>elief（原因の説明）',
+    example: '例：\n・なぜその原因が重要だと考えたのか\n・具体的にどのような影響があったのか\n・関連する事実は何か'
   },
   { 
-    type: ElementType.disputation, 
-    label: '視点の探索', 
-    description: '前のステップで入力した信念に対する反論を入力してください',
-    title: '<strong>D</strong>isputation',
-    example: '例：\n・一度の失敗で全てを判断するのは極端すぎる\n・誰にでもミスはある\n・この経験を次に活かすことができる'
+    type: ElementType.disputation,
+    subType: 'evidence',
+    label: '根拠の入力', 
+    description: '各原因に対する根拠を入力してください',
+    title: '<strong>D</strong>isputation（根拠）',
+    example: '例：\n・具体的な事実や経験\n・客観的なデータや情報\n・他者からのフィードバック'
   },
+  { 
+    type: ElementType.disputation,
+    subType: 'counter',
+    label: '反証の可能性', 
+    description: '各根拠に対する反証の可能性を検討してください',
+    title: '<strong>D</strong>isputation（反証）',
+    example: '例：\n・別の解釈の可能性\n・見落としている要因\n・異なる視点からの考察'
+  }
 ]; 

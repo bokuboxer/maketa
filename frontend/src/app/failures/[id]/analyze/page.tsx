@@ -220,7 +220,7 @@ export default function AnalyzePage({
 				await suggestNextElements(ElementType.belief, currentElements);
 				setActiveStep(ElementType.belief);
 				setActiveSubType('selection');
-			} else if (currentStep?.type === ElementType.belief && currentStep?.subType === 'selection') {
+			} else if (activeStep === ElementType.belief && activeSubType === 'selection') {
 				// B-1からB-2への遷移
 				if (selectedElements[ElementType.belief].length === 0 || selectedElements[ElementType.belief].length > 3) {
 					setNextLoading(false);
@@ -228,22 +228,21 @@ export default function AnalyzePage({
 				}
 				setActiveSubType('explanation');
 				setNextLoading(false);
-			} else if (nextStep.type === ElementType.disputation) {
-				// B-2からDisputationへの遷移
+			} else if (activeStep === ElementType.belief && activeSubType === 'explanation') {
+				// B-2からD-1への遷移
 				let currentElements = selectedElements[ElementType.belief].map(
 					(dndElement) => dndElement.element
 				);
-				await suggestNextElements(nextStep.type, currentElements);
-				setActiveStep(nextStep.type);
-				setActiveSubType(null);
-			} else {
-				// その他の通常の遷移
-				let currentElements = selectedElements[activeStep].map(
+				await suggestNextElements(ElementType.disputation, currentElements);
+				setActiveStep(ElementType.disputation);
+				setActiveSubType('evidence');
+			} else if (activeStep === ElementType.disputation && activeSubType === 'evidence') {
+				// D-1からD-2への遷移
+				let currentElements = selectedElements[ElementType.disputation].map(
 					(dndElement) => dndElement.element
 				);
-				await suggestNextElements(nextStep.type, currentElements);
-				setActiveStep(nextStep.type);
-				setActiveSubType(nextStep.subType || null);
+				await suggestNextElements(ElementType.disputation, currentElements);
+				setActiveSubType('counter');
 			}
 			
 			setNextLoading(false);
