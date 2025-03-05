@@ -8,6 +8,7 @@ from weaviate.util import generate_uuid5
 import pandas as pd
 from tqdm import tqdm
 from pprint import pprint
+from urllib.parse import urlparse
 
 from app.schema import Hero
 
@@ -43,10 +44,15 @@ class VectorDB:
 
                 logger.info(f"Using production Weaviate URL: {weaviate_url}")
 
+                # URLからホスト名を抽出
+                parsed_url = urlparse(weaviate_url)
+                host = parsed_url.netloc
+
+                # REST APIのみを使用するように設定
                 client = weaviate.WeaviateClient(
                     connection_params=wcon.ConnectionParams.from_url(
                         url=weaviate_url,
-                        grpc_port=None,  # gRPCを無効化
+                        grpc_port=50051,
                     ),
                     additional_headers=headers,
                     skip_init_checks=True,  # 初期チェックをスキップ
