@@ -45,9 +45,11 @@ class VectorDB:
 
                 client = weaviate.WeaviateClient(
                     connection_params=wcon.ConnectionParams.from_url(
-                        url=weaviate_url, grpc_port=50051
+                        url=weaviate_url,
+                        grpc_port=None,  # gRPCを無効化
                     ),
                     additional_headers=headers,
+                    skip_init_checks=True,  # 初期チェックをスキップ
                 )
             else:
                 # 開発環境（Docker Compose）
