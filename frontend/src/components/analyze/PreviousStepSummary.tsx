@@ -2,7 +2,7 @@ import { ElementType } from "@/api/model/elementType";
 import { PreviousStepSummaryProps } from "./types";
 
 // Previous step summary component
-export const PreviousStepSummary = ({ activeStep, failure, selectedElements, summarizedText, steps }: PreviousStepSummaryProps) => {
+export const PreviousStepSummary = ({ activeStep, failure, selectedElements, steps }: PreviousStepSummaryProps) => {
   return (
     <div className="mb-6">
       <div className="border rounded-lg p-3 bg-white">
@@ -21,18 +21,16 @@ export const PreviousStepSummary = ({ activeStep, failure, selectedElements, sum
         <p className="text-black text-sm">
           {activeStep === ElementType.adversity
             ? failure?.description
-            : activeStep === ElementType.belief && summarizedText
-              ? summarizedText
-              : activeStep === ElementType.disputation
-                ? selectedElements[ElementType.belief]
-                    .map((element) => element.element.description)
-                    .join("\n")
-                : selectedElements[
-                    steps[steps.findIndex((s) => s.type === activeStep) - 1]
-                      .type
-                  ]
-                    .map((element) => element.element.description)
-                    .join("\n")}
+            : activeStep === ElementType.disputation
+              ? selectedElements[ElementType.belief]
+                  .map((element) => element.element.description)
+                  .join("\n")
+              : selectedElements[
+                  steps[steps.findIndex((s) => s.type === activeStep) - 1]
+                    .type
+                ]
+                  .map((element) => element.element.description)
+                  .join("\n")}
         </p>
       </div>
     </div>

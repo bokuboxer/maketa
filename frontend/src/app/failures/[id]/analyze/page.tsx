@@ -7,7 +7,7 @@ import {
 } from "@/api/generated/default/default";
 import { Element } from "@/api/model/element";
 import { ElementType } from "@/api/model/elementType";
-import type { Failure } from "@/api/model/failure";
+import { DragDropContext, DropResult } from "@hello-pangea/dnd";
 import { useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
 import HypnoticLoader from "@/components/HypnoticLoader";
@@ -19,17 +19,12 @@ import {
 	BeliefExplanationComponent, 
 	StandardStepComponent,
 	steps,
+	DndElement
 } from "@/components/analyze";
 import { IconArrowLeft } from "@tabler/icons-react";
 
 interface PageParams {
 	id: string;
-}
-
-interface BeliefAnalysisResponse {
-	belief_analysis?: {
-		labels: Element[];
-	};
 }
 
 // Main component
@@ -38,13 +33,12 @@ export default function AnalyzePage({
 }: { params: Promise<PageParams> }) {
 	const resolvedParams = use(params);
 	const { data: failure, isLoading: isFailureLoading } =
-		useGetFailureByIdFailureFailureIdGet(Number(resolvedParams.id)) as { data: Failure | undefined, isLoading: boolean };
+		useGetFailureByIdFailureFailureIdGet(Number(resolvedParams.id));
 	const { mutate: suggestElements } = useSuggestElementsElementsSuggestPost();
 	const { mutate: createElements } = useBulkCreateElementsElementsPost();
 	const [loading, setLoading] = useState(true);
 	const [activeStep, setActiveStep] = useState<ElementType>(ElementType.adversity);
 	const [activeSubType, setActiveSubType] = useState<string | null>(null);
-	const [summarizedText, setSummarizedText] = useState<string>("");
 	const [selectedElements, setSelectedElements] = useState<GroupedElements>({
 		adversity: [],
 		belief: [],
@@ -75,14 +69,14 @@ export default function AnalyzePage({
 			{
 				onSuccess: (data) => {
 					if (data) {
-						const elements = data.map((element) => ({
+						const dndElements = data.map((element) => ({
 							element,
 							isSelected: false,
 						}));
 
 						setSuggestedElements((prev) => ({
 							...prev,
-							[element_type]: elements,
+							[element_type]: dndElements,
 						}));
 
 						setSelectedElements((prev) => ({
@@ -96,39 +90,120 @@ export default function AnalyzePage({
 		);
 	};
 
-	const fetchSummary = async (elementType: ElementType, elements: Element[]) => {
-		suggestElements(
-			{
-				data: {
-					type: elementType,
-					text: "",
-					elements: elements,
-				},
-			},
-			{
-				onSuccess: (data) => {
-					if (typeof data === 'string') {
-						setSummarizedText(data);
-					}
-				},
-			},
-		);
-	};
-
 	useEffect(() => {
 		if (failure?.description) {
 			fetchSuggestElements(ElementType.adversity, failure?.description, []);
 		}
 	}, [failure?.description]);
 
-	useEffect(() => {
-		if (activeStep === ElementType.belief) {
-			const elements = selectedElements[ElementType.adversity];
-			if (elements.length > 0) {
-				fetchSummary(ElementType.adversity, elements.map(e => e.element));
-			}
+	const handleDragStart = () => {
+		setLoading(true);
+	};
+
+	const handleDragEnd = (result: DropResult) => {
+		if (activeStep === ElementType.belief && activeSubType === 'selection') {
+			return; // Ignore drag and drop for belief selection
 		}
-	}, [activeStep, selectedElements[ElementType.adversity]]);
+
+		setLoading(false);
+		if (!result.destination) return;
+
+		const sourceType = result.source.droppableId.split("-")[0];
+		const destType = result.destination.droppableId.split("-")[0];
+		const elementType = result.source.droppableId.split(
+			"-",
+		)[1] as keyof GroupedElements;
+
+		const sourceList =
+			sourceType === "selected" ? selectedElements : suggestedElements;
+		const dndElement = sourceList[elementType][result.source.index];
+
+		// 同じリスト内での移動（selected内またはsuggested内）
+		if (sourceType === destType) {
+			const items = Array.from(sourceList[elementType]);
+			const [removed] = items.splice(result.source.index, 1);
+			items.splice(result.destination.index, 0, removed);
+
+			if (sourceType === "selected") {
+				setSelectedElements((prev) => ({
+					...prev,
+					[elementType]: items,
+				}));
+			} else {
+				setSuggestedElements((prev) => ({
+					...prev,
+					[elementType]: items,
+				}));
+			}
+			return;
+		}
+
+		// selected と suggested 間の移動
+		const newDndElement = {
+			...dndElement,
+			isSelected: !dndElement.isSelected,
+		};
+
+		if (sourceType === "selected") {
+			setSelectedElements((prev) => ({
+				...prev,
+				[elementType]: prev[elementType].filter(
+					(_, i) => i !== result.source.index,
+				),
+			}));
+			setSuggestedElements((prev) => ({
+				...prev,
+				[elementType]: [...prev[elementType], newDndElement],
+			}));
+		} else {
+			setSuggestedElements((prev) => ({
+				...prev,
+				[elementType]: prev[elementType].filter(
+					(_, i) => i !== result.source.index,
+				),
+			}));
+			setSelectedElements((prev) => ({
+				...prev,
+				[elementType]: [...prev[elementType], newDndElement],
+			}));
+		}
+	};
+
+	const suggestNextElements = async (nextType: ElementType, currentElements: Element[]) => {
+		return new Promise<void>((resolve) => {
+			suggestElements(
+				{
+					data: {
+						type: nextType,
+						text: "",
+						elements: currentElements,
+					},
+				},
+				{
+					onSuccess: (data) => {
+						if (data) {
+							const dndElements = data.map((element) => ({
+								element,
+								isSelected: false,
+							}));
+
+							setSuggestedElements((prev) => ({
+								...prev,
+								[nextType]: dndElements,
+							}));
+
+							setSelectedElements((prev) => ({
+								...prev,
+								[nextType]: [],
+							}));
+						}
+						setNextLoading(false);
+						resolve();
+					},
+				},
+			);
+		});
+	};
 
 	const handleNext = async () => {
 		const currentStep = steps.find(step => 
@@ -141,119 +216,66 @@ export default function AnalyzePage({
 			setNextLoading(true);
 
 			if (activeStep === ElementType.adversity) {
-				if (!failure?.id) {
-					setNextLoading(false);
-					return;
-				}
+				// AからBへの遷移
 				let currentElements = [{
 					id: selectedElements[activeStep][0].element.id,
 					type: ElementType.adversity,
 					description: selectedElements[activeStep][0].element.description,
-					failure_id: failure.id,
+					failure_id: failure?.id,
 					created_at: new Date().toISOString(),
 				}];
+				await suggestNextElements(ElementType.belief, currentElements);
+				setActiveStep(ElementType.belief);
+				setActiveSubType('selection');
+			} else if (activeStep === ElementType.belief && activeSubType === 'selection') {
+				// B-1からB-2への遷移
+				if (selectedElements[ElementType.belief].length !== 1) {
+					setNextLoading(false);
+					return;
+				}
+				// 説明の候補を取得
 				suggestElements(
 					{
 						data: {
 							type: ElementType.belief,
-							text: "",
-							elements: currentElements as Element[],
+							text: failure?.description || "",
+							elements: [],
+							selected_labels: selectedElements[ElementType.belief].map(
+								(dndElement) => dndElement.element
+							),
 						},
 					},
 					{
 						onSuccess: (data) => {
-							if (data) {
-								const elements = data.map((element) => ({
+							if (data?.belief_analysis?.labels) {
+								const dndElements = data.belief_analysis.labels.map((element) => ({
 									element,
 									isSelected: false,
 								}));
-
 								setSuggestedElements((prev) => ({
 									...prev,
-									[ElementType.belief]: elements,
-								}));
-
-								setSelectedElements((prev) => ({
-									...prev,
-									[ElementType.belief]: [],
+									[ElementType.belief]: dndElements,
 								}));
 							}
-							setNextLoading(false);
 						},
 					},
 				);
-				setActiveStep(ElementType.belief);
-				setActiveSubType('selection');
+				setActiveSubType('explanation');
+				setNextLoading(false);
 			} else if (activeStep === ElementType.belief && activeSubType === 'explanation') {
+				// B-2からD-1への遷移
 				let currentElements = selectedElements[ElementType.belief].map(
-					(element) => element.element
+					(dndElement) => dndElement.element
 				);
-				suggestElements(
-					{
-						data: {
-							type: ElementType.disputation,
-							text: "",
-							elements: currentElements,
-						},
-					},
-					{
-						onSuccess: (data) => {
-							if (data) {
-								const elements = data.map((element) => ({
-									element,
-									isSelected: false,
-								}));
-
-								setSuggestedElements((prev) => ({
-									...prev,
-									[ElementType.disputation]: elements,
-								}));
-
-								setSelectedElements((prev) => ({
-									...prev,
-									[ElementType.disputation]: [],
-								}));
-							}
-							setNextLoading(false);
-						},
-					},
-				);
+				await suggestNextElements(ElementType.disputation, currentElements);
 				setActiveStep(ElementType.disputation);
 				setActiveSubType('evidence');
 			} else if (activeStep === ElementType.disputation && activeSubType === 'evidence') {
+				// D-1からD-2への遷移
 				let currentElements = selectedElements[ElementType.disputation].map(
-					(element) => element.element
+					(dndElement) => dndElement.element
 				);
-				suggestElements(
-					{
-						data: {
-							type: ElementType.disputation,
-							text: "",
-							elements: currentElements,
-						},
-					},
-					{
-						onSuccess: (data) => {
-							if (data) {
-								const elements = data.map((element) => ({
-									element,
-									isSelected: false,
-								}));
-
-								setSuggestedElements((prev) => ({
-									...prev,
-									[ElementType.disputation]: elements,
-								}));
-
-								setSelectedElements((prev) => ({
-									...prev,
-									[ElementType.disputation]: [],
-								}));
-							}
-							setNextLoading(false);
-						},
-					},
-				);
+				await suggestNextElements(ElementType.disputation, currentElements);
 				setActiveSubType('counter');
 			}
 			
@@ -268,8 +290,10 @@ export default function AnalyzePage({
 		const currentIndex = steps.indexOf(currentStep!);
 
 		if (activeStep === ElementType.belief && activeSubType === 'explanation') {
+			// B-2からB-1への遷移
 			setActiveSubType('selection');
 		} else if (currentIndex > 0) {
+			// 通常の前のステップへの遷移
 			const prevStep = steps[currentIndex - 1];
 			setActiveStep(prevStep.type);
 			setActiveSubType(prevStep.subType || null);
@@ -285,7 +309,7 @@ export default function AnalyzePage({
 			data: {
 				failure_id: failure.id,
 				elements: Object.values(selectedElements)
-					.flatMap((elements) => elements.map((element) => element.element))
+					.flatMap((elements) => elements.map((dndElement) => dndElement.element))
 			}
 		}, {
 			onSuccess: () => {
@@ -295,6 +319,7 @@ export default function AnalyzePage({
 		});
 	};
 
+	// Render loading state
 	if (isFailureLoading || loading) {
 		return (
 			<div className="min-h-screen bg-white flex items-center justify-center">
@@ -310,9 +335,11 @@ export default function AnalyzePage({
 		);
 	}
 
+	// Render main content
 	return (
 		<div className="min-h-screen bg-white">
 			<div className="container mx-auto px-4 py-8">
+				{/* Header */}
 				<div className="flex items-center mb-4">
 					<button
 						onClick={() => router.back()}
@@ -323,20 +350,22 @@ export default function AnalyzePage({
 					<h1 className="text-2xl font-bold text-black">詳細分析</h1>
 				</div>
 
+				{/* Previous step summary */}
 				<PreviousStepSummary 
 					activeStep={activeStep} 
 					failure={failure} 
-					selectedElements={selectedElements}
-					summarizedText={summarizedText}
+					selectedElements={selectedElements} 
 					steps={steps}
 				/>
 
+				{/* Stepper */}
 				<StepperComponent 
 					activeStep={activeStep} 
 					activeSubType={activeSubType} 
 					steps={steps}
 				/>
 
+				{/* Main content area */}
 				<div className="space-y-4">
 					<div key={`${activeStep}-${activeSubType}`}>
 						{activeStep === ElementType.belief && activeSubType === 'explanation' ? (
@@ -359,6 +388,7 @@ export default function AnalyzePage({
 					</div>
 				</div>
 
+				{/* Navigation buttons */}
 				<NavigationButtons 
 					activeStep={activeStep}
 					selectedElements={selectedElements}
