@@ -136,12 +136,12 @@ export default function Failures() {
 				</div>
 			</Modal>
 			<div className="min-h-screen bg-white">
-				<header className="bg-white border-b border-gray-200 py-5 px-6 sticky top-0 z-50 shadow-sm backdrop-blur-sm bg-white/80">
+				<header className="bg-white border-b border-gray-200 py-3 px-6 sticky top-0 z-50 shadow-sm backdrop-blur-sm bg-white/80">
 					<div className="container mx-auto flex justify-between items-center max-w-5xl">
 						<h1 className="text-2xl font-bold tracking-tight text-black">Maketa</h1>
 						<button
 							onClick={() => auth.signOut()}
-							className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-all duration-200"
+							className="p-2.5 text-gray-600 hover:bg-gray-100 rounded-full transition-all duration-200"
 							title="ログアウト"
 						>
 							<ArrowRightStartOnRectangleIcon className="w-5 h-5" />
