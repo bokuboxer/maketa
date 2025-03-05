@@ -344,6 +344,8 @@ export default function AnalyzePage({
 									selectedElements={selectedElements}
 									suggestedElements={suggestedElements}
 									steps={steps}
+									setSelectedElements={setSelectedElements}
+									setSuggestedElements={setSuggestedElements}
 								/>
 							)}
 						</div>

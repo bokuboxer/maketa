@@ -73,4 +73,6 @@ export interface StandardStepComponentProps {
   selectedElements: GroupedElements;
   suggestedElements: GroupedElements;
   steps: StepConfig[];
+  setSelectedElements: React.Dispatch<React.SetStateAction<GroupedElements>>;
+  setSuggestedElements: React.Dispatch<React.SetStateAction<GroupedElements>>;
 } 

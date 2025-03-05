@@ -15,10 +15,11 @@ const BeliefSelectionComponent = ({
   activeStep: ElementType;
   onSelect: (element: any) => void;
 }) => {
-  const elements = suggestedElements[activeStep];
-  const midPoint = Math.ceil(elements.length / 2);
-  const firstColumn = elements.slice(0, midPoint);
-  const secondColumn = elements.slice(midPoint);
+  // すべての要素を表示（suggestedElementsのみを使用）
+  const displayElements = [...suggestedElements[activeStep]];
+  const midPoint = Math.ceil(displayElements.length / 2);
+  const firstColumn = displayElements.slice(0, midPoint);
+  const secondColumn = displayElements.slice(midPoint);
 
   return (
     <div className="grid grid-cols-2 gap-3">
@@ -72,7 +73,9 @@ export const StandardStepComponent = ({
   isDragging, 
   selectedElements, 
   suggestedElements,
-  steps
+  steps,
+  setSelectedElements,
+  setSuggestedElements,
 }: StandardStepComponentProps) => {
   const currentStep = steps.find((step) => step.type === activeStep);
   
@@ -81,19 +84,16 @@ export const StandardStepComponent = ({
     if (selectedElements[activeStep].some(
       (selected) => selected.element.id === element.element.id
     )) {
-      selectedElements[activeStep] = [];
-      suggestedElements[activeStep] = [...suggestedElements[activeStep], element];
+      setSelectedElements((prev) => ({
+        ...prev,
+        [activeStep]: []
+      }));
     } else {
-      // Move any currently selected element back to suggested
-      const currentlySelected = selectedElements[activeStep][0];
-      if (currentlySelected) {
-        suggestedElements[activeStep] = [...suggestedElements[activeStep], currentlySelected];
-      }
       // Select the new element
-      selectedElements[activeStep] = [element];
-      suggestedElements[activeStep] = suggestedElements[activeStep].filter(
-        (e) => e.element.id !== element.element.id
-      );
+      setSelectedElements((prev) => ({
+        ...prev,
+        [activeStep]: [element]
+      }));
     }
   };
 
