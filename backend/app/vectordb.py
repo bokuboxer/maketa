@@ -42,13 +42,14 @@ class VectorDB:
                     raise ValueError("WEAVIATE_URL environment variable is not set")
 
                 logger.info(f"Using production Weaviate URL: {weaviate_url}")
-                # URLからホストを抽出（https://を除去）
-                host = weaviate_url.replace("https://", "").replace("http://", "")
-                secure = weaviate_url.startswith("https://")
 
                 client = weaviate.WeaviateClient(
-                    connection_params=wcon.ConnectionParams.from_url(
-                        url=weaviate_url, grpc_port=self.grpc_port, grpc_secure=secure
+                    connection_params=wcon.ConnectionParams(
+                        http={
+                            "host": weaviate_url,
+                            "port": self.port,
+                            "secure": False,
+                        },
                     ),
                     additional_headers=headers,
                 )
