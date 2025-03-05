@@ -26,3 +26,6 @@ export * from "./user";
 export * from "./userDisplayName";
 export * from "./validationError";
 export * from "./validationErrorLocItem";
+export * from "./getHeroesHeroesGet200";
+export * from "./getHeroesHeroesGetParams";
+export * from "./hero";

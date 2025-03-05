@@ -12,6 +12,7 @@
 		"generate:api": "orval"
 	},
 	"dependencies": {
+		"@heroicons/react": "^2.2.0",
 		"@mantine/core": "^7.17.0",
 		"@mantine/hooks": "^7.17.0",
 		"biome": "^0.3.3",

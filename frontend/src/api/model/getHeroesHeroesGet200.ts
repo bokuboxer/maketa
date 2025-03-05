@@ -4,6 +4,6 @@
  * FastAPI
  * OpenAPI spec version: 0.1.0
  */
-import type { Failure } from "./failure";
+import type { Hero } from "./hero";
 
-export type GetFailureByIdFailureFailureIdGet200 = Failure | null;
+export type GetHeroesHeroesGet200 = Hero[] | null;

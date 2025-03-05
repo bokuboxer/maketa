@@ -2,6 +2,7 @@ import app.model as model
 import app.schema as schema
 from app.chain import SuggestChain
 from sqlalchemy.orm import Session, joinedload
+from app.vectordb import VectorDB
 
 
 class UserController:
@@ -95,3 +96,11 @@ class ElementController:
             self.db.refresh(failure)
 
         return None
+
+
+class HeroController:
+    def __init__(self, vectordb: VectorDB):
+        self.vectordb = vectordb
+
+    def list(self, search_query: str, limit: int = 5) -> list[schema.Hero] | None:
+        return self.vectordb.query_collection(search_query, limit)

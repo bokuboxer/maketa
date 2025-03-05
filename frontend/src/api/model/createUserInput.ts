@@ -6,6 +6,6 @@
  */
 
 export interface CreateUserInput {
-  firebase_uid: string;
-  email: string;
+	firebase_uid: string;
+	email: string;
 }
