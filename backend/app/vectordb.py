@@ -1,8 +1,6 @@
 import weaviate
-import weaviate.classes.config as wc
-import weaviate.classes.query as wq
-import weaviate.connect as wcon
 import os
+import logging
 from weaviate.util import generate_uuid5
 import pandas as pd
 from tqdm import tqdm
@@ -10,123 +8,128 @@ from pprint import pprint
 
 from app.schema import Hero
 
+logger = logging.getLogger(__name__)
 
-class VectorDB:
-    def __init__(self, port: int = 8080, grpc_port: int = 50051):
-        self.port = port
-        self.grpc_port = grpc_port
-        self.client = self._create_client()
-        self.client.connect()
-        self._create_collection()
-
-    def _create_client(self):
+def create_client() -> weaviate.Client:
+    try:
         api_key = os.environ.get("OPENAI_API_KEY", "")
         headers = {"X-OpenAI-Api-Key": api_key}
 
-        # Docker環境ではサービス名で接続
-        host = "weaviate" if os.getenv("ENVIRONMENT") == "development" else "localhost"
+        # 環境に応じてホストを設定
+        if os.getenv("ENVIRONMENT") == "production":
+            # 本番環境（Azure Container Apps）
+            weaviate_url = os.environ.get("WEAVIATE_URL", "")
+            if not weaviate_url:
+                logger.error("WEAVIATE_URL environment variable is not set")
+                raise ValueError("WEAVIATE_URL environment variable is not set")
 
-        client = weaviate.WeaviateClient(
-            connection_params=wcon.ConnectionParams(
-                http={
-                    "host": host,
-                    "port": self.port,
-                    "secure": False,  # 開発環境ではHTTPを使用
-                },
-                grpc={
-                    "host": host,
-                    "port": self.grpc_port,
-                    "secure": False,  # 開発環境ではgRPCも非セキュア
-                },
-            ),
-            additional_headers=headers,
-        )
+            logger.info(f"Using production Weaviate URL: {weaviate_url}")
+            client = weaviate.Client(
+                url=weaviate_url,
+                additional_headers=headers,
+            )
+        else:
+            # 開発環境（Docker Compose）
+            logger.info("Using development Weaviate configuration")
+            client = weaviate.Client(
+                url="http://localhost:8080",
+                additional_headers=headers,
+            )
         return client
+    except Exception as e:
+        logger.error(f"Failed to create Weaviate client: {e}")
+        raise
 
-    def _create_collection(self):
-        if not self.client.collections.exists("Hero"):
-            self.client.collections.create(
-                name="Hero",
-                properties=[
-                    wc.Property(name="name", data_type=wc.DataType.TEXT),
-                    wc.Property(name="description", data_type=wc.DataType.TEXT),
-                    wc.Property(
-                        name="failure",
-                        data_type=wc.DataType.TEXT,
-                        vectorize_property=True,
-                    ),
-                    wc.Property(name="source", data_type=wc.DataType.TEXT),
-                ],
-                vectorizer_config=wc.Configure.Vectorizer.text2vec_openai(
-                    model="text-embedding-3-small",
-                    vectorize_collection_name=False,
-                ),
-                generative_config=wc.Configure.Generative.openai(),
+def create_collection() -> None:
+    client = create_client()
+    class_obj = {
+        "class": "Hero",
+        "vectorizer": "text2vec-openai",
+        "moduleConfig": {
+            "text2vec-openai": {
+                "model": "text-embedding-3-small",
+                "modelVersion": "latest",
+                "type": "text",
+            }
+        },
+        "properties": [
+            {
+                "name": "name",
+                "dataType": ["text"],
+            },
+            {
+                "name": "description",
+                "dataType": ["text"],
+            },
+            {
+                "name": "failure",
+                "dataType": ["text"],
+            },
+            {
+                "name": "source",
+                "dataType": ["text"],
+            },
+        ],
+    }
+    if not client.schema.exists("Hero"):
+        client.schema.create_class(class_obj)
+
+
+def import_data(csv_path: str) -> None:
+    df = pd.read_csv(csv_path)
+    batch_size = 100
+    client = create_client()
+    with client.batch as batch:
+        batch.batch_size = batch_size
+        for _, batch_df in tqdm(df.iterrows()):
+            properties = {
+                "name": batch_df["Name"],
+                "description": batch_df["Description"],
+                "failure": batch_df["Failure"],
+                "source": batch_df["Source"],
+            }
+        batch.add_data_object(
+            data_object=properties,
+            class_name="Hero",
+                uuid=generate_uuid5(batch_df["Name"]),
             )
 
-    def import_data(self, csv_path: str):
-        df = pd.read_csv(csv_path)
-        heros = self.client.collections.get("Hero")
-        with heros.batch.dynamic() as batch:
-            for _, batch_df in tqdm(df.iterrows()):
-                agri_obj = {
-                    "name": batch_df["Name"],
-                    "description": batch_df["Description"],
-                    "failure": batch_df["Failure"],
-                    "source": batch_df["Source"],
-                }
 
-                batch.add_object(
-                    properties=agri_obj,
-                    uuid=generate_uuid5(batch_df["Name"]),
-                )
+def query_collection(search_query: str, limit: int) -> list[Hero] | None:
+    client = create_client()
+    response = (
+        client.query.get("Hero", ["name", "description", "failure", "source"])
+        .with_near_text({"concepts": [search_query]})
+        .with_limit(limit)
+        .with_additional(["certainty"])
+        .do()
+    )
 
-    def query_collection(self, search_query: str, limit: int) -> list[Hero] | None:
-        try:
-            if not self.client.is_connected():
-                self.client.connect()
+    if (
+        "data" not in response
+        or "Get" not in response["data"]
+        or "Hero" not in response["data"]["Get"]
+    ):
+        return None
 
-            response = self.client.collections.get("Hero").query.near_text(
-                query=search_query,
-                limit=limit,
-                return_metadata=wq.MetadataQuery(
-                    certainty=True,
-                    distance=True,
-                ),
-                return_properties=["name", "description", "failure", "source"],
-                include_vector=True,
+    heroes = []
+    for obj in response["data"]["Get"]["Hero"]:
+        heroes.append(
+            Hero(
+                name=obj["name"],
+                description=obj["description"],
+                failure=obj["failure"],
+                source=obj["source"],
+                certainty=obj.get("_additional", {}).get("certainty", 0),
             )
-
-            heroes = []
-            for o in response.objects:
-                heroes.append(
-                    Hero(
-                        name=o.properties["name"],
-                        description=o.properties["description"],
-                        failure=o.properties["failure"],
-                        source=o.properties["source"],
-                        certainty=o.metadata.certainty,
-                    )
-                )
-            return heroes
-        except Exception as e:
-            print(f"Error querying collection: {e}")
-            return None
-
-    def close(self):
-        if hasattr(self, "client"):
-            self.client.close()
-
-    def __del__(self):
-        self.close()
+        )
+    logger.info(f"Found {len(heroes)} matching heroes")
+    return heroes
 
 
 if __name__ == "__main__":
-    csv_path = "../data/output.csv"
-    db = VectorDB()
-    try:
-        db.import_data(csv_path)
-        heros = db.query_collection("お金を無駄遣いしてしまった", 10)
-        pprint(heros)
-    finally:
-        db.close()
+    csv_path = "/Users/kimotonorihiro/dev/llm/maketa/backend/data/output.csv"
+    create_collection()
+    import_data(csv_path)
+    heros = query_collection("お金を無駄遣いしてしまった", 10)
+    pprint(heros)

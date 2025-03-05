@@ -1,6 +1,8 @@
 import os
+import logging
 
 import app.schema as schema
+import app.vectordb as vectordb
 from app.chain import SuggestChain
 from app.controller import (
     ElementController,
@@ -9,12 +11,15 @@ from app.controller import (
     HeroController,
 )
 from app.database import get_db
-from app.vectordb import VectorDB
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from langchain_openai import ChatOpenAI
 from pydantic import SecretStr
+
+# ロギングの設定
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -45,57 +50,56 @@ app.add_middleware(
     max_age=600,
 )
 
-try:
-    db = get_db()
-    vectordb = VectorDB()
-    csv_path = "./data/output.csv"
-    vectordb.import_data(csv_path)
+logger.info("Starting server...")
 
-    suggest_chain = SuggestChain(llm)
-    user_controller = UserController(db)
-    failure_controller = FailureController(db)
-    element_controller = ElementController(db, suggest_chain)
-    hero_controller = HeroController(vectordb)
 
-    @app.post("/users")
-    async def create_user(input: schema.CreateUserInput) -> None:
-        return user_controller.create(input)
+db = get_db()
+vectordb.create_collection()
+csv_path = "./data/output.csv"
+vectordb.import_data(csv_path)
+logger.info("Importing data from CSV...")
+logger.info("Data import completed")
 
-    @app.get("/user/{firebase_uid}")
-    async def get_user_by_firebase_uid(
-        firebase_uid: str,
-    ) -> schema.User | None:
-        return user_controller.get_by_firebase_uid(firebase_uid)
+suggest_chain = SuggestChain(llm)
+user_controller = UserController(db)
+failure_controller = FailureController(db)
+element_controller = ElementController(db, suggest_chain)
+hero_controller = HeroController()
+logger.info("All controllers initialized successfully")
 
-    @app.get("/failure/{failure_id}")
-    async def get_failure_by_id(failure_id: int) -> schema.Failure | None:
-        return failure_controller.get_by_id(failure_id)
+@app.post("/users")
+async def create_user(input: schema.CreateUserInput) -> None:
+    return user_controller.create(input)
 
-    @app.post("/failures")
-    async def create_failure(input: schema.CreateFailureInput) -> None:
-        return failure_controller.create(input)
+@app.get("/user/{firebase_uid}")
+async def get_user_by_firebase_uid(
+    firebase_uid: str,
+) -> schema.User | None:
+    return user_controller.get_by_firebase_uid(firebase_uid)
 
-    @app.post("/elements/suggest")
-    async def suggest_elements(
-        input: schema.SuggestInput,
-    ) -> list[schema.Element] | None:
-        return element_controller.suggest(input)
+@app.get("/failure/{failure_id}")
+async def get_failure_by_id(failure_id: int) -> schema.Failure | None:
+    return failure_controller.get_by_id(failure_id)
 
-    @app.post("/elements")
-    async def bulk_create_elements(input: schema.CreateElementInput) -> None:
-        return element_controller.bulk_create(input)
+@app.post("/failures")
+async def create_failure(input: schema.CreateFailureInput) -> None:
+    return failure_controller.create(input)
 
-    @app.get("/heroes")
-    async def get_heroes(search_query: str) -> list[schema.Hero] | None:
-        return hero_controller.list(search_query, 1)
+@app.post("/elements/suggest")
+async def suggest_elements(
+    input: schema.SuggestInput,
+) -> list[schema.Element] | None:
+    return element_controller.suggest(input)
 
-    if __name__ == "__main__":
-        import uvicorn
+@app.post("/elements")
+async def bulk_create_elements(input: schema.CreateElementInput) -> None:
+    return element_controller.bulk_create(input)
 
-        uvicorn.run(app, host="0.0.0.0", port=8000)
+@app.post("/heroes")
+async def get_heroes(input: schema.GetHeroesInput) -> list[schema.Hero] | None:
+    return hero_controller.list(input)
 
-finally:
-    if "db" in locals():
-        db.close()
-    if "vectordb" in locals():
-        vectordb.close()
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=8000)

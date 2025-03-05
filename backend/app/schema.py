@@ -43,7 +43,7 @@ class Hero(BaseModel):
     failure: str
     source: str
     certainty: float
-    
+
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -87,6 +87,10 @@ class CreateElementInput(BaseModel):
 
 class AnalysisResult(BaseModel):
     elements: list[Element]
+
+
+class GetHeroesInput(BaseModel):
+    query: str
 
 
 def to_schema_element(model_element: model.Element) -> Element:

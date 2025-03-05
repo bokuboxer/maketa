@@ -5,7 +5,6 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface CreateFailureInput {
-  user_id: number;
-  description: string;
+export interface GetHeroesInput {
+  query: string;
 }
