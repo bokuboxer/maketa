@@ -12,7 +12,7 @@ COPY pyproject.toml poetry.lock ./
 RUN poetry config virtualenvs.create false
 
 # 依存関係のインストール（詳細な出力を有効化）
-RUN poetry install --only main --no-root --verbose
+RUN poetry install --no-root --verbose
 
 # アプリケーションのコードをコピー
 COPY . .
@@ -21,4 +21,4 @@ COPY . .
 EXPOSE 8000
 
 # アプリケーションの起動
-CMD ["poetry", "run", "uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["poetry", "run", "uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

@@ -37,6 +37,16 @@ class User(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class Hero(BaseModel):
+    name: str
+    description: str
+    failure: str
+    source: str
+    certainty: float
+    
+    model_config = ConfigDict(from_attributes=True)
+
+
 class SuggestInput(BaseModel):
     text: str
     elements: list[Element]
