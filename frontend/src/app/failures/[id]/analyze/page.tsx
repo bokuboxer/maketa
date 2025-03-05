@@ -21,37 +21,28 @@ import {
 	IconArrowRight,
 	IconDeviceFloppy,
 	IconHelp,
-	IconPlus,
 } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
 import HypnoticLoader from "@/components/HypnoticLoader";
+
 interface PageParams {
 	id: string;
 }
 
-interface DndElement {
-	element: Element;
-	isSelected: boolean;
-}
-
-interface GroupedElements {
-	[key: string]: DndElement[];
-}
-
-// Add new interface for belief labels
-interface BeliefLabel {
-	id: number;
-	description: string;
-	type: 'internal' | 'external';
-	isSelected: boolean;
+interface ExtendedElement extends Element {
 	explanation?: string;
 }
 
-interface BeliefSuggestion {
-	id: number;
-	labelId: number;
-	description: string;
+type DndElement = {
+	element: ExtendedElement;
+	isSelected: boolean;
+};
+
+type ElementTypeKey = keyof typeof ElementType;
+
+interface GroupedElements {
+	[key: string]: DndElement[];
 }
 
 export default function AnalyzePage({
@@ -65,24 +56,20 @@ export default function AnalyzePage({
 	const [loading, setLoading] = useState(true);
 	const [isDragging, setIsDragging] = useState(false);
 	const [activeStep, setActiveStep] = useState<ElementType>(ElementType.adversity);
+	const [activeSubType, setActiveSubType] = useState<string | null>(null);
 	const [selectedElements, setSelectedElements] = useState<GroupedElements>({
-		[ElementType.adversity]: [],
-		[ElementType.belief]: [],
-		[ElementType.disputation]: [],
+		adversity: [],
+		belief: [],
+		disputation: [],
 	});
 	const [suggestedElements, setSuggestedElements] = useState<GroupedElements>({
-		[ElementType.adversity]: [],
-		[ElementType.belief]: [],
-		[ElementType.disputation]: [],
+		adversity: [],
+		belief: [],
+		disputation: [],
 	});
 	const router = useRouter();
 	const [nextLoading, setNextLoading] = useState(false);
 	const [saveLoading, setSaveLoading] = useState(false);
-	const [beliefLabels, setBeliefLabels] = useState<BeliefLabel[]>([]);
-	const [showCustomInput, setShowCustomInput] = useState(false);
-	const [activeBeliefLabel, setActiveBeliefLabel] = useState<number | null>(null);
-	const [beliefSuggestions, setBeliefSuggestions] = useState<BeliefSuggestion[]>([]);
-	const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
 
 	const fetchSuggestElements = async (
 		element_type: ElementType,
@@ -200,6 +187,42 @@ export default function AnalyzePage({
 		}
 	};
 
+	const suggestNextElements = async (nextType: ElementType, currentElements: Element[]) => {
+		return new Promise<void>((resolve) => {
+			suggestElements(
+				{
+					data: {
+						type: nextType,
+						text: "",
+						elements: currentElements,
+					},
+				},
+				{
+					onSuccess: (data) => {
+						if (data) {
+							const dndElements = data.map((element) => ({
+								element,
+								isSelected: false,
+							}));
+
+							setSuggestedElements((prev) => ({
+								...prev,
+								[nextType]: dndElements,
+							}));
+
+							setSelectedElements((prev) => ({
+								...prev,
+								[nextType]: [],
+							}));
+						}
+						setNextLoading(false);
+						resolve();
+					},
+				},
+			);
+		});
+	};
+
 	const steps = [
 		{ 
 			type: ElementType.adversity, 
@@ -210,10 +233,19 @@ export default function AnalyzePage({
 		},
 		{ 
 			type: ElementType.belief, 
-			label: '意見の整理', 
-			description: 'あなたの意見を整理しよう',
-			title: '<strong>B</strong>elief',
+			subType: 'selection',
+			label: '意見の選択', 
+			description: 'あなたの意見を選択しよう（最大3つまで）',
+			title: '<strong>B</strong>elief Selection',
 			example: '例：\n・自分は無能だ\n・もう取り返しがつかない\n・誰も自分を信用してくれない'
+		},
+		{ 
+			type: ElementType.belief,
+			subType: 'explanation',
+			label: '意見の説明', 
+			description: '選択した意見について詳しく説明しよう',
+			title: '<strong>B</strong>elief Explanation',
+			example: '例：\n・なぜそう考えたのか\n・どのような影響があったか\n・具体的な事実は何か'
 		},
 		{ 
 			type: ElementType.disputation, 
@@ -224,114 +256,51 @@ export default function AnalyzePage({
 		},
 	];
 
-	const fetchBeliefExplanations = async (labelId: number) => {
-		setIsLoadingSuggestions(true);
-		const selectedLabel = beliefLabels.find(label => label.id === labelId);
-		if (!selectedLabel || !failure?.description) return;
-
-		suggestElements(
-			{
-				data: {
-					type: ElementType.belief,
-					text: failure.description,
-					elements: [{
-						id: selectedLabel.id,
-						type: ElementType.belief,
-						description: selectedLabel.description,
-						created_at: new Date().toISOString(),
-						failure_id: failure.id,
-					}],
-				},
-			},
-			{
-				onSuccess: (data) => {
-					if (data) {
-						const suggestions: BeliefSuggestion[] = data.map((element, index) => ({
-							id: index,
-							labelId: selectedLabel.id,
-							description: element.description,
-						}));
-						setBeliefSuggestions(suggestions);
-					}
-					setIsLoadingSuggestions(false);
-				},
-			},
-		);
-	};
-
-	const handleExplanationUpdate = (labelId: number, explanation: string) => {
-		setBeliefLabels(prev => prev.map(label => 
-			label.id === labelId ? { ...label, explanation } : label
-		));
-	};
-
 	const handleNext = async () => {
-		const currentIndex = steps.findIndex((step) => step.type === activeStep);
+		const currentStep = steps.find(step => 
+			step.type === activeStep && (!step.subType || step.subType === activeSubType)
+		);
+		const currentIndex = steps.indexOf(currentStep!);
+		
 		if (currentIndex < steps.length - 1) {
-			const nextStep = steps[currentIndex + 1].type;
+			const nextStep = steps[currentIndex + 1];
 			setNextLoading(true);
 
-			let currentElements: Element[] = [];
-			if (nextStep === ElementType.disputation) {
-				currentElements = selectedElements[ElementType.belief].map(
-					(dndElement) => ({
-						...dndElement.element,
-						description: `${dndElement.element.description}\n説明: ${
-							beliefLabels.find(label => label.id === dndElement.element.id)?.explanation || ''
-						}`,
-					}),
+			if (activeStep === ElementType.adversity) {
+				// AからBへの遷移
+				let currentElements = selectedElements[activeStep].map(
+					(dndElement) => dndElement.element
 				);
+				await suggestNextElements(ElementType.belief, currentElements);
+				setActiveStep(ElementType.belief);
+				setActiveSubType('selection');
+			} else if (currentStep?.type === ElementType.belief && currentStep?.subType === 'selection') {
+				// B-1からB-2への遷移
+				if (selectedElements[ElementType.belief].length === 0 || selectedElements[ElementType.belief].length > 3) {
+					setNextLoading(false);
+					return;
+				}
+				setActiveSubType('explanation');
+				setNextLoading(false);
+			} else if (nextStep.type === ElementType.disputation) {
+				// B-2からDisputationへの遷移
+				let currentElements = selectedElements[ElementType.belief].map(
+					(dndElement) => dndElement.element
+				);
+				await suggestNextElements(nextStep.type, currentElements);
+				setActiveStep(nextStep.type);
+				setActiveSubType(null);
 			} else {
-				currentElements = selectedElements[activeStep].map(
-					(dndElement) => dndElement.element,
+				// その他の通常の遷移
+				let currentElements = selectedElements[activeStep].map(
+					(dndElement) => dndElement.element
 				);
+				await suggestNextElements(nextStep.type, currentElements);
+				setActiveStep(nextStep.type);
+				setActiveSubType(nextStep.subType || null);
 			}
-
-			await new Promise((resolve) => {
-				suggestElements(
-					{
-						data: {
-							type: nextStep,
-							text: "",
-							elements: currentElements,
-						},
-					},
-					{
-						onSuccess: (data) => {
-							if (data) {
-								if (nextStep === ElementType.belief) {
-									// Convert suggested elements to belief labels
-									const labels: BeliefLabel[] = data.map((element, index) => ({
-										id: element.id,
-										description: element.description,
-										type: index < 5 ? 'internal' : 'external',
-										isSelected: false,
-									}));
-									setBeliefLabels(labels);
-								} else {
-									const dndElements = data.map((element) => ({
-										element,
-										isSelected: false,
-									}));
-
-									setSuggestedElements((prev) => ({
-										...prev,
-										[nextStep]: dndElements,
-									}));
-
-									setSelectedElements((prev) => ({
-										...prev,
-										[nextStep]: [],
-									}));
-								}
-							}
-							setNextLoading(false);
-							setActiveStep(nextStep);
-							resolve(undefined);
-						},
-					},
-				);
-			});
+			
+			setNextLoading(false);
 		}
 	};
 
@@ -342,41 +311,37 @@ export default function AnalyzePage({
 		}
 	};
 
-	// Add new function to handle belief label selection
-	const handleBeliefLabelSelect = (labelId: number) => {
-		setBeliefLabels(prev => {
-			const selectedCount = prev.filter(label => label.isSelected).length;
-			const newLabels = prev.map(label => {
-				if (label.id === labelId) {
-					// If already selected, unselect it
-					if (label.isSelected) {
-						return { ...label, isSelected: false };
-					}
-					// If not selected and less than 3 labels are selected, select it
-					if (selectedCount < 3) {
-						return { ...label, isSelected: true };
-					}
-				}
-				return label;
-			});
-			return newLabels;
-		});
-
-		// Update selectedElements for belief
-		const selectedLabels = beliefLabels.filter(label => label.isSelected);
-		setSelectedElements(prev => ({
-			...prev,
-			[ElementType.belief]: selectedLabels.map(label => ({
-				element: {
-					id: label.id,
-					type: ElementType.belief,
-					description: label.description,
-					created_at: new Date().toISOString(),
-					failure_id: failure?.id ?? 0,
-				},
-				isSelected: true,
-			})),
-		}));
+	// Beliefフェーズの説明入力用コンポーネント
+	const BeliefExplanationInput = () => {
+		return (
+			<div className="space-y-4">
+				{selectedElements[ElementType.belief].map((dndElement: DndElement, index: number) => (
+					<div key={index} className="border rounded-lg p-4 bg-white">
+						<h4 className="font-medium mb-2">{dndElement.element.description}</h4>
+						<textarea
+							className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+							placeholder="この意見について詳しく説明してください"
+							rows={3}
+							value={dndElement.element.explanation || ''}
+							onChange={(e) => {
+								const newSelectedElements = [...selectedElements[ElementType.belief]];
+								newSelectedElements[index] = {
+									...dndElement,
+									element: {
+										...dndElement.element,
+										explanation: e.target.value
+									}
+								};
+								setSelectedElements(prev => ({
+									...prev,
+									[ElementType.belief]: newSelectedElements
+								}));
+							}}
+						/>
+					</div>
+				))}
+			</div>
+		);
 	};
 
 	if (isFailureLoading || loading) {
@@ -442,22 +407,33 @@ export default function AnalyzePage({
 				<div className="mb-4">
 					<div className="relative flex items-center justify-between">
 						<div className="relative z-10 flex w-full justify-between">
-							{steps.map((step, index) => (
-								<div key={step.type} className="flex flex-col items-center">
-									<button
-										className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
-											step.type === activeStep
-												? "bg-black border-black text-white"
-												: "bg-white border-gray-300 text-black"
-										}`}
-									>
-										{String.fromCharCode(65 + index)}
-									</button>
-									<div className="mt-2 text-sm font-bold text-black">
-										{step.label}
+							{steps
+								.filter((step, index, self) => 
+									// 同じtypeのステップの場合、最初に出現したものだけを表示
+									index === self.findIndex(s => s.type === step.type)
+								)
+								.map((step, index) => (
+									<div key={`${step.type}-${step.subType || 'main'}`} className="flex flex-col items-center">
+										<button
+											className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
+												step.type === activeStep
+													? "bg-black border-black text-white"
+													: "bg-white border-gray-300 text-black"
+											}`}
+										>
+											{String.fromCharCode(65 + index)}
+										</button>
+										<div className="mt-2 text-sm font-bold text-black">
+											{step.label}
+											{step.type === ElementType.belief && (
+												<div className="text-xs font-normal text-gray-500">
+													{activeSubType === 'selection' ? '(ラベル選択)' : 
+													 activeSubType === 'explanation' ? '(説明入力)' : ''}
+												</div>
+											)}
+										</div>
 									</div>
-								</div>
-							))}
+								))}
 						</div>
 					</div>
 				</div>
@@ -467,215 +443,50 @@ export default function AnalyzePage({
 					onDragStart={handleDragStart}
 				>
 					<div className="space-y-4">
-						<div key={activeStep}>
-							<div className="border rounded-lg p-3 bg-white">
-								<div className="mb-4">
-									<h3
-										className="text-lg font-medium mb-2"
-										dangerouslySetInnerHTML={{
-											__html:
-												steps.find((step) => step.type === activeStep)?.title ||
-												"",
-										}}
-									/>
-									<div className="flex items-center gap-2">
-										<p className="text-sm text-gray-600">
-											{
-												steps.find((step) => step.type === activeStep)
-													?.description
-											}
-										</p>
-										<Popover
-											width={400}
-											position="bottom"
-											withArrow
-											shadow="md"
-										>
-											<Popover.Target>
-												<button className="text-gray-400 hover:text-gray-600">
-													<IconHelp size={16} />
-												</button>
-											</Popover.Target>
-											<Popover.Dropdown>
-												<div className="text-sm whitespace-pre-line">
-													{
-														steps.find((step) => step.type === activeStep)
-															?.example
-													}
-												</div>
-											</Popover.Dropdown>
-										</Popover>
-									</div>
-								</div>
-								<div className="w-full">
-									{activeStep === ElementType.belief ? (
-										<div className="space-y-6">
-											<div>
-												<h4 className="text-sm font-medium text-black mb-2">内的要因（自己）</h4>
-												<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-													{beliefLabels
-														.filter(label => label.type === 'internal')
-														.map(label => (
-															<button
-																key={label.id}
-																onClick={() => handleBeliefLabelSelect(label.id)}
-																className={`p-3 rounded-lg border text-left transition-colors ${
-																	label.isSelected
-																		? 'bg-black text-white border-black'
-																		: 'bg-white text-black border-gray-200 hover:border-black'
-																}`}
-															>
-																<p className="text-sm">{label.description}</p>
-															</button>
-														))}
-												</div>
-											</div>
-											<div>
-												<h4 className="text-sm font-medium text-black mb-2">外的要因（環境・他者）</h4>
-												<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-													{beliefLabels
-														.filter(label => label.type === 'external')
-														.map(label => (
-															<button
-																key={label.id}
-																onClick={() => handleBeliefLabelSelect(label.id)}
-																className={`p-3 rounded-lg border text-left transition-colors ${
-																	label.isSelected
-																		? 'bg-black text-white border-black'
-																		: 'bg-white text-black border-gray-200 hover:border-black'
-																}`}
-															>
-																<p className="text-sm">{label.description}</p>
-															</button>
-														))}
-												</div>
-											</div>
-											<div className="mt-4">
-												<button
-													onClick={() => setShowCustomInput(!showCustomInput)}
-													className="text-sm text-gray-600 hover:text-black flex items-center gap-1"
-												>
-													<IconPlus size={16} />
-													カスタムラベルを追加
-												</button>
-												{showCustomInput && (
-													<form
-														onSubmit={(e) => {
-															e.preventDefault();
-															const input = e.currentTarget.elements.namedItem(
-																'customLabel',
-															) as HTMLInputElement;
-															const type = (e.currentTarget.elements.namedItem(
-																'labelType',
-															) as HTMLSelectElement).value as 'internal' | 'external';
-															
-															if (input.value.trim()) {
-																const newLabel: BeliefLabel = {
-																	id: Date.now(),
-																	description: input.value.trim(),
-																	type,
-																	isSelected: true,
-																};
-																setBeliefLabels(prev => [...prev, newLabel]);
-																handleBeliefLabelSelect(newLabel.id);
-																input.value = '';
-																setShowCustomInput(false);
-															}
-														}}
-														className="mt-2 space-y-2"
-													>
-														<div className="flex gap-2">
-															<input
-																type="text"
-																name="customLabel"
-																placeholder="新しいラベルを入力"
-																className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black text-sm text-black"
-															/>
-															<select
-																name="labelType"
-																className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black text-sm text-black"
-															>
-																<option value="internal">内的要因</option>
-																<option value="external">外的要因</option>
-															</select>
-														</div>
-														<button
-															type="submit"
-															className="w-full px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 text-sm"
-														>
-															追加
-														</button>
-													</form>
-												)}
-												<div className="mt-4">
-													<p className="text-sm text-gray-500">
-														選択中: {beliefLabels.filter(label => label.isSelected).length}/3
-													</p>
-												</div>
-											</div>
-											{beliefLabels.some(label => label.isSelected) && (
-												<div className="mt-8">
-													<h4 className="text-lg font-medium text-black mb-4">ラベルの詳細説明</h4>
-													<div className="flex space-x-2 mb-4">
-														{beliefLabels
-															.filter(label => label.isSelected)
-															.map(label => (
-																<button
-																	key={label.id}
-																	onClick={() => {
-																		setActiveBeliefLabel(label.id);
-																		if (!label.explanation) {
-																			fetchBeliefExplanations(label.id);
-																		}
-																	}}
-																	className={`px-4 py-2 rounded-lg transition-colors ${
-																		activeBeliefLabel === label.id
-																			? 'bg-black text-white'
-																			: 'bg-gray-100 text-black hover:bg-gray-200'
-																	}`}
-																>
-																	{label.description}
-																</button>
-															))}
+						<div key={`${activeStep}-${activeSubType}`}>
+							{activeStep === ElementType.belief && activeSubType === 'explanation' ? (
+								<BeliefExplanationInput />
+							) : (
+								<div className="border rounded-lg p-3 bg-white">
+									<div className="mb-4">
+										<h3
+											className="text-lg font-medium mb-2"
+											dangerouslySetInnerHTML={{
+												__html:
+													steps.find((step) => step.type === activeStep)?.title ||
+													"",
+											}}
+										/>
+										<div className="flex items-center gap-2">
+											<p className="text-sm text-gray-600">
+												{
+													steps.find((step) => step.type === activeStep)
+														?.description
+												}
+											</p>
+											<Popover
+												width={400}
+												position="bottom"
+												withArrow
+												shadow="md"
+											>
+												<Popover.Target>
+													<button className="text-gray-400 hover:text-gray-600">
+														<IconHelp size={16} />
+													</button>
+												</Popover.Target>
+												<Popover.Dropdown>
+													<div className="text-sm whitespace-pre-line">
+														{
+															steps.find((step) => step.type === activeStep)
+																?.example
+														}
 													</div>
-													{activeBeliefLabel && (
-														<div className="space-y-4">
-															<div>
-																<textarea
-																	value={beliefLabels.find(label => label.id === activeBeliefLabel)?.explanation || ''}
-																	onChange={(e) => handleExplanationUpdate(activeBeliefLabel, e.target.value)}
-																	placeholder="このラベルについて詳しく説明してください..."
-																	className="w-full h-32 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black text-sm text-black resize-none"
-																/>
-															</div>
-															<div>
-																<h5 className="text-sm font-medium text-black mb-2">入力候補</h5>
-																{isLoadingSuggestions ? (
-																	<div className="flex justify-center py-4">
-																		<Loader color="black" size="sm" />
-																	</div>
-																) : (
-																	<div className="space-y-2">
-																		{beliefSuggestions
-																			.filter(suggestion => suggestion.labelId === activeBeliefLabel)
-																			.map(suggestion => (
-																				<button
-																					key={suggestion.id}
-																					onClick={() => handleExplanationUpdate(activeBeliefLabel, suggestion.description)}
-																					className="w-full p-3 text-left border rounded-lg hover:bg-gray-50 transition-colors text-sm text-black"
-																				>
-																					{suggestion.description}
-																				</button>
-																			))}
-																	</div>
-																)}
-															</div>
-														</div>
-													)}
-												</div>
-											)}
+												</Popover.Dropdown>
+											</Popover>
 										</div>
-									) : (
+									</div>
+									<div className="w-full">
 										<Droppable droppableId={`selected-${activeStep}`}>
 											{(provided: DroppableProvided) => (
 												<div
@@ -716,101 +527,53 @@ export default function AnalyzePage({
 												</div>
 											)}
 										</Droppable>
-									)}
-								</div>
-								{activeStep !== ElementType.belief && (
-									<>
-										<div className="border-t border-gray-200 my-3" />
-										<div>
-											<h4 className="text-sm font-medium text-black mb-2">
-												入力候補
-											</h4>
-											<Droppable droppableId={`suggested-${activeStep}`}>
-												{(provided: DroppableProvided) => (
-													<div
-														ref={provided.innerRef}
-														{...provided.droppableProps}
-														className="w-full"
-														style={{ minHeight: 36 }}
-													>
-														{suggestedElements[activeStep].length > 0 ? (
-															suggestedElements[activeStep].map(
-																(dndElement, index) => (
-																	<Draggable
-																		key={`${dndElement.element.id}-suggested`}
-																		draggableId={`${dndElement.element.id}-suggested`}
-																		index={index}
-																	>
-																		{(provided: DraggableProvided) => (
-																			<div
-																				ref={provided.innerRef}
-																				{...provided.draggableProps}
-																				{...provided.dragHandleProps}
-																				className="bg-white border rounded-lg p-2 mb-1 shadow-sm hover:shadow transition-shadow cursor-move min-h-[36px] flex items-center"
-																			>
-																				<p className="text-black text-sm leading-normal break-words">
-																					{dndElement.element.description}
-																				</p>
-																			</div>
-																		)}
-																	</Draggable>
-																),
-															)
-														) : !isDragging ? (
-															<div className="text-gray-400 text-sm p-2 h-[36px] flex items-center justify-center">
-																入力候補はありません
-															</div>
-														) : null}
-														{!isDragging && provided.placeholder}
-													</div>
-												)}
-											</Droppable>
-										</div>
-									</>
-								)}
-							</div>
-							{activeStep !== ElementType.belief && (
-								<div className="mt-3">
-									<form
-										onSubmit={(e) => {
-											e.preventDefault();
-											const input = e.currentTarget.elements.namedItem(
-												'element',
-											) as HTMLInputElement;
-											if (input.value.trim()) {
-												const newElement: Element = {
-													id: 0,
-													type: activeStep,
-													description: input.value.trim(),
-													created_at: new Date().toISOString(),
-													failure_id: failure?.id ?? 0,
-												};
-												const newDndElement: DndElement = {
-													element: newElement,
-													isSelected: true,
-												};
-												setSelectedElements((prev) => ({
-													...prev,
-													[activeStep]: [...prev[activeStep], newDndElement],
-												}));
-												input.value = '';
-											}
-										}}
-										className="flex gap-2"
-									>
-										<input
-											type="text"
-											name="element"
-											placeholder="新しい要素を入力"
-											className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black text-sm text-black"
-										/>
-										<button
-											type="submit"
-											className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 text-sm w-20"
-										>
-											追加
-										</button>
-									</form>
+									</div>
+									<div className="border-t border-gray-200 my-3" />
+									<div>
+										<h4 className="text-sm font-medium text-black mb-2">
+											入力候補
+										</h4>
+										<Droppable droppableId={`suggested-${activeStep}`}>
+											{(provided: DroppableProvided) => (
+												<div
+													ref={provided.innerRef}
+													{...provided.droppableProps}
+													className="w-full"
+													style={{ minHeight: 36 }}
+												>
+													{suggestedElements[activeStep].length > 0 ? (
+														suggestedElements[activeStep].map(
+															(dndElement, index) => (
+																<Draggable
+																	key={`${dndElement.element.id}-suggested`}
+																	draggableId={`${dndElement.element.id}-suggested`}
+																	index={index}
+																>
+																	{(provided: DraggableProvided) => (
+																		<div
+																			ref={provided.innerRef}
+																			{...provided.draggableProps}
+																			{...provided.dragHandleProps}
+																			className="bg-white border rounded-lg p-2 mb-1 shadow-sm hover:shadow transition-shadow cursor-move min-h-[36px] flex items-center"
+																		>
+																			<p className="text-black text-sm leading-normal break-words">
+																				{dndElement.element.description}
+																			</p>
+																		</div>
+																	)}
+																</Draggable>
+															),
+														)
+													) : !isDragging ? (
+														<div className="text-gray-400 text-sm p-2 h-[36px] flex items-center justify-center">
+															入力候補はありません
+														</div>
+													) : null}
+													{!isDragging && provided.placeholder}
+												</div>
+											)}
+										</Droppable>
+									</div>
 								</div>
 							)}
 						</div>

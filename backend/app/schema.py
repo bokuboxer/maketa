@@ -1,8 +1,23 @@
 from datetime import datetime
+from typing import List
 
 from pydantic import BaseModel, ConfigDict
 
 import app.model as model
+
+
+class BeliefLabel(BaseModel):
+    id: int
+    description: str
+    type: str  # 'internal' or 'external'
+    explanation: str | None = None
+    evidence: str | None = None
+    disputation: str | None = None
+    new_perspective: str | None = None
+
+
+class BeliefAnalysisResult(BaseModel):
+    labels: List[BeliefLabel]
 
 
 class Element(BaseModel):
@@ -39,8 +54,9 @@ class User(BaseModel):
 
 class SuggestInput(BaseModel):
     text: str
-    elements: list[Element]
     type: model.ElementType
+    elements: List[Element]
+    selected_labels: List[BeliefLabel] | None = None
 
 
 class AnalyzeInput(BaseModel):
@@ -76,7 +92,8 @@ class CreateElementInput(BaseModel):
 
 
 class AnalysisResult(BaseModel):
-    elements: list[Element]
+    elements: List[Element] | None = None
+    belief_analysis: BeliefAnalysisResult | None = None
 
 
 def to_schema_element(model_element: model.Element) -> Element:
