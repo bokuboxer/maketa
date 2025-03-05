@@ -108,7 +108,9 @@ resource "azurerm_linux_web_app" "server" {
     "HTTP_LOGGING_DAYS" = "7"
     "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = "false"
     "DOCKER_ENABLE_CI" = "true"
-    "WEAVIATE_URL"    = "https://${azurerm_container_app.weaviate.latest_revision_fqdn}"
+    "WEAVIATE_URL"    = "https://${azurerm_container_app.weaviate.ingress[0].fqdn}"
+    "ENVIRONMENT"     = "production"
+    "STARTUP_TIMEOUT" = "300"
   }
 
   https_only = true

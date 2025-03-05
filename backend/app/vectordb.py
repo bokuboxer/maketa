@@ -45,27 +45,29 @@ class VectorDB:
                 # URLからホストを抽出（https://を除去）
                 host = weaviate_url.replace("https://", "").replace("http://", "")
                 secure = weaviate_url.startswith("https://")
+
+                client = weaviate.WeaviateClient(additional_headers=headers)
             else:
                 # 開発環境（Docker Compose）
                 logger.info("Using development Weaviate configuration")
                 host = "weaviate"
                 secure = False
 
-            client = weaviate.WeaviateClient(
-                connection_params=wcon.ConnectionParams(
-                    http={
-                        "host": host,
-                        "port": self.port,
-                        "secure": secure,
-                    },
-                    grpc={
-                        "host": host,
-                        "port": self.grpc_port,
-                        "secure": secure,
-                    },
-                ),
-                additional_headers=headers,
-            )
+                client = weaviate.WeaviateClient(
+                    connection_params=wcon.ConnectionParams(
+                        http={
+                            "host": host,
+                            "port": self.port,
+                            "secure": secure,
+                        },
+                        grpc={
+                            "host": host,
+                            "port": self.grpc_port,
+                            "secure": secure,
+                        },
+                    ),
+                    additional_headers=headers,
+                )
             return client
         except Exception as e:
             logger.error(f"Failed to create Weaviate client: {e}")
