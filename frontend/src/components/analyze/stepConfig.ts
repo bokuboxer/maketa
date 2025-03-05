@@ -14,8 +14,8 @@ export const steps: StepConfig[] = [
     type: ElementType.belief, 
     subType: 'selection',
     label: '原因ラベル選択', 
-    description: '提案された原因ラベルから最大3つを選択してください',
-    title: '<strong>B</strong>elief（原因ラベル選択）',
+    description: '失敗の原因だと思うものを選択/入力しよう',
+    title: '<strong>B</strong>elief',
     example: '例：\n・内的要因（自己）：\n - 準備不足だった\n - 経験が足りなかった\n・外的要因（環境・他者）：\n - 時間が足りなかった\n - チーム内のコミュニケーション不足'
   },
   { 

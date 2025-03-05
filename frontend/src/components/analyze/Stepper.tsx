@@ -25,12 +25,6 @@ export const StepperComponent = ({ activeStep, activeSubType, steps }: StepperCo
                 </button>
                 <div className="mt-2 text-sm font-bold text-black">
                   {step.label}
-                  {step.type === ElementType.belief && (
-                    <div className="text-xs font-normal text-gray-500">
-                      {activeSubType === 'selection' ? '(ラベル選択)' : 
-                       activeSubType === 'explanation' ? '(説明入力)' : ''}
-                    </div>
-                  )}
                 </div>
               </div>
             ))}
