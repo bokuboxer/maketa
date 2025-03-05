@@ -1,12 +1,13 @@
 import { Element } from "@/api/model/element";
 import { ElementType } from "@/api/model/elementType";
+import type { Failure } from "@/api/model/failure";
 import { Dispatch, SetStateAction } from "react";
 
 export interface ExtendedElement extends Element {
   explanation?: string;
 }
 
-export type DndElement = {
+export type ElementItem = {
   element: ExtendedElement;
   isSelected: boolean;
 };
@@ -14,7 +15,7 @@ export type DndElement = {
 export type ElementTypeKey = keyof typeof ElementType;
 
 export interface GroupedElements {
-  [key: string]: DndElement[];
+  [key: string]: ElementItem[];
 }
 
 export interface StepConfig {
@@ -35,8 +36,9 @@ export interface StepperComponentProps {
 
 export interface PreviousStepSummaryProps {
   activeStep: ElementType;
-  failure: any; // Using 'any' for now as we don't have the full failure type
+  failure?: Failure;
   selectedElements: GroupedElements;
+  summarizedText: string;
   steps: StepConfig[];
 }
 
@@ -48,17 +50,6 @@ export interface NavigationButtonsProps {
   handleSave: () => void;
   nextLoading: boolean;
   saveLoading: boolean;
-}
-
-export interface DraggableElementListProps {
-  elementType: ElementType;
-  elements: DndElement[];
-  droppableId: string;
-  emptyMessage: string;
-}
-
-export interface StepHeaderProps {
-  currentStep: StepConfig | undefined;
 }
 
 export interface BeliefExplanationComponentProps {
@@ -75,4 +66,8 @@ export interface StandardStepComponentProps {
   steps: StepConfig[];
   setSelectedElements: React.Dispatch<React.SetStateAction<GroupedElements>>;
   setSuggestedElements: React.Dispatch<React.SetStateAction<GroupedElements>>;
+}
+
+export interface StepHeaderProps {
+  currentStep: StepConfig | undefined;
 } 

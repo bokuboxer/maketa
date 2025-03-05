@@ -11,4 +11,5 @@ export interface SuggestInput {
 	text: string;
 	elements: Element[];
 	type: ElementType;
+	selected_labels?: Element[];
 }
