@@ -1,14 +1,10 @@
 import weaviate
-import weaviate.classes.config as wc
-import weaviate.classes.query as wq
-import weaviate.connect as wcon
 import os
 import logging
 from weaviate.util import generate_uuid5
 import pandas as pd
 from tqdm import tqdm
 from pprint import pprint
-from urllib.parse import urlparse
 
 from app.schema import Hero
 
@@ -16,13 +12,10 @@ logger = logging.getLogger(__name__)
 
 
 class VectorDB:
-    def __init__(self, port: int = 8080, grpc_port: int = 50051):
+    def __init__(self, port: int = 8080):
         self.port = port
-        self.grpc_port = grpc_port
-        logger.info("Initializing VectorDB...")
         self.client = self._create_client()
         try:
-            self.client.connect()
             logger.info("Successfully connected to Weaviate")
             self._create_collection()
         except Exception as e:
@@ -43,39 +36,15 @@ class VectorDB:
                     raise ValueError("WEAVIATE_URL environment variable is not set")
 
                 logger.info(f"Using production Weaviate URL: {weaviate_url}")
-
-                # URLからホスト名を抽出
-                parsed_url = urlparse(weaviate_url)
-                host = parsed_url.netloc
-
-                # REST APIのみを使用するように設定
-                client = weaviate.WeaviateClient(
-                    connection_params=wcon.ConnectionParams.from_url(
-                        url=weaviate_url,
-                        grpc_port=50051,
-                    ),
+                client = weaviate.Client(
+                    url=weaviate_url,
                     additional_headers=headers,
-                    skip_init_checks=True,  # 初期チェックをスキップ
                 )
             else:
                 # 開発環境（Docker Compose）
                 logger.info("Using development Weaviate configuration")
-                host = "weaviate"
-                secure = False
-
-                client = weaviate.WeaviateClient(
-                    connection_params=wcon.ConnectionParams(
-                        http={
-                            "host": host,
-                            "port": self.port,
-                            "secure": secure,
-                        },
-                        grpc={
-                            "host": host,
-                            "port": self.grpc_port,
-                            "secure": secure,
-                        },
-                    ),
+                client = weaviate.Client(
+                    url="http://localhost:8080",
                     additional_headers=headers,
                 )
             return client
@@ -85,26 +54,45 @@ class VectorDB:
 
     def _create_collection(self):
         try:
-            if not self.client.collections.exists("Hero"):
+            class_obj = {
+                "class": "Hero",
+                "vectorizer": "text2vec-openai",
+                "moduleConfig": {
+                    "text2vec-openai": {
+                        "model": "text-embedding-3-small",
+                        "modelVersion": "latest",
+                        "type": "text",
+                    }
+                },
+                "properties": [
+                    {
+                        "name": "name",
+                        "dataType": ["text"],
+                    },
+                    {
+                        "name": "description",
+                        "dataType": ["text"],
+                    },
+                    {
+                        "name": "failure",
+                        "dataType": ["text"],
+                        "moduleConfig": {
+                            "text2vec-openai": {
+                                "skip": False,
+                                "vectorizePropertyName": False,
+                            }
+                        },
+                    },
+                    {
+                        "name": "source",
+                        "dataType": ["text"],
+                    },
+                ],
+            }
+
+            if not self.client.schema.exists("Hero"):
                 logger.info("Creating Hero collection...")
-                self.client.collections.create(
-                    name="Hero",
-                    properties=[
-                        wc.Property(name="name", data_type=wc.DataType.TEXT),
-                        wc.Property(name="description", data_type=wc.DataType.TEXT),
-                        wc.Property(
-                            name="failure",
-                            data_type=wc.DataType.TEXT,
-                            vectorize_property=True,
-                        ),
-                        wc.Property(name="source", data_type=wc.DataType.TEXT),
-                    ],
-                    vectorizer_config=wc.Configure.Vectorizer.text2vec_openai(
-                        model="text-embedding-3-small",
-                        vectorize_collection_name=False,
-                    ),
-                    generative_config=wc.Configure.Generative.openai(),
-                )
+                self.client.schema.create_class(class_obj)
                 logger.info("Hero collection created successfully")
             else:
                 logger.info("Hero collection already exists")
@@ -114,48 +102,51 @@ class VectorDB:
 
     def import_data(self, csv_path: str):
         df = pd.read_csv(csv_path)
-        heros = self.client.collections.get("Hero")
-        with heros.batch.dynamic() as batch:
+        batch_size = 100
+        with self.client.batch as batch:
+            batch.batch_size = batch_size
             for _, batch_df in tqdm(df.iterrows()):
-                agri_obj = {
+                properties = {
                     "name": batch_df["Name"],
                     "description": batch_df["Description"],
                     "failure": batch_df["Failure"],
                     "source": batch_df["Source"],
                 }
 
-                batch.add_object(
-                    properties=agri_obj,
+                batch.add_data_object(
+                    data_object=properties,
+                    class_name="Hero",
                     uuid=generate_uuid5(batch_df["Name"]),
                 )
 
     def query_collection(self, search_query: str, limit: int) -> list[Hero] | None:
         try:
-            if not self.client.is_connected():
-                logger.info("Reconnecting to Weaviate...")
-                self.client.connect()
-
-            logger.info(f"Querying collection with: {search_query}")
-            response = self.client.collections.get("Hero").query.near_text(
-                query=search_query,
-                limit=limit,
-                return_metadata=wq.MetadataQuery(
-                    certainty=True,
-                    distance=True,
-                ),
-                return_properties=["name", "description", "failure", "source"],
-                include_vector=True,
+            response = (
+                self.client.query.get(
+                    "Hero", ["name", "description", "failure", "source"]
+                )
+                .with_near_text({"concepts": [search_query]})
+                .with_limit(limit)
+                .with_additional(["certainty"])
+                .do()
             )
 
+            if (
+                "data" not in response
+                or "Get" not in response["data"]
+                or "Hero" not in response["data"]["Get"]
+            ):
+                return None
+
             heroes = []
-            for o in response.objects:
+            for obj in response["data"]["Get"]["Hero"]:
                 heroes.append(
                     Hero(
-                        name=o.properties["name"],
-                        description=o.properties["description"],
-                        failure=o.properties["failure"],
-                        source=o.properties["source"],
-                        certainty=o.metadata.certainty,
+                        name=obj["name"],
+                        description=obj["description"],
+                        failure=obj["failure"],
+                        source=obj["source"],
+                        certainty=obj.get("_additional", {}).get("certainty", 0),
                     )
                 )
             logger.info(f"Found {len(heroes)} matching heroes")
@@ -168,7 +159,7 @@ class VectorDB:
     def close(self):
         if hasattr(self, "client"):
             try:
-                self.client.close()
+                self.client = None
                 logger.info("Weaviate client closed successfully")
             except Exception as e:
                 logger.error(f"Error closing Weaviate client: {e}")
@@ -178,7 +169,7 @@ class VectorDB:
 
 
 if __name__ == "__main__":
-    csv_path = "../data/output.csv"
+    csv_path = "/Users/kimotonorihiro/dev/llm/maketa/backend/data/output.csv"
     db = VectorDB()
     try:
         db.import_data(csv_path)
