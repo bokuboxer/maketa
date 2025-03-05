@@ -44,12 +44,8 @@ class VectorDB:
                 logger.info(f"Using production Weaviate URL: {weaviate_url}")
 
                 client = weaviate.WeaviateClient(
-                    connection_params=wcon.ConnectionParams(
-                        http={
-                            "host": weaviate_url,
-                            "port": self.port,
-                            "secure": False,
-                        },
+                    connection_params=wcon.ConnectionParams.from_url(
+                        url=weaviate_url, grpc_port=50051
                     ),
                     additional_headers=headers,
                 )
