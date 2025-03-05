@@ -102,6 +102,10 @@ export default function AnalyzePage({
 	};
 
 	const handleDragEnd = (result: DropResult) => {
+		if (activeStep === ElementType.belief && activeSubType === 'selection') {
+			return; // Ignore drag and drop for belief selection
+		}
+
 		setIsDragging(false);
 		if (!result.destination) return;
 
@@ -222,7 +226,7 @@ export default function AnalyzePage({
 				setActiveSubType('selection');
 			} else if (activeStep === ElementType.belief && activeSubType === 'selection') {
 				// B-1からB-2への遷移
-				if (selectedElements[ElementType.belief].length === 0 || selectedElements[ElementType.belief].length > 3) {
+				if (selectedElements[ElementType.belief].length !== 1) {
 					setNextLoading(false);
 					return;
 				}
