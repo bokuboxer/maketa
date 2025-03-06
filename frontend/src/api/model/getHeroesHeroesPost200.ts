@@ -4,6 +4,6 @@
  * FastAPI
  * OpenAPI spec version: 0.1.0
  */
-import type { Hero } from './hero';
+import type { Hero } from "./hero";
 
 export type GetHeroesHeroesPost200 = Hero[] | null;

@@ -6,14 +6,14 @@
  */
 
 export interface BeliefExplanation {
-    type: "belief";
-    description: string;  // 説明文
+	type: "belief";
+	description: string; // 説明文
 }
 
 export interface BeliefAnalysisResult {
-    explanations: BeliefExplanation[];  // 3つの説明を含む配列
+	explanations: BeliefExplanation[]; // 3つの説明を含む配列
 }
 
 export interface BeliefAnalysisResponse {
-    belief_analysis: BeliefAnalysisResult;
-} 
+	belief_analysis: BeliefAnalysisResult;
+}

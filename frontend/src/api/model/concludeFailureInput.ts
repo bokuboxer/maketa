@@ -6,5 +6,5 @@
  */
 
 export interface ConcludeFailureInput {
-  failure_id: number;
+	failure_id: number;
 }

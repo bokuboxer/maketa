@@ -6,5 +6,5 @@
  */
 
 export interface GetHeroesInput {
-  query: string;
+	query: string;
 }

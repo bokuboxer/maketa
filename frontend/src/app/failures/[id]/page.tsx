@@ -1,8 +1,6 @@
 "use client";
 
-import {
-	useGetFailureByIdFailureFailureIdGet,
-} from "@/api/generated/default/default";
+import { useGetFailureByIdFailureFailureIdGet } from "@/api/generated/default/default";
 import { ElementType } from "@/api/model/elementType";
 import { Hero } from "@/api/model/hero";
 import { IconArrowLeft } from "@tabler/icons-react";
@@ -37,7 +35,7 @@ const FailureDetailPage = dynamic(
 			];
 
 			if (isLoading || !failure) {
-				return ( 
+				return (
 					<div className="min-h-screen bg-white flex items-center justify-center">
 						<HypnoticLoader
 							size={250}
@@ -58,7 +56,11 @@ const FailureDetailPage = dynamic(
 						onClose={close}
 						size="lg"
 						centered
-						title={<span className="text-xl font-bold">{failure.hero_name}の失敗</span>}
+						title={
+							<span className="text-xl font-bold">
+								{failure.hero_name}の失敗
+							</span>
+						}
 					>
 						<div className="space-y-4">
 							<div className="flex items-center justify-center">
@@ -76,10 +78,13 @@ const FailureDetailPage = dynamic(
 										{failure.hero_description}
 									</div>
 									<div className="text-sm text-gray-500">
-										類似度: {Math.round((failure.hero_failure_certainty ?? 0) * 100)}%
+										類似度:{" "}
+										{Math.round((failure.hero_failure_certainty ?? 0) * 100)}%
 									</div>
 								</div>
-								<p className="text-base text-gray-600 whitespace-pre-wrap">{failure.hero_failure}</p>
+								<p className="text-base text-gray-600 whitespace-pre-wrap">
+									{failure.hero_failure}
+								</p>
 								<p className="text-sm text-gray-400">
 									出典: {failure.hero_failure_source}
 								</p>
@@ -128,13 +133,18 @@ const FailureDetailPage = dynamic(
 											{elements.length > 0 ? (
 												<div className="space-y-2">
 													{elements.map((element: Element) => (
-														<div key={element.id} className="text-sm text-black">
+														<div
+															key={element.id}
+															className="text-sm text-black"
+														>
 															{element.description}
 														</div>
 													))}
 												</div>
 											) : (
-												<p className="text-sm text-gray-500">要素がありません</p>
+												<p className="text-sm text-gray-500">
+													要素がありません
+												</p>
 											)}
 										</div>
 									);
@@ -173,7 +183,8 @@ const FailureDetailPage = dynamic(
 											</div>
 										</div>
 										<div className="text-xs font-medium text-gray-700 group-hover:text-black bg-gray-200 px-2 py-1 rounded-full">
-											類似度: {Math.round((failure.hero_failure_certainty ?? 0) * 100)}%
+											類似度:{" "}
+											{Math.round((failure.hero_failure_certainty ?? 0) * 100)}%
 										</div>
 									</div>
 								</button>

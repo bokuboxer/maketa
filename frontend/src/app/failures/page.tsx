@@ -93,7 +93,9 @@ export default function Failures() {
 				onClose={close}
 				size="lg"
 				centered
-				title={<span className="text-xl font-bold">新しい失敗カードを作成</span>}
+				title={
+					<span className="text-xl font-bold">新しい失敗カードを作成</span>
+				}
 				classNames={{
 					content: "p-0 bg-white rounded-lg mx-4",
 					header: "hidden",
@@ -181,8 +183,8 @@ export default function Failures() {
 														}
 														className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
 															failure.has_analyzed
-																? 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-																: 'bg-black text-white hover:bg-gray-800'
+																? "bg-gray-100 text-gray-800 hover:bg-gray-200"
+																: "bg-black text-white hover:bg-gray-800"
 														} flex items-center space-x-1`}
 													>
 														{failure.has_analyzed ? (
