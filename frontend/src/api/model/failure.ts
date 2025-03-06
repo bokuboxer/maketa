@@ -6,6 +6,13 @@
  */
 import type { FailureConclusion } from './failureConclusion';
 import type { Element } from './element';
+import type { FailureHeroName } from './failureHeroName';
+import type { FailureHeroDescription } from './failureHeroDescription';
+import type { FailureHeroFailure } from './failureHeroFailure';
+import type { FailureHeroFailureSource } from './failureHeroFailureSource';
+import type { FailureHeroFailureCertainty } from './failureHeroFailureCertainty';
+import type { FailureExplainCertainty } from './failureExplainCertainty';
+import type { FailureHeroFailureReason } from './failureHeroFailureReason';
 
 export interface Failure {
   id: number;
@@ -14,4 +21,11 @@ export interface Failure {
   conclusion: FailureConclusion;
   has_analyzed: boolean;
   elements: Element[];
+  hero_name: FailureHeroName;
+  hero_description: FailureHeroDescription;
+  hero_failure: FailureHeroFailure;
+  hero_failure_source: FailureHeroFailureSource;
+  hero_failure_certainty: FailureHeroFailureCertainty;
+  explain_certainty: FailureExplainCertainty;
+  hero_failure_reason: FailureHeroFailureReason;
 }

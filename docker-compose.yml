@@ -50,7 +50,6 @@ services:
     image: cr.weaviate.io/semitechnologies/weaviate:1.26.1
     ports:
       - 8080:8080
-      - 50051:50051
     restart: on-failure:0
     environment:
       OPENAI_API_KEY: ${OPENAI_API_KEY}

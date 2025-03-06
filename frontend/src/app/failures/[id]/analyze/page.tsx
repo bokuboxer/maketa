@@ -4,6 +4,7 @@ import {
 	useGetFailureByIdFailureFailureIdGet,
 	useSuggestElementsElementsSuggestPost,
 	useBulkCreateElementsElementsPost,
+	useConcludeFailureFailuresConcludePut,
 } from "@/api/generated/default/default";
 import { Element } from "@/api/model/element";
 import { ElementType } from "@/api/model/elementType";
@@ -47,7 +48,10 @@ export default function AnalyzePage({
 	const { data: failure, isLoading: isFailureLoading } =
 		useGetFailureByIdFailureFailureIdGet(Number(resolvedParams.id));
 	const { mutate: suggestElements } = useSuggestElementsElementsSuggestPost();
-	const { mutate: createElements } = useBulkCreateElementsElementsPost();
+	const { mutateAsync: createElements } =
+		useBulkCreateElementsElementsPost();
+	const { mutateAsync: concludeFailure } =
+		useConcludeFailureFailuresConcludePut();
 	const [loading, setLoading] = useState(true);
 	const [isDragging, setIsDragging] = useState(false);
 	const [activeStep, setActiveStep] = useState<ElementType>(
@@ -551,32 +555,32 @@ export default function AnalyzePage({
 					</button>
 					{activeStep === ElementType.disputation ? (
 						<button
-							onClick={() => {
+							onClick={async () => {
 								if (!failure?.id) {
 									return;
 								}
 								setSaveLoading(true);
-								console.log("###############################################");
 								console.log(selectedElements);
-								createElements(
+								await createElements(
 									{
 										data: {
 											failure_id: failure.id,
 											elements: Object.values(selectedElements).flatMap(
-												(elements: DndElement[]) =>
+												(elements: DndElement[]) =>	
 													elements.map(
 														(dndElement: DndElement) => dndElement.element,
 													),
 											),
 										},
-									},
-									{
-										onSuccess: () => {
-											setSaveLoading(false);
-											router.push(`/failures/${failure.id}`);
-										},
-									},
+									}
 								);
+								await concludeFailure({
+									data: {
+										failure_id: failure.id,
+									},
+								});
+								setSaveLoading(false);
+								router.push(`/failures/${failure.id}`);
 							}}
 							disabled={
 								selectedElements[activeStep].length === 0 || saveLoading

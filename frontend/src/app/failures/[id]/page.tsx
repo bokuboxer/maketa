@@ -2,7 +2,6 @@
 
 import {
 	useGetFailureByIdFailureFailureIdGet,
-	useGetHeroesHeroesPost,
 } from "@/api/generated/default/default";
 import { ElementType } from "@/api/model/elementType";
 import { Hero } from "@/api/model/hero";
@@ -20,14 +19,10 @@ interface PageParams {
 const FailureDetailPage = dynamic(
 	() =>
 		Promise.resolve(({ params }: { params: Promise<PageParams> }) => {
-			const [heros, setHeroes] = useState<Hero[] | null>(null);
-			const [isHeroLoading, setIsHeroLoading] = useState(false);
-
 			const resolvedParams = use(params);
 			const { data: failure, isLoading } = useGetFailureByIdFailureFailureIdGet(
 				Number(resolvedParams.id),
 			);
-			const { mutate: getHeroes } = useGetHeroesHeroesPost();
 			const router = useRouter();
 
 			const steps = [
@@ -36,23 +31,7 @@ const FailureDetailPage = dynamic(
 				{ type: ElementType.disputation, label: "反論" },
 			];
 
-			useEffect(() => {
-				if (failure) {
-					setIsHeroLoading(true);
-					getHeroes({
-						data: {
-							query: failure.description ?? "",
-						},
-					}, {
-						onSuccess: (data) => {
-							setHeroes(data);
-							setIsHeroLoading(false);
-						},
-					});
-				}
-			}, [failure]);
-
-			if (isLoading || isHeroLoading || !failure) {
+			if (isLoading || !failure) {
 				return ( 
 					<div className="min-h-screen bg-white flex items-center justify-center">
 						<HypnoticLoader
@@ -116,29 +95,28 @@ const FailureDetailPage = dynamic(
 							})}
 
 							{/* 似ている偉人の失敗 */}
-							{heros && heros.length > 0 && (
-								<div className="border rounded-lg p-4 bg-white">
-									<h2 className="font-semibold mb-2 text-black">
-										似ている偉人の失敗
-									</h2>
-									{heros.map((hero) => (
-										<div key={hero.name} className="space-y-2">
-											<div className="flex justify-between items-center">
-												<div className="text-sm font-medium text-black">
-													{hero.name} - {hero.description}
-												</div>
-												<div className="text-sm text-gray-500">
-													類似度: {Math.round(hero.certainty * 100)}%
-												</div>
+							<div className="border rounded-lg p-4 bg-white">
+								<h2 className="font-semibold mb-2 text-black">
+									似ている偉人の失敗
+								</h2>
+									<div key={failure.hero_name} className="space-y-2">
+										<div className="flex justify-between items-center">
+											<div className="text-sm font-medium text-black">
+												{failure.hero_name} - {failure.hero_description}
 											</div>
-											<p className="text-sm text-gray-600">{hero.failure}</p>
-											<p className="text-xs text-gray-400">
-												出典: {hero.source}
-											</p>
+											<div className="text-sm text-gray-500">
+												類似度: {Math.round((failure.hero_failure_certainty ?? 0) * 100)}%
+											</div>
 										</div>
-									))}
-								</div>
-							)}
+										<p className="text-sm text-gray-600">{failure.hero_failure}</p>
+										<p className="text-xs text-gray-400">
+											出典: {failure.hero_failure_source}
+										</p>
+										<p className="text-sm">
+											理由: {failure.explain_certainty}
+										</p>
+									</div>
+							</div>
 						</div>
 					</div>
 				</div>
