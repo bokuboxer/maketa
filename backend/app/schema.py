@@ -80,6 +80,10 @@ class CreateFailureInput(BaseModel):
     description: str
 
 
+class ConcludeFailureInput(BaseModel):
+    failure_id: int
+
+
 class CreateElementInput(BaseModel):
     failure_id: int
     elements: list[Element]
@@ -91,6 +95,11 @@ class AnalysisResult(BaseModel):
 
 class GetHeroesInput(BaseModel):
     query: str
+
+
+class ExplainInput(BaseModel):
+    user_failure: str
+    hero_failure: str
 
 
 def to_schema_element(model_element: model.Element) -> Element:

@@ -54,10 +54,12 @@ logger.info("Starting server...")
 
 
 db = get_db()
+if db.in_transaction():
+    db.rollback()
+
 vectordb.create_collection()
 csv_path = "./data/output.csv"
 vectordb.import_data(csv_path)
-logger.info("Importing data from CSV...")
 logger.info("Data import completed")
 
 suggest_chain = SuggestChain(llm)

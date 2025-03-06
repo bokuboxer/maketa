@@ -48,4 +48,6 @@ packages = [
 types-pymysql = "^1.1.0.20241103"
 pandas-stubs = "^2.2.0.240218"
 types-tqdm = "^4.66.0.20240106"
+sqlalchemy-stubs = "*"
+types-sqlalchemy = "*"
 
