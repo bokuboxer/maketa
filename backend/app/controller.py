@@ -2,6 +2,7 @@ import app.model as model
 import app.schema as schema
 from app.chain import SuggestChain
 from sqlalchemy.orm import Session, joinedload
+import app.vectordb as vectordb
 
 
 class UserController:
@@ -13,10 +14,17 @@ class UserController:
             firebase_uid=input.firebase_uid,
             email=input.email,
         )
+        if self.db.in_transaction():
+            self.db.rollback()
 
-        self.db.add(user)
-        self.db.commit()
-        self.db.refresh(user)
+        self.db.begin()
+        try:
+            self.db.add(user)
+            self.db.commit()
+            self.db.refresh(user)
+        except Exception as e:
+            self.db.rollback()
+            raise e
         return None
 
     def get_by_firebase_uid(self, firebase_uid: str) -> schema.User | None:
@@ -42,10 +50,17 @@ class FailureController:
             description=input.description,
             user_id=input.user_id,
         )
+        if self.db.in_transaction():
+            self.db.rollback()
 
-        self.db.add(failure)
-        self.db.commit()
-        self.db.refresh(failure)
+        self.db.begin()
+        try:
+            self.db.add(failure)
+            self.db.commit()
+            self.db.refresh(failure)
+        except Exception as e:
+            self.db.rollback()
+            raise e
         return None
 
     def get_by_id(self, failure_id: int) -> schema.Failure | None:
@@ -78,10 +93,18 @@ class ElementController:
             for element in input.elements
         ]
 
-        self.db.add_all(elements)
-        self.db.commit()
-        for element in elements:
-            self.db.refresh(element)
+        if self.db.in_transaction():
+            self.db.rollback()
+
+        self.db.begin()
+        try:
+            self.db.add_all(elements)
+            self.db.commit()
+            for element in elements:
+                self.db.refresh(element)
+        except Exception as e:
+            self.db.rollback()
+            raise e
 
         # failureのhas_elementsをTrueにする
         failure = (
@@ -95,3 +118,13 @@ class ElementController:
             self.db.refresh(failure)
 
         return None
+
+
+class HeroController:
+    def __init__(self):
+        pass
+
+    def list(self, input: schema.GetHeroesInput) -> list[schema.Hero] | None:
+        # 複数の偉人を取得したいときにlimitを変更
+        limit = 1
+        return vectordb.query_collection(input.query, limit)

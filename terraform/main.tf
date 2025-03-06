@@ -89,6 +89,13 @@ resource "azurerm_linux_web_app" "server" {
     always_on = true
     application_stack {
       docker_image_name = "${azurerm_container_registry.acr.login_server}/backend:latest"
+      docker_registry_url      = "https://${azurerm_container_registry.acr.login_server}"
+      docker_registry_username = azurerm_container_registry.acr.admin_username
+      docker_registry_password = azurerm_container_registry.acr.admin_password
+    }
+    cors {
+      allowed_origins     = ["https://maketa-frontend-app.azurewebsites.net"]
+      support_credentials = true
     }
   }
 
@@ -104,6 +111,9 @@ resource "azurerm_linux_web_app" "server" {
     "HTTP_LOGGING_DAYS" = "7"
     "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = "false"
     "DOCKER_ENABLE_CI" = "true"
+    "WEAVIATE_URL"    = "https://${azurerm_container_app.weaviate.ingress[0].fqdn}"
+    "ENVIRONMENT"     = "production"
+    "STARTUP_TIMEOUT" = "300"
   }
 
   https_only = true
@@ -186,4 +196,141 @@ resource "azurerm_log_analytics_workspace" "main" {
   resource_group_name = azurerm_resource_group.main.name
   sku                = "PerGB2018"
   retention_in_days  = 30
+}
+
+# Container Apps Environment
+resource "azurerm_container_app_environment" "main" {
+  name                       = "${var.project_name}-env"
+  location                   = azurerm_resource_group.main.location
+  resource_group_name       = azurerm_resource_group.main.name
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
+}
+
+# Weaviate Container App
+resource "azurerm_container_app" "weaviate" {
+  name                         = "${var.project_name}-weaviate"
+  container_app_environment_id = azurerm_container_app_environment.main.id
+  resource_group_name         = azurerm_resource_group.main.name
+  revision_mode               = "Single"
+
+  template {
+    container {
+      name   = "weaviate"
+      image  = "cr.weaviate.io/semitechnologies/weaviate:1.26.1"
+      cpu    = "1.0"
+      memory = "2Gi"
+
+      env {
+        name  = "OPENAI_API_KEY"
+        value = var.openai_api_key
+      }
+      env {
+        name  = "QUERY_DEFAULTS_LIMIT"
+        value = "25"
+      }
+      env {
+        name  = "AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED"
+        value = "true"
+      }
+      env {
+        name  = "PERSISTENCE_DATA_PATH"
+        value = "/var/lib/weaviate"
+      }
+      env {
+        name  = "DEFAULT_VECTORIZER_MODULE"
+        value = "text2vec-openai"
+      }
+      env {
+        name  = "ENABLE_MODULES"
+        value = "text2vec-openai,generative-openai"
+      }
+      env {
+        name  = "CLUSTER_HOSTNAME"
+        value = "node1"
+      }
+      env {
+        name  = "REST_ENABLED"
+        value = "true"
+      }
+      env {
+        name  = "GRPC_ENABLED"
+        value = "false"
+      }
+      env {
+        name  = "PERSISTENCE_LSM_ACCESS_STRATEGY"
+        value = "roaring"
+      }
+      env {
+        name  = "DISABLE_TELEMETRY"
+        value = "true"
+      }
+      env {
+        name  = "PERSISTENCE_MINIMUM_AGE_SECONDS"
+        value = "0"
+      }
+      env {
+        name  = "PERSISTENCE_MEMTABLES_FLUSH_IDLE_AFTER_SECONDS"
+        value = "30"
+      }
+      env {
+        name  = "PERSISTENCE_MEMTABLES_MAX_SIZE_MB"
+        value = "512"
+      }
+      env {
+        name  = "PERSISTENCE_MEMTABLES_TOTAL_SIZE_MB"
+        value = "1024"
+      }
+      env {
+        name  = "PERSISTENCE_LSM_WRITE_BUFFER_SIZE_MB"
+        value = "32"
+      }
+      env {
+        name  = "LOG_LEVEL"
+        value = "debug"
+      }
+
+      liveness_probe {
+        transport = "HTTP"
+        port      = 8080
+        path      = "/v1/.well-known/ready"
+        initial_delay = 30
+        interval      = 10
+        timeout       = 5
+        retries       = 3
+      }
+
+      readiness_probe {
+        transport = "HTTP"
+        port      = 8080
+        path      = "/v1/.well-known/ready"
+        initial_delay = 30
+        interval      = 10
+        timeout       = 5
+        retries       = 3
+      }
+
+      startup_probe {
+        transport = "HTTP"
+        port      = 8080
+        path      = "/v1/.well-known/ready"
+        initial_delay = 30
+        interval      = 10
+        timeout       = 5
+        retries       = 3
+      }
+    }
+
+    min_replicas = 1
+    max_replicas = 1
+  }
+
+  ingress {
+    external_enabled = true
+    target_port     = 8080
+    transport       = "http"
+    traffic_weight {
+      latest_revision = true
+      percentage     = 100
+    }
+  }
 } 

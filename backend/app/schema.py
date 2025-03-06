@@ -52,6 +52,16 @@ class User(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class Hero(BaseModel):
+    name: str
+    description: str
+    failure: str
+    source: str
+    certainty: float
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class SuggestInput(BaseModel):
     text: str
     type: model.ElementType
@@ -94,6 +104,10 @@ class CreateElementInput(BaseModel):
 class AnalysisResult(BaseModel):
     elements: List[Element] | None = None
     belief_analysis: BeliefAnalysisResult | None = None
+
+
+class GetHeroesInput(BaseModel):
+    query: str
 
 
 def to_schema_element(model_element: model.Element) -> Element:

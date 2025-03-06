@@ -4,1009 +4,668 @@
  * FastAPI
  * OpenAPI spec version: 0.1.0
  */
-import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery
+} from '@tanstack/react-query'
 import type {
-	DataTag,
-	DefinedInitialDataOptions,
-	DefinedUseInfiniteQueryResult,
-	DefinedUseQueryResult,
-	InfiniteData,
-	MutationFunction,
-	QueryFunction,
-	QueryKey,
-	UndefinedInitialDataOptions,
-	UseInfiniteQueryOptions,
-	UseInfiniteQueryResult,
-	UseMutationOptions,
-	UseMutationResult,
-	UseQueryOptions,
-	UseQueryResult,
-} from "@tanstack/react-query";
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseInfiniteQueryResult,
+  DefinedUseQueryResult,
+  InfiniteData,
+  MutationFunction,
+  QueryFunction,
+  QueryKey,
+  UndefinedInitialDataOptions,
+  UseInfiniteQueryOptions,
+  UseInfiniteQueryResult,
+  UseMutationOptions,
+  UseMutationResult,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query'
 import type {
-	CreateElementInput,
-	CreateFailureInput,
-	CreateUserInput,
-	GetFailureByIdFailureFailureIdGet200,
-	GetUserByFirebaseUidUserFirebaseUidGet200,
-	HTTPValidationError,
-	SuggestElementsElementsSuggestPost200,
-	SuggestInput,
-} from "../../model";
-import { customAxios } from "../../mutator";
+  CreateElementInput,
+  CreateFailureInput,
+  CreateUserInput,
+  GetFailureByIdFailureFailureIdGet200,
+  GetHeroesHeroesPost200,
+  GetHeroesInput,
+  GetUserByFirebaseUidUserFirebaseUidGet200,
+  HTTPValidationError,
+  SuggestElementsElementsSuggestPost200,
+  SuggestInput
+} from '../../model'
+import { customAxios } from '../../mutator';
+
+
 
 /**
  * @summary Create User
  */
 export const createUserUsersPost = (
-	createUserInput: CreateUserInput,
-	signal?: AbortSignal,
+    createUserInput: CreateUserInput,
+ signal?: AbortSignal
 ) => {
-	return customAxios<unknown>({
-		url: `/users`,
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		data: createUserInput,
-		signal,
-	});
-};
+      
+      
+      return customAxios<unknown>(
+      {url: `/users`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createUserInput, signal
+    },
+      );
+    }
+  
 
-export const getCreateUserUsersPostMutationOptions = <
-	TError = HTTPValidationError,
-	TContext = unknown,
->(options?: {
-	mutation?: UseMutationOptions<
-		Awaited<ReturnType<typeof createUserUsersPost>>,
-		TError,
-		{ data: CreateUserInput },
-		TContext
-	>;
-}): UseMutationOptions<
-	Awaited<ReturnType<typeof createUserUsersPost>>,
-	TError,
-	{ data: CreateUserInput },
-	TContext
-> => {
-	const mutationKey = ["createUserUsersPost"];
-	const { mutation: mutationOptions } = options
-		? options.mutation &&
-			"mutationKey" in options.mutation &&
-			options.mutation.mutationKey
-			? options
-			: { ...options, mutation: { ...options.mutation, mutationKey } }
-		: { mutation: { mutationKey } };
 
-	const mutationFn: MutationFunction<
-		Awaited<ReturnType<typeof createUserUsersPost>>,
-		{ data: CreateUserInput }
-	> = (props) => {
-		const { data } = props ?? {};
+export const getCreateUserUsersPostMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createUserUsersPost>>, TError,{data: CreateUserInput}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof createUserUsersPost>>, TError,{data: CreateUserInput}, TContext> => {
+    
+const mutationKey = ['createUserUsersPost'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-		return createUserUsersPost(data);
-	};
+      
 
-	return { mutationFn, ...mutationOptions };
-};
 
-export type CreateUserUsersPostMutationResult = NonNullable<
-	Awaited<ReturnType<typeof createUserUsersPost>>
->;
-export type CreateUserUsersPostMutationBody = CreateUserInput;
-export type CreateUserUsersPostMutationError = HTTPValidationError;
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createUserUsersPost>>, {data: CreateUserInput}> = (props) => {
+          const {data} = props ?? {};
 
-/**
+          return  createUserUsersPost(data,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateUserUsersPostMutationResult = NonNullable<Awaited<ReturnType<typeof createUserUsersPost>>>
+    export type CreateUserUsersPostMutationBody = CreateUserInput
+    export type CreateUserUsersPostMutationError = HTTPValidationError
+
+    /**
  * @summary Create User
  */
-export const useCreateUserUsersPost = <
-	TError = HTTPValidationError,
-	TContext = unknown,
->(options?: {
-	mutation?: UseMutationOptions<
-		Awaited<ReturnType<typeof createUserUsersPost>>,
-		TError,
-		{ data: CreateUserInput },
-		TContext
-	>;
-}): UseMutationResult<
-	Awaited<ReturnType<typeof createUserUsersPost>>,
-	TError,
-	{ data: CreateUserInput },
-	TContext
-> => {
-	const mutationOptions = getCreateUserUsersPostMutationOptions(options);
+export const useCreateUserUsersPost = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createUserUsersPost>>, TError,{data: CreateUserInput}, TContext>, }
+): UseMutationResult<
+        Awaited<ReturnType<typeof createUserUsersPost>>,
+        TError,
+        {data: CreateUserInput},
+        TContext
+      > => {
 
-	return useMutation(mutationOptions);
-};
-/**
+      const mutationOptions = getCreateUserUsersPostMutationOptions(options);
+
+      return useMutation(mutationOptions);
+    }
+    /**
  * @summary Get User By Firebase Uid
  */
 export const getUserByFirebaseUidUserFirebaseUidGet = (
-	firebaseUid: string,
-	signal?: AbortSignal,
+    firebaseUid: string,
+ signal?: AbortSignal
 ) => {
-	return customAxios<GetUserByFirebaseUidUserFirebaseUidGet200>({
-		url: `/user/${firebaseUid}`,
-		method: "GET",
-		signal,
-	});
-};
+      
+      
+      return customAxios<GetUserByFirebaseUidUserFirebaseUidGet200>(
+      {url: `/user/${firebaseUid}`, method: 'GET', signal
+    },
+      );
+    }
+  
 
-export const getGetUserByFirebaseUidUserFirebaseUidGetQueryKey = (
-	firebaseUid: string,
+export const getGetUserByFirebaseUidUserFirebaseUidGetQueryKey = (firebaseUid: string,) => {
+    return [`/user/${firebaseUid}`] as const;
+    }
+
+    
+export const getGetUserByFirebaseUidUserFirebaseUidGetInfiniteQueryOptions = <TData = InfiniteData<Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>>, TError = HTTPValidationError>(firebaseUid: string, options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>, TError, TData>>, }
 ) => {
-	return [`/user/${firebaseUid}`] as const;
-};
 
-export const getGetUserByFirebaseUidUserFirebaseUidGetInfiniteQueryOptions = <
-	TData = InfiniteData<
-		Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>
-	>,
-	TError = HTTPValidationError,
->(
-	firebaseUid: string,
-	options?: {
-		query?: Partial<
-			UseInfiniteQueryOptions<
-				Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>,
-				TError,
-				TData
-			>
-		>;
-	},
-) => {
-	const { query: queryOptions } = options ?? {};
+const {query: queryOptions} = options ?? {};
 
-	const queryKey =
-		queryOptions?.queryKey ??
-		getGetUserByFirebaseUidUserFirebaseUidGetQueryKey(firebaseUid);
+  const queryKey =  queryOptions?.queryKey ?? getGetUserByFirebaseUidUserFirebaseUidGetQueryKey(firebaseUid);
 
-	const queryFn: QueryFunction<
-		Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>
-	> = ({ signal }) =>
-		getUserByFirebaseUidUserFirebaseUidGet(firebaseUid, signal);
+  
 
-	return {
-		queryKey,
-		queryFn,
-		enabled: !!firebaseUid,
-		...queryOptions,
-	} as UseInfiniteQueryOptions<
-		Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>,
-		TError,
-		TData
-	> & { queryKey: DataTag<QueryKey, TData, TError> };
-};
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>> = ({ signal }) => getUserByFirebaseUidUserFirebaseUidGet(firebaseUid, signal);
 
-export type GetUserByFirebaseUidUserFirebaseUidGetInfiniteQueryResult =
-	NonNullable<
-		Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>
-	>;
-export type GetUserByFirebaseUidUserFirebaseUidGetInfiniteQueryError =
-	HTTPValidationError;
+      
 
-export function useGetUserByFirebaseUidUserFirebaseUidGetInfinite<
-	TData = InfiniteData<
-		Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>
-	>,
-	TError = HTTPValidationError,
->(
-	firebaseUid: string,
-	options: {
-		query: Partial<
-			UseInfiniteQueryOptions<
-				Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>,
-				TError,
-				TData
-			>
-		> &
-			Pick<
-				DefinedInitialDataOptions<
-					Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>,
-					TError,
-					Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>
-				>,
-				"initialData"
-			>;
-	},
-): DefinedUseInfiniteQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetUserByFirebaseUidUserFirebaseUidGetInfinite<
-	TData = InfiniteData<
-		Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>
-	>,
-	TError = HTTPValidationError,
->(
-	firebaseUid: string,
-	options?: {
-		query?: Partial<
-			UseInfiniteQueryOptions<
-				Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>,
-				TError,
-				TData
-			>
-		> &
-			Pick<
-				UndefinedInitialDataOptions<
-					Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>,
-					TError,
-					Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>
-				>,
-				"initialData"
-			>;
-	},
-): UseInfiniteQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetUserByFirebaseUidUserFirebaseUidGetInfinite<
-	TData = InfiniteData<
-		Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>
-	>,
-	TError = HTTPValidationError,
->(
-	firebaseUid: string,
-	options?: {
-		query?: Partial<
-			UseInfiniteQueryOptions<
-				Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>,
-				TError,
-				TData
-			>
-		>;
-	},
-): UseInfiniteQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+      
+
+   return  { queryKey, queryFn, enabled: !!(firebaseUid), ...queryOptions} as UseInfiniteQueryOptions<Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetUserByFirebaseUidUserFirebaseUidGetInfiniteQueryResult = NonNullable<Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>>
+export type GetUserByFirebaseUidUserFirebaseUidGetInfiniteQueryError = HTTPValidationError
+
+
+export function useGetUserByFirebaseUidUserFirebaseUidGetInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>>, TError = HTTPValidationError>(
+ firebaseUid: string, options: { query:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>,
+          TError,
+          Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>
+        > , 'initialData'
+      >, }
+
+  ):  DefinedUseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetUserByFirebaseUidUserFirebaseUidGetInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>>, TError = HTTPValidationError>(
+ firebaseUid: string, options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>,
+          TError,
+          Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>
+        > , 'initialData'
+      >, }
+
+  ):  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetUserByFirebaseUidUserFirebaseUidGetInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>>, TError = HTTPValidationError>(
+ firebaseUid: string, options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>, TError, TData>>, }
+
+  ):  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get User By Firebase Uid
  */
 
-export function useGetUserByFirebaseUidUserFirebaseUidGetInfinite<
-	TData = InfiniteData<
-		Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>
-	>,
-	TError = HTTPValidationError,
->(
-	firebaseUid: string,
-	options?: {
-		query?: Partial<
-			UseInfiniteQueryOptions<
-				Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>,
-				TError,
-				TData
-			>
-		>;
-	},
-): UseInfiniteQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
-	const queryOptions =
-		getGetUserByFirebaseUidUserFirebaseUidGetInfiniteQueryOptions(
-			firebaseUid,
-			options,
-		);
+export function useGetUserByFirebaseUidUserFirebaseUidGetInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>>, TError = HTTPValidationError>(
+ firebaseUid: string, options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>, TError, TData>>, }
 
-	const query = useInfiniteQuery(queryOptions) as UseInfiniteQueryResult<
-		TData,
-		TError
-	> & { queryKey: DataTag<QueryKey, TData, TError> };
+  ):  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-	query.queryKey = queryOptions.queryKey;
+  const queryOptions = getGetUserByFirebaseUidUserFirebaseUidGetInfiniteQueryOptions(firebaseUid,options)
 
-	return query;
+  const query = useInfiniteQuery(queryOptions) as  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
 }
 
-export const getGetUserByFirebaseUidUserFirebaseUidGetQueryOptions = <
-	TData = Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>,
-	TError = HTTPValidationError,
->(
-	firebaseUid: string,
-	options?: {
-		query?: Partial<
-			UseQueryOptions<
-				Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>,
-				TError,
-				TData
-			>
-		>;
-	},
+
+
+export const getGetUserByFirebaseUidUserFirebaseUidGetQueryOptions = <TData = Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>, TError = HTTPValidationError>(firebaseUid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>, TError, TData>>, }
 ) => {
-	const { query: queryOptions } = options ?? {};
 
-	const queryKey =
-		queryOptions?.queryKey ??
-		getGetUserByFirebaseUidUserFirebaseUidGetQueryKey(firebaseUid);
+const {query: queryOptions} = options ?? {};
 
-	const queryFn: QueryFunction<
-		Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>
-	> = ({ signal }) =>
-		getUserByFirebaseUidUserFirebaseUidGet(firebaseUid, signal);
+  const queryKey =  queryOptions?.queryKey ?? getGetUserByFirebaseUidUserFirebaseUidGetQueryKey(firebaseUid);
 
-	return {
-		queryKey,
-		queryFn,
-		enabled: !!firebaseUid,
-		...queryOptions,
-	} as UseQueryOptions<
-		Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>,
-		TError,
-		TData
-	> & { queryKey: DataTag<QueryKey, TData, TError> };
-};
+  
 
-export type GetUserByFirebaseUidUserFirebaseUidGetQueryResult = NonNullable<
-	Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>
->;
-export type GetUserByFirebaseUidUserFirebaseUidGetQueryError =
-	HTTPValidationError;
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>> = ({ signal }) => getUserByFirebaseUidUserFirebaseUidGet(firebaseUid, signal);
 
-export function useGetUserByFirebaseUidUserFirebaseUidGet<
-	TData = Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>,
-	TError = HTTPValidationError,
->(
-	firebaseUid: string,
-	options: {
-		query: Partial<
-			UseQueryOptions<
-				Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>,
-				TError,
-				TData
-			>
-		> &
-			Pick<
-				DefinedInitialDataOptions<
-					Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>,
-					TError,
-					Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>
-				>,
-				"initialData"
-			>;
-	},
-): DefinedUseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetUserByFirebaseUidUserFirebaseUidGet<
-	TData = Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>,
-	TError = HTTPValidationError,
->(
-	firebaseUid: string,
-	options?: {
-		query?: Partial<
-			UseQueryOptions<
-				Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>,
-				TError,
-				TData
-			>
-		> &
-			Pick<
-				UndefinedInitialDataOptions<
-					Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>,
-					TError,
-					Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>
-				>,
-				"initialData"
-			>;
-	},
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetUserByFirebaseUidUserFirebaseUidGet<
-	TData = Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>,
-	TError = HTTPValidationError,
->(
-	firebaseUid: string,
-	options?: {
-		query?: Partial<
-			UseQueryOptions<
-				Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>,
-				TError,
-				TData
-			>
-		>;
-	},
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(firebaseUid), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetUserByFirebaseUidUserFirebaseUidGetQueryResult = NonNullable<Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>>
+export type GetUserByFirebaseUidUserFirebaseUidGetQueryError = HTTPValidationError
+
+
+export function useGetUserByFirebaseUidUserFirebaseUidGet<TData = Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>, TError = HTTPValidationError>(
+ firebaseUid: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>,
+          TError,
+          Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>
+        > , 'initialData'
+      >, }
+
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetUserByFirebaseUidUserFirebaseUidGet<TData = Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>, TError = HTTPValidationError>(
+ firebaseUid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>,
+          TError,
+          Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>
+        > , 'initialData'
+      >, }
+
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetUserByFirebaseUidUserFirebaseUidGet<TData = Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>, TError = HTTPValidationError>(
+ firebaseUid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>, TError, TData>>, }
+
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get User By Firebase Uid
  */
 
-export function useGetUserByFirebaseUidUserFirebaseUidGet<
-	TData = Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>,
-	TError = HTTPValidationError,
->(
-	firebaseUid: string,
-	options?: {
-		query?: Partial<
-			UseQueryOptions<
-				Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>,
-				TError,
-				TData
-			>
-		>;
-	},
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
-	const queryOptions = getGetUserByFirebaseUidUserFirebaseUidGetQueryOptions(
-		firebaseUid,
-		options,
-	);
+export function useGetUserByFirebaseUidUserFirebaseUidGet<TData = Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>, TError = HTTPValidationError>(
+ firebaseUid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserByFirebaseUidUserFirebaseUidGet>>, TError, TData>>, }
 
-	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-		queryKey: DataTag<QueryKey, TData, TError>;
-	};
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-	query.queryKey = queryOptions.queryKey;
+  const queryOptions = getGetUserByFirebaseUidUserFirebaseUidGetQueryOptions(firebaseUid,options)
 
-	return query;
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
 }
+
+
 
 /**
  * @summary Get Failure By Id
  */
 export const getFailureByIdFailureFailureIdGet = (
-	failureId: number,
-	signal?: AbortSignal,
+    failureId: number,
+ signal?: AbortSignal
 ) => {
-	return customAxios<GetFailureByIdFailureFailureIdGet200>({
-		url: `/failure/${failureId}`,
-		method: "GET",
-		signal,
-	});
-};
+      
+      
+      return customAxios<GetFailureByIdFailureFailureIdGet200>(
+      {url: `/failure/${failureId}`, method: 'GET', signal
+    },
+      );
+    }
+  
 
-export const getGetFailureByIdFailureFailureIdGetQueryKey = (
-	failureId: number,
+export const getGetFailureByIdFailureFailureIdGetQueryKey = (failureId: number,) => {
+    return [`/failure/${failureId}`] as const;
+    }
+
+    
+export const getGetFailureByIdFailureFailureIdGetInfiniteQueryOptions = <TData = InfiniteData<Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>>, TError = HTTPValidationError>(failureId: number, options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>, TError, TData>>, }
 ) => {
-	return [`/failure/${failureId}`] as const;
-};
 
-export const getGetFailureByIdFailureFailureIdGetInfiniteQueryOptions = <
-	TData = InfiniteData<
-		Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>
-	>,
-	TError = HTTPValidationError,
->(
-	failureId: number,
-	options?: {
-		query?: Partial<
-			UseInfiniteQueryOptions<
-				Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>,
-				TError,
-				TData
-			>
-		>;
-	},
-) => {
-	const { query: queryOptions } = options ?? {};
+const {query: queryOptions} = options ?? {};
 
-	const queryKey =
-		queryOptions?.queryKey ??
-		getGetFailureByIdFailureFailureIdGetQueryKey(failureId);
+  const queryKey =  queryOptions?.queryKey ?? getGetFailureByIdFailureFailureIdGetQueryKey(failureId);
 
-	const queryFn: QueryFunction<
-		Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>
-	> = ({ signal }) => getFailureByIdFailureFailureIdGet(failureId, signal);
+  
 
-	return {
-		queryKey,
-		queryFn,
-		enabled: !!failureId,
-		...queryOptions,
-	} as UseInfiniteQueryOptions<
-		Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>,
-		TError,
-		TData
-	> & { queryKey: DataTag<QueryKey, TData, TError> };
-};
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>> = ({ signal }) => getFailureByIdFailureFailureIdGet(failureId, signal);
 
-export type GetFailureByIdFailureFailureIdGetInfiniteQueryResult = NonNullable<
-	Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>
->;
-export type GetFailureByIdFailureFailureIdGetInfiniteQueryError =
-	HTTPValidationError;
+      
 
-export function useGetFailureByIdFailureFailureIdGetInfinite<
-	TData = InfiniteData<
-		Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>
-	>,
-	TError = HTTPValidationError,
->(
-	failureId: number,
-	options: {
-		query: Partial<
-			UseInfiniteQueryOptions<
-				Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>,
-				TError,
-				TData
-			>
-		> &
-			Pick<
-				DefinedInitialDataOptions<
-					Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>,
-					TError,
-					Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>
-				>,
-				"initialData"
-			>;
-	},
-): DefinedUseInfiniteQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetFailureByIdFailureFailureIdGetInfinite<
-	TData = InfiniteData<
-		Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>
-	>,
-	TError = HTTPValidationError,
->(
-	failureId: number,
-	options?: {
-		query?: Partial<
-			UseInfiniteQueryOptions<
-				Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>,
-				TError,
-				TData
-			>
-		> &
-			Pick<
-				UndefinedInitialDataOptions<
-					Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>,
-					TError,
-					Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>
-				>,
-				"initialData"
-			>;
-	},
-): UseInfiniteQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetFailureByIdFailureFailureIdGetInfinite<
-	TData = InfiniteData<
-		Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>
-	>,
-	TError = HTTPValidationError,
->(
-	failureId: number,
-	options?: {
-		query?: Partial<
-			UseInfiniteQueryOptions<
-				Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>,
-				TError,
-				TData
-			>
-		>;
-	},
-): UseInfiniteQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+      
+
+   return  { queryKey, queryFn, enabled: !!(failureId), ...queryOptions} as UseInfiniteQueryOptions<Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetFailureByIdFailureFailureIdGetInfiniteQueryResult = NonNullable<Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>>
+export type GetFailureByIdFailureFailureIdGetInfiniteQueryError = HTTPValidationError
+
+
+export function useGetFailureByIdFailureFailureIdGetInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>>, TError = HTTPValidationError>(
+ failureId: number, options: { query:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>,
+          TError,
+          Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>
+        > , 'initialData'
+      >, }
+
+  ):  DefinedUseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetFailureByIdFailureFailureIdGetInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>>, TError = HTTPValidationError>(
+ failureId: number, options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>,
+          TError,
+          Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>
+        > , 'initialData'
+      >, }
+
+  ):  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetFailureByIdFailureFailureIdGetInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>>, TError = HTTPValidationError>(
+ failureId: number, options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>, TError, TData>>, }
+
+  ):  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get Failure By Id
  */
 
-export function useGetFailureByIdFailureFailureIdGetInfinite<
-	TData = InfiniteData<
-		Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>
-	>,
-	TError = HTTPValidationError,
->(
-	failureId: number,
-	options?: {
-		query?: Partial<
-			UseInfiniteQueryOptions<
-				Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>,
-				TError,
-				TData
-			>
-		>;
-	},
-): UseInfiniteQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
-	const queryOptions = getGetFailureByIdFailureFailureIdGetInfiniteQueryOptions(
-		failureId,
-		options,
-	);
+export function useGetFailureByIdFailureFailureIdGetInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>>, TError = HTTPValidationError>(
+ failureId: number, options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>, TError, TData>>, }
 
-	const query = useInfiniteQuery(queryOptions) as UseInfiniteQueryResult<
-		TData,
-		TError
-	> & { queryKey: DataTag<QueryKey, TData, TError> };
+  ):  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-	query.queryKey = queryOptions.queryKey;
+  const queryOptions = getGetFailureByIdFailureFailureIdGetInfiniteQueryOptions(failureId,options)
 
-	return query;
+  const query = useInfiniteQuery(queryOptions) as  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
 }
 
-export const getGetFailureByIdFailureFailureIdGetQueryOptions = <
-	TData = Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>,
-	TError = HTTPValidationError,
->(
-	failureId: number,
-	options?: {
-		query?: Partial<
-			UseQueryOptions<
-				Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>,
-				TError,
-				TData
-			>
-		>;
-	},
+
+
+export const getGetFailureByIdFailureFailureIdGetQueryOptions = <TData = Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>, TError = HTTPValidationError>(failureId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>, TError, TData>>, }
 ) => {
-	const { query: queryOptions } = options ?? {};
 
-	const queryKey =
-		queryOptions?.queryKey ??
-		getGetFailureByIdFailureFailureIdGetQueryKey(failureId);
+const {query: queryOptions} = options ?? {};
 
-	const queryFn: QueryFunction<
-		Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>
-	> = ({ signal }) => getFailureByIdFailureFailureIdGet(failureId, signal);
+  const queryKey =  queryOptions?.queryKey ?? getGetFailureByIdFailureFailureIdGetQueryKey(failureId);
 
-	return {
-		queryKey,
-		queryFn,
-		enabled: !!failureId,
-		...queryOptions,
-	} as UseQueryOptions<
-		Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>,
-		TError,
-		TData
-	> & { queryKey: DataTag<QueryKey, TData, TError> };
-};
+  
 
-export type GetFailureByIdFailureFailureIdGetQueryResult = NonNullable<
-	Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>
->;
-export type GetFailureByIdFailureFailureIdGetQueryError = HTTPValidationError;
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>> = ({ signal }) => getFailureByIdFailureFailureIdGet(failureId, signal);
 
-export function useGetFailureByIdFailureFailureIdGet<
-	TData = Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>,
-	TError = HTTPValidationError,
->(
-	failureId: number,
-	options: {
-		query: Partial<
-			UseQueryOptions<
-				Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>,
-				TError,
-				TData
-			>
-		> &
-			Pick<
-				DefinedInitialDataOptions<
-					Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>,
-					TError,
-					Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>
-				>,
-				"initialData"
-			>;
-	},
-): DefinedUseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetFailureByIdFailureFailureIdGet<
-	TData = Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>,
-	TError = HTTPValidationError,
->(
-	failureId: number,
-	options?: {
-		query?: Partial<
-			UseQueryOptions<
-				Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>,
-				TError,
-				TData
-			>
-		> &
-			Pick<
-				UndefinedInitialDataOptions<
-					Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>,
-					TError,
-					Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>
-				>,
-				"initialData"
-			>;
-	},
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetFailureByIdFailureFailureIdGet<
-	TData = Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>,
-	TError = HTTPValidationError,
->(
-	failureId: number,
-	options?: {
-		query?: Partial<
-			UseQueryOptions<
-				Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>,
-				TError,
-				TData
-			>
-		>;
-	},
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(failureId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetFailureByIdFailureFailureIdGetQueryResult = NonNullable<Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>>
+export type GetFailureByIdFailureFailureIdGetQueryError = HTTPValidationError
+
+
+export function useGetFailureByIdFailureFailureIdGet<TData = Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>, TError = HTTPValidationError>(
+ failureId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>,
+          TError,
+          Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>
+        > , 'initialData'
+      >, }
+
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetFailureByIdFailureFailureIdGet<TData = Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>, TError = HTTPValidationError>(
+ failureId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>,
+          TError,
+          Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>
+        > , 'initialData'
+      >, }
+
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetFailureByIdFailureFailureIdGet<TData = Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>, TError = HTTPValidationError>(
+ failureId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>, TError, TData>>, }
+
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get Failure By Id
  */
 
-export function useGetFailureByIdFailureFailureIdGet<
-	TData = Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>,
-	TError = HTTPValidationError,
->(
-	failureId: number,
-	options?: {
-		query?: Partial<
-			UseQueryOptions<
-				Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>,
-				TError,
-				TData
-			>
-		>;
-	},
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
-	const queryOptions = getGetFailureByIdFailureFailureIdGetQueryOptions(
-		failureId,
-		options,
-	);
+export function useGetFailureByIdFailureFailureIdGet<TData = Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>, TError = HTTPValidationError>(
+ failureId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFailureByIdFailureFailureIdGet>>, TError, TData>>, }
 
-	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-		queryKey: DataTag<QueryKey, TData, TError>;
-	};
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-	query.queryKey = queryOptions.queryKey;
+  const queryOptions = getGetFailureByIdFailureFailureIdGetQueryOptions(failureId,options)
 
-	return query;
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
 }
+
+
 
 /**
  * @summary Create Failure
  */
 export const createFailureFailuresPost = (
-	createFailureInput: CreateFailureInput,
-	signal?: AbortSignal,
+    createFailureInput: CreateFailureInput,
+ signal?: AbortSignal
 ) => {
-	return customAxios<unknown>({
-		url: `/failures`,
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		data: createFailureInput,
-		signal,
-	});
-};
+      
+      
+      return customAxios<unknown>(
+      {url: `/failures`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createFailureInput, signal
+    },
+      );
+    }
+  
 
-export const getCreateFailureFailuresPostMutationOptions = <
-	TError = HTTPValidationError,
-	TContext = unknown,
->(options?: {
-	mutation?: UseMutationOptions<
-		Awaited<ReturnType<typeof createFailureFailuresPost>>,
-		TError,
-		{ data: CreateFailureInput },
-		TContext
-	>;
-}): UseMutationOptions<
-	Awaited<ReturnType<typeof createFailureFailuresPost>>,
-	TError,
-	{ data: CreateFailureInput },
-	TContext
-> => {
-	const mutationKey = ["createFailureFailuresPost"];
-	const { mutation: mutationOptions } = options
-		? options.mutation &&
-			"mutationKey" in options.mutation &&
-			options.mutation.mutationKey
-			? options
-			: { ...options, mutation: { ...options.mutation, mutationKey } }
-		: { mutation: { mutationKey } };
 
-	const mutationFn: MutationFunction<
-		Awaited<ReturnType<typeof createFailureFailuresPost>>,
-		{ data: CreateFailureInput }
-	> = (props) => {
-		const { data } = props ?? {};
+export const getCreateFailureFailuresPostMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createFailureFailuresPost>>, TError,{data: CreateFailureInput}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof createFailureFailuresPost>>, TError,{data: CreateFailureInput}, TContext> => {
+    
+const mutationKey = ['createFailureFailuresPost'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-		return createFailureFailuresPost(data);
-	};
+      
 
-	return { mutationFn, ...mutationOptions };
-};
 
-export type CreateFailureFailuresPostMutationResult = NonNullable<
-	Awaited<ReturnType<typeof createFailureFailuresPost>>
->;
-export type CreateFailureFailuresPostMutationBody = CreateFailureInput;
-export type CreateFailureFailuresPostMutationError = HTTPValidationError;
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createFailureFailuresPost>>, {data: CreateFailureInput}> = (props) => {
+          const {data} = props ?? {};
 
-/**
+          return  createFailureFailuresPost(data,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateFailureFailuresPostMutationResult = NonNullable<Awaited<ReturnType<typeof createFailureFailuresPost>>>
+    export type CreateFailureFailuresPostMutationBody = CreateFailureInput
+    export type CreateFailureFailuresPostMutationError = HTTPValidationError
+
+    /**
  * @summary Create Failure
  */
-export const useCreateFailureFailuresPost = <
-	TError = HTTPValidationError,
-	TContext = unknown,
->(options?: {
-	mutation?: UseMutationOptions<
-		Awaited<ReturnType<typeof createFailureFailuresPost>>,
-		TError,
-		{ data: CreateFailureInput },
-		TContext
-	>;
-}): UseMutationResult<
-	Awaited<ReturnType<typeof createFailureFailuresPost>>,
-	TError,
-	{ data: CreateFailureInput },
-	TContext
-> => {
-	const mutationOptions = getCreateFailureFailuresPostMutationOptions(options);
+export const useCreateFailureFailuresPost = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createFailureFailuresPost>>, TError,{data: CreateFailureInput}, TContext>, }
+): UseMutationResult<
+        Awaited<ReturnType<typeof createFailureFailuresPost>>,
+        TError,
+        {data: CreateFailureInput},
+        TContext
+      > => {
 
-	return useMutation(mutationOptions);
-};
-/**
+      const mutationOptions = getCreateFailureFailuresPostMutationOptions(options);
+
+      return useMutation(mutationOptions);
+    }
+    /**
  * @summary Suggest Elements
  */
 export const suggestElementsElementsSuggestPost = (
-	suggestInput: SuggestInput,
-	signal?: AbortSignal,
+    suggestInput: SuggestInput,
+ signal?: AbortSignal
 ) => {
-	return customAxios<SuggestElementsElementsSuggestPost200>({
-		url: `/elements/suggest`,
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		data: suggestInput,
-		signal,
-	});
-};
+      
+      
+      return customAxios<SuggestElementsElementsSuggestPost200>(
+      {url: `/elements/suggest`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: suggestInput, signal
+    },
+      );
+    }
+  
 
-export const getSuggestElementsElementsSuggestPostMutationOptions = <
-	TError = HTTPValidationError,
-	TContext = unknown,
->(options?: {
-	mutation?: UseMutationOptions<
-		Awaited<ReturnType<typeof suggestElementsElementsSuggestPost>>,
-		TError,
-		{ data: SuggestInput },
-		TContext
-	>;
-}): UseMutationOptions<
-	Awaited<ReturnType<typeof suggestElementsElementsSuggestPost>>,
-	TError,
-	{ data: SuggestInput },
-	TContext
-> => {
-	const mutationKey = ["suggestElementsElementsSuggestPost"];
-	const { mutation: mutationOptions } = options
-		? options.mutation &&
-			"mutationKey" in options.mutation &&
-			options.mutation.mutationKey
-			? options
-			: { ...options, mutation: { ...options.mutation, mutationKey } }
-		: { mutation: { mutationKey } };
 
-	const mutationFn: MutationFunction<
-		Awaited<ReturnType<typeof suggestElementsElementsSuggestPost>>,
-		{ data: SuggestInput }
-	> = (props) => {
-		const { data } = props ?? {};
+export const getSuggestElementsElementsSuggestPostMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof suggestElementsElementsSuggestPost>>, TError,{data: SuggestInput}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof suggestElementsElementsSuggestPost>>, TError,{data: SuggestInput}, TContext> => {
+    
+const mutationKey = ['suggestElementsElementsSuggestPost'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-		return suggestElementsElementsSuggestPost(data);
-	};
+      
 
-	return { mutationFn, ...mutationOptions };
-};
 
-export type SuggestElementsElementsSuggestPostMutationResult = NonNullable<
-	Awaited<ReturnType<typeof suggestElementsElementsSuggestPost>>
->;
-export type SuggestElementsElementsSuggestPostMutationBody = SuggestInput;
-export type SuggestElementsElementsSuggestPostMutationError =
-	HTTPValidationError;
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof suggestElementsElementsSuggestPost>>, {data: SuggestInput}> = (props) => {
+          const {data} = props ?? {};
 
-/**
+          return  suggestElementsElementsSuggestPost(data,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SuggestElementsElementsSuggestPostMutationResult = NonNullable<Awaited<ReturnType<typeof suggestElementsElementsSuggestPost>>>
+    export type SuggestElementsElementsSuggestPostMutationBody = SuggestInput
+    export type SuggestElementsElementsSuggestPostMutationError = HTTPValidationError
+
+    /**
  * @summary Suggest Elements
  */
-export const useSuggestElementsElementsSuggestPost = <
-	TError = HTTPValidationError,
-	TContext = unknown,
->(options?: {
-	mutation?: UseMutationOptions<
-		Awaited<ReturnType<typeof suggestElementsElementsSuggestPost>>,
-		TError,
-		{ data: SuggestInput },
-		TContext
-	>;
-}): UseMutationResult<
-	Awaited<ReturnType<typeof suggestElementsElementsSuggestPost>>,
-	TError,
-	{ data: SuggestInput },
-	TContext
-> => {
-	const mutationOptions =
-		getSuggestElementsElementsSuggestPostMutationOptions(options);
+export const useSuggestElementsElementsSuggestPost = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof suggestElementsElementsSuggestPost>>, TError,{data: SuggestInput}, TContext>, }
+): UseMutationResult<
+        Awaited<ReturnType<typeof suggestElementsElementsSuggestPost>>,
+        TError,
+        {data: SuggestInput},
+        TContext
+      > => {
 
-	return useMutation(mutationOptions);
-};
-/**
+      const mutationOptions = getSuggestElementsElementsSuggestPostMutationOptions(options);
+
+      return useMutation(mutationOptions);
+    }
+    /**
  * @summary Bulk Create Elements
  */
 export const bulkCreateElementsElementsPost = (
-	createElementInput: CreateElementInput,
-	signal?: AbortSignal,
+    createElementInput: CreateElementInput,
+ signal?: AbortSignal
 ) => {
-	return customAxios<unknown>({
-		url: `/elements`,
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		data: createElementInput,
-		signal,
-	});
-};
+      
+      
+      return customAxios<unknown>(
+      {url: `/elements`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createElementInput, signal
+    },
+      );
+    }
+  
 
-export const getBulkCreateElementsElementsPostMutationOptions = <
-	TError = HTTPValidationError,
-	TContext = unknown,
->(options?: {
-	mutation?: UseMutationOptions<
-		Awaited<ReturnType<typeof bulkCreateElementsElementsPost>>,
-		TError,
-		{ data: CreateElementInput },
-		TContext
-	>;
-}): UseMutationOptions<
-	Awaited<ReturnType<typeof bulkCreateElementsElementsPost>>,
-	TError,
-	{ data: CreateElementInput },
-	TContext
-> => {
-	const mutationKey = ["bulkCreateElementsElementsPost"];
-	const { mutation: mutationOptions } = options
-		? options.mutation &&
-			"mutationKey" in options.mutation &&
-			options.mutation.mutationKey
-			? options
-			: { ...options, mutation: { ...options.mutation, mutationKey } }
-		: { mutation: { mutationKey } };
 
-	const mutationFn: MutationFunction<
-		Awaited<ReturnType<typeof bulkCreateElementsElementsPost>>,
-		{ data: CreateElementInput }
-	> = (props) => {
-		const { data } = props ?? {};
+export const getBulkCreateElementsElementsPostMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof bulkCreateElementsElementsPost>>, TError,{data: CreateElementInput}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof bulkCreateElementsElementsPost>>, TError,{data: CreateElementInput}, TContext> => {
+    
+const mutationKey = ['bulkCreateElementsElementsPost'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-		return bulkCreateElementsElementsPost(data);
-	};
+      
 
-	return { mutationFn, ...mutationOptions };
-};
 
-export type BulkCreateElementsElementsPostMutationResult = NonNullable<
-	Awaited<ReturnType<typeof bulkCreateElementsElementsPost>>
->;
-export type BulkCreateElementsElementsPostMutationBody = CreateElementInput;
-export type BulkCreateElementsElementsPostMutationError = HTTPValidationError;
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof bulkCreateElementsElementsPost>>, {data: CreateElementInput}> = (props) => {
+          const {data} = props ?? {};
 
-/**
+          return  bulkCreateElementsElementsPost(data,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type BulkCreateElementsElementsPostMutationResult = NonNullable<Awaited<ReturnType<typeof bulkCreateElementsElementsPost>>>
+    export type BulkCreateElementsElementsPostMutationBody = CreateElementInput
+    export type BulkCreateElementsElementsPostMutationError = HTTPValidationError
+
+    /**
  * @summary Bulk Create Elements
  */
-export const useBulkCreateElementsElementsPost = <
-	TError = HTTPValidationError,
-	TContext = unknown,
->(options?: {
-	mutation?: UseMutationOptions<
-		Awaited<ReturnType<typeof bulkCreateElementsElementsPost>>,
-		TError,
-		{ data: CreateElementInput },
-		TContext
-	>;
-}): UseMutationResult<
-	Awaited<ReturnType<typeof bulkCreateElementsElementsPost>>,
-	TError,
-	{ data: CreateElementInput },
-	TContext
-> => {
-	const mutationOptions =
-		getBulkCreateElementsElementsPostMutationOptions(options);
+export const useBulkCreateElementsElementsPost = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof bulkCreateElementsElementsPost>>, TError,{data: CreateElementInput}, TContext>, }
+): UseMutationResult<
+        Awaited<ReturnType<typeof bulkCreateElementsElementsPost>>,
+        TError,
+        {data: CreateElementInput},
+        TContext
+      > => {
 
-	return useMutation(mutationOptions);
-};
+      const mutationOptions = getBulkCreateElementsElementsPostMutationOptions(options);
+
+      return useMutation(mutationOptions);
+    }
+    /**
+ * @summary Get Heroes
+ */
+export const getHeroesHeroesPost = (
+    getHeroesInput: GetHeroesInput,
+ signal?: AbortSignal
+) => {
+      
+      
+      return customAxios<GetHeroesHeroesPost200>(
+      {url: `/heroes`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: getHeroesInput, signal
+    },
+      );
+    }
+  
+
+
+export const getGetHeroesHeroesPostMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof getHeroesHeroesPost>>, TError,{data: GetHeroesInput}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof getHeroesHeroesPost>>, TError,{data: GetHeroesInput}, TContext> => {
+    
+const mutationKey = ['getHeroesHeroesPost'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof getHeroesHeroesPost>>, {data: GetHeroesInput}> = (props) => {
+          const {data} = props ?? {};
+
+          return  getHeroesHeroesPost(data,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type GetHeroesHeroesPostMutationResult = NonNullable<Awaited<ReturnType<typeof getHeroesHeroesPost>>>
+    export type GetHeroesHeroesPostMutationBody = GetHeroesInput
+    export type GetHeroesHeroesPostMutationError = HTTPValidationError
+
+    /**
+ * @summary Get Heroes
+ */
+export const useGetHeroesHeroesPost = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof getHeroesHeroesPost>>, TError,{data: GetHeroesInput}, TContext>, }
+): UseMutationResult<
+        Awaited<ReturnType<typeof getHeroesHeroesPost>>,
+        TError,
+        {data: GetHeroesInput},
+        TContext
+      > => {
+
+      const mutationOptions = getGetHeroesHeroesPostMutationOptions(options);
+
+      return useMutation(mutationOptions);
+    }
+    

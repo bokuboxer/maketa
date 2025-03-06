@@ -4,8 +4,6 @@
  * FastAPI
  * OpenAPI spec version: 0.1.0
  */
+import type { Hero } from "./hero";
 
-export interface CreateFailureInput {
-  user_id: number;
-  description: string;
-}
+export type GetHeroesHeroesGet200 = Hero[] | null;
