@@ -2,19 +2,11 @@ import { Element } from "@/api/model/element";
 import { ElementType } from "@/api/model/elementType";
 import { Dispatch, SetStateAction } from "react";
 
-export interface ExtendedElement extends Element {
-  explanation?: string;
-}
-
-export type DndElement = {
-  element: ExtendedElement;
-  isSelected: boolean;
-};
 
 export type ElementTypeKey = keyof typeof ElementType;
 
 export interface GroupedElements {
-  [key: string]: DndElement[];
+  [key: string]: Element[];
 }
 
 export interface StepConfig {
@@ -53,7 +45,7 @@ export interface NavigationButtonsProps {
 
 export interface DraggableElementListProps {
   elementType: ElementType;
-  elements: DndElement[];
+  elements: Element[];
   droppableId: string;
   emptyMessage: string;
 }

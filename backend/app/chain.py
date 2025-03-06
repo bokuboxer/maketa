@@ -30,9 +30,6 @@ class SuggestChain:
     def __init__(self, llm: BaseChatModel):
         self.llm = llm
         self.json_parser = PydanticOutputParser(pydantic_object=schema.AnalysisResult)
-        self.belief_parser = PydanticOutputParser(
-            pydantic_object=schema.BeliefAnalysisResult
-        )
         self.summarize_prompt = PromptTemplate(
             template=summary_template,
             input_variables=["analysis_type", "elements_text"],
@@ -55,10 +52,10 @@ class SuggestChain:
                 template=belief_explanation_template,
                 input_variables=["text", "selected_label"],
                 partial_variables={
-                    "format_instructions": self.belief_parser.get_format_instructions()
+                    "format_instructions": self.json_parser.get_format_instructions()
                 },
             )
-            chain = prompt | self.llm | self.belief_parser
+            chain = prompt | self.llm | self.json_parser
             belief_result = chain.invoke(
                 {
                     "text": input.text,
@@ -67,13 +64,7 @@ class SuggestChain:
             )
             logger.debug(f"Belief explanation result: {belief_result}")
             # Handle response format
-            if isinstance(belief_result, schema.BeliefAnalysisResult):
-                result = schema.AnalysisResult(belief_analysis=belief_result)
-                logger.debug(f"Final response 1: {result.model_dump()}")
-                return result
-            else:
-                logger.error(f"Invalid belief result format: {belief_result}")
-                return schema.AnalysisResult(elements=[])
+            return belief_result
 
         # Handle initial suggestions for belief type
         if input.type == model.ElementType.BELIEF:

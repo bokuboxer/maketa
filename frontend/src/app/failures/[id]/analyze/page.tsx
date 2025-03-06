@@ -31,20 +31,6 @@ interface PageParams {
 	id: string;
 }
 
-type ApiResponse = {
-	elements?: Element[] | null;
-	belief_analysis?: {
-		labels: BeliefLabel[];
-	} | null;
-} | Element[] | null;
-
-interface AnalysisResult {
-	elements?: Element[] | null;
-	belief_analysis?: {
-		labels: BeliefLabel[];
-	} | null;
-}
-
 // Main component
 export default function AnalyzePage({
 	params,
@@ -217,14 +203,9 @@ export default function AnalyzePage({
 								elements: data,
 							});
 							if (data) {
-								const elements = data.map((element: Element) => ({
-									element,
-									isSelected: false,
-								}));
-
 								setSuggestedElements((prev) => ({
 									...prev,
-									[ElementType.belief]: elements,
+									[ElementType.belief]: data,
 								}));
 
 								setSelectedElements((prev) => ({
@@ -246,6 +227,7 @@ export default function AnalyzePage({
 				);
 			} else if (activeStep === ElementType.belief && activeSubType === 'selection') {
 				const selectedBelief = selectedElements[ElementType.belief][0]?.element;
+				console.log("Selected belief:", selectedBelief);
 				if (!selectedBelief) {
 					console.error("No belief selected");
 					setNextLoading(false);
@@ -280,37 +262,21 @@ export default function AnalyzePage({
 					},
 					{
 						onSuccess: (
-							data: ApiResponse,
-							variables: { data: SuggestInput },
-							context: unknown
+							data,
 						) => {
-							if (data && typeof data === 'object' && !Array.isArray(data) && 'belief_analysis' in data && data.belief_analysis?.labels) {
-								const elements = data.belief_analysis.labels.map((label: BeliefLabel) => ({
-									element: {
-										id: Date.now() + Math.random(),
-										description: label.description,
-										type: ElementType.belief,
-										created_at: new Date().toISOString(),
-										failure_id: failure?.id || 0,
-										explanation: label.explanation || undefined,
-									},
-									isSelected: false,
-								}));
+							setSuggestedElements((prev) => ({
+								...prev,
+								[ElementType.belief]: data || [],
+							}));
 
-								setSuggestedElements((prev) => ({
-									...prev,
-									[ElementType.belief]: elements,
-								}));
-
-								// Keep the selected belief
-								setSelectedElements((prev) => ({
-									...prev,
-									[ElementType.belief]: [selectedElements[ElementType.belief][0]],
-								}));
-							}
+							// Keep the selected belief
+							setSelectedElements((prev) => ({
+								...prev,
+								[ElementType.belief]: [selectedElements[ElementType.belief][0]],
+							}));
 							setActiveSubType('explanation');
 							setNextLoading(false);
-						},
+						}
 					},
 				);
 			} else if (activeStep === ElementType.belief && activeSubType === 'explanation') {

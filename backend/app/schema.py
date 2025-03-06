@@ -120,7 +120,6 @@ class CreateElementInput(BaseModel):
 
 class AnalysisResult(BaseModel):
     elements: List[Element] | None = None
-    belief_analysis: BeliefAnalysisResult | None = None
 
 
 class GetHeroesInput(BaseModel):
