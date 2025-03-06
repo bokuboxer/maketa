@@ -37,6 +37,7 @@ export interface PreviousStepSummaryProps {
   activeStep: ElementType;
   failure: any; // Using 'any' for now as we don't have the full failure type
   selectedElements: GroupedElements;
+  summarizedText: string;
   steps: StepConfig[];
 }
 

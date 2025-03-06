@@ -1,3 +1,4 @@
+import logging
 import app.schema as schema
 from app.chain import SuggestChain
 from app.controller import ElementController, FailureController, UserController
@@ -10,6 +11,10 @@ from langchain_core.language_models import BaseChatModel
 from pydantic import SecretStr
 import os
 
+# ロガーの設定
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
 load_dotenv()
 
 # 環境変数からAzure OpenAIの設定を取得
@@ -18,6 +23,7 @@ azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
 
 llm: BaseChatModel
 if azure_key and azure_endpoint:
+    logger.info("Using Azure OpenAI")
     llm = AzureChatOpenAI(
         azure_endpoint=azure_endpoint,
         api_key=SecretStr(azure_key),
@@ -27,6 +33,7 @@ if azure_key and azure_endpoint:
         temperature=0,
     )
 else:
+    logger.info("Using OpenAI")
     llm = ChatOpenAI(
         model="gpt-4o-mini",
         temperature=0,
@@ -75,7 +82,10 @@ async def create_failure(input: schema.CreateFailureInput) -> None:
 
 @app.post("/elements/suggest")
 async def suggest_elements(input: schema.SuggestInput) -> list[schema.Element] | None:
-    return element_controller.suggest(input)
+    logger.debug(f"Received suggest elements request with input: {input}")
+    result = element_controller.suggest(input)
+    logger.debug(f"Suggest elements result: {result}")
+    return result
 
 
 @app.post("/elements")
