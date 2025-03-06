@@ -14,10 +14,14 @@ class UserController:
             firebase_uid=input.firebase_uid,
             email=input.email,
         )
-
-        self.db.add(user)
-        self.db.commit()
-        self.db.refresh(user)
+        self.db.begin()
+        try:
+            self.db.add(user)
+            self.db.commit()
+            self.db.refresh(user)
+        except Exception as e:
+            self.db.rollback()
+            raise e
         return None
 
     def get_by_firebase_uid(self, firebase_uid: str) -> schema.User | None:
@@ -43,10 +47,14 @@ class FailureController:
             description=input.description,
             user_id=input.user_id,
         )
-
-        self.db.add(failure)
-        self.db.commit()
-        self.db.refresh(failure)
+        self.db.begin()
+        try:
+            self.db.add(failure)
+            self.db.commit()
+            self.db.refresh(failure)
+        except Exception as e:
+            self.db.rollback()
+            raise e
         return None
 
     def get_by_id(self, failure_id: int) -> schema.Failure | None:
@@ -79,10 +87,15 @@ class ElementController:
             for element in input.elements
         ]
 
-        self.db.add_all(elements)
-        self.db.commit()
-        for element in elements:
-            self.db.refresh(element)
+        self.db.begin()
+        try:
+            self.db.add_all(elements)
+            self.db.commit()
+            for element in elements:
+                    self.db.refresh(element)
+        except Exception as e:
+            self.db.rollback()
+            raise e
 
         # failureのhas_elementsをTrueにする
         failure = (
