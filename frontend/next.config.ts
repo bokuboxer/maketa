@@ -8,6 +8,16 @@ const nextConfig: NextConfig = {
 	devIndicators: {
 		buildActivity: false,
 	},
+	images: {
+		remotePatterns: [
+			{
+				protocol: 'https',
+				hostname: 'maketastorage.blob.core.windows.net',
+				port: '',
+				pathname: '/uploads/**',
+			},
+		],
+	},
 	env: {
 		NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
 		NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN:
