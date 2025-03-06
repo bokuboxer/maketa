@@ -43,10 +43,14 @@ class SuggestChain:
 
     def run(self, input: schema.SuggestInput) -> schema.AnalysisResult:
         logger.info(f"Processing {input.type} type request")
+        logger.debug(f"Input data: {input.dict()}")
 
         # Handle belief explanation
         if input.type == model.ElementType.BELIEF and input.selected_labels:
             logger.info("Processing belief explanation with selected labels")
+            logger.debug(
+                f"Selected labels: {[label.dict() for label in input.selected_labels]}"
+            )
             prompt = PromptTemplate(
                 template=belief_explanation_template,
                 input_variables=["text", "selected_labels"],
@@ -67,13 +71,30 @@ class SuggestChain:
             # Ensure the belief_result has the correct structure
             if isinstance(belief_result, dict) and "labels" in belief_result:
                 belief_result = schema.BeliefAnalysisResult(
-                    labels=belief_result["labels"]
+                    labels=[
+                        schema.BeliefLabel(
+                            id=i + 1,
+                            description=label.get("description", ""),
+                            type="belief",
+                            explanation=label.get("explanation"),
+                        )
+                        for i, label in enumerate(belief_result["labels"])
+                    ]
                 )
-            return schema.AnalysisResult(belief_analysis=belief_result)
+                logger.debug(f"Structured belief result: {belief_result.dict()}")
+                result = schema.AnalysisResult(belief_analysis=belief_result)
+                logger.debug(f"Final response: {result.dict()}")
+                return result
+            else:
+                logger.error(f"Invalid belief result format: {belief_result}")
+                return schema.AnalysisResult(elements=[])
 
         # Handle initial suggestions for belief type
         if input.type == model.ElementType.BELIEF:
             logger.info(f"Processing belief suggestions with text: '{input.text}'")
+            logger.debug(
+                f"No selected labels present, using regular belief suggestion flow"
+            )
             text_to_use = (
                 input.text if input.text else self.format_elements(input.elements)
             )

@@ -8,6 +8,9 @@ import {
 import { Element } from "@/api/model/element";
 import { ElementType } from "@/api/model/elementType";
 import type { Failure } from "@/api/model/failure";
+import type { BeliefAnalysisResponse, BeliefExplanation } from "@/api/model/beliefAnalysisResponse";
+import type { BeliefLabel } from "@/api/model/beliefLabel";
+import type { SuggestElementsElementsSuggestPost200 } from "@/api/model/suggestElementsElementsSuggestPost200";
 import { useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
 import HypnoticLoader from "@/components/HypnoticLoader";
@@ -21,15 +24,10 @@ import {
 	steps,
 } from "@/components/analyze";
 import { IconArrowLeft } from "@tabler/icons-react";
+import type { SuggestInput } from "@/api/model/suggestInput";
 
 interface PageParams {
 	id: string;
-}
-
-interface BeliefAnalysisResponse {
-	belief_analysis?: {
-		labels: Element[];
-	};
 }
 
 // Main component
@@ -86,9 +84,9 @@ export default function AnalyzePage({
 				},
 			},
 			{
-				onSuccess: (data) => {
+				onSuccess: (data: Element[]) => {
 					if (data) {
-						const elements = data.map((element) => ({
+						const elements = data.map((element: Element) => ({
 							element,
 							isSelected: false,
 						}));
@@ -187,13 +185,13 @@ export default function AnalyzePage({
 						},
 					},
 					{
-						onSuccess: (data) => {
+						onSuccess: (data: Element[]) => {
 							console.log("Belief elements suggestion response:", {
 								receivedElements: data?.length || 0,
 								elements: data,
 							});
 							if (data) {
-								const elements = data.map((element) => ({
+								const elements = data.map((element: Element) => ({
 									element,
 									isSelected: false,
 								}));
@@ -221,10 +219,126 @@ export default function AnalyzePage({
 					},
 				);
 			} else if (activeStep === ElementType.belief && activeSubType === 'selection') {
-				setActiveSubType('explanation');
+				const selectedBelief = selectedElements[ElementType.belief][0]?.element;
+				if (!selectedBelief) {
+					console.error("No belief selected");
+					setNextLoading(false);
+					return;
+				}
+
+				const requestData: SuggestInput = {
+					type: ElementType.belief,
+					text: failure?.description || "",
+					elements: [],
+					selected_labels: [{
+						id: selectedBelief.id,
+						description: selectedBelief.description,
+						type: 'internal' as const,
+						explanation: null
+					}]
+				};
+
+				console.log("Sending belief explanation request:", {
+					selectedBelief,
+					requestData,
+					currentSubType: activeSubType,
+					currentStep: activeStep
+				});
+
+				// B-1からB-2への遷移時は必ずexplanation生成APIを呼び出す
+				suggestElements(
+					{
+						data: requestData,
+					},
+					{
+						onSuccess: (data: BeliefAnalysisResponse | null) => {
+							console.log("Raw API response:", {
+								data,
+								type: typeof data,
+								keys: data ? Object.keys(data) : null,
+								isNull: data === null,
+							});
+
+							if (data === null) {
+								console.error("Received null response from API");
+								setNextLoading(false);
+								return;
+							}
+
+							console.log("Belief explanation API response:", {
+								responseType: typeof data,
+								hasBeliefAnalysis: !!data?.belief_analysis,
+								labels: data?.belief_analysis?.labels,
+								rawData: data
+							});
+
+							// belief_analysisプロパティが存在する場合のみ処理
+							if (data?.belief_analysis?.labels) {
+								const explanations = data.belief_analysis.labels;
+								console.log("Processing belief explanations:", {
+									count: explanations.length,
+									explanations,
+									firstExplanation: explanations[0],
+								});
+
+								const elements = explanations.map((explanation: BeliefExplanation) => ({
+									element: {
+										...explanation,
+										id: Date.now() + Math.random(),
+										type: "belief" as const,
+									},
+									isSelected: false,
+								}));
+
+								console.log("Created elements for suggestions:", {
+									elements,
+									firstElement: elements[0],
+								});
+
+								setSuggestedElements((prev) => {
+									console.log("Updating suggested elements:", {
+										previousElements: prev[ElementType.belief],
+										newElements: elements,
+										elementType: ElementType.belief,
+									});
+									return {
+										...prev,
+										[ElementType.belief]: elements,
+									};
+								});
+
+								// 選択された要素を保持
+								setSelectedElements((prev) => {
+									console.log("Updating selected elements:", {
+										previousElements: prev[ElementType.belief],
+										keepingElement: selectedElements[ElementType.belief][0],
+									});
+									return {
+										...prev,
+										[ElementType.belief]: [selectedElements[ElementType.belief][0]],
+									};
+								});
+							} else {
+								console.warn("Invalid API response format:", {
+									data,
+									expectedFormat: "{ belief_analysis: { labels: BeliefExplanation[] } }",
+								});
+							}
+							setActiveSubType('explanation');
+							setNextLoading(false);
+						},
+						onError: (error) => {
+							console.error("Error suggesting belief explanations:", {
+								error,
+								requestData,
+							});
+							setNextLoading(false);
+						},
+					},
+				);
 			} else if (activeStep === ElementType.belief && activeSubType === 'explanation') {
 				let currentElements = selectedElements[ElementType.belief].map(
-					(element) => element.element
+					(element: { element: Element }) => element.element
 				);
 				suggestElements(
 					{
@@ -235,9 +349,9 @@ export default function AnalyzePage({
 						},
 					},
 					{
-						onSuccess: (data) => {
+						onSuccess: (data: Element[]) => {
 							if (data) {
-								const elements = data.map((element) => ({
+								const elements = data.map((element: Element) => ({
 									element,
 									isSelected: false,
 								}));
@@ -260,7 +374,7 @@ export default function AnalyzePage({
 				setActiveSubType('evidence');
 			} else if (activeStep === ElementType.disputation && activeSubType === 'evidence') {
 				let currentElements = selectedElements[ElementType.disputation].map(
-					(element) => element.element
+					(element: { element: Element }) => element.element
 				);
 				suggestElements(
 					{
@@ -271,9 +385,9 @@ export default function AnalyzePage({
 						},
 					},
 					{
-						onSuccess: (data) => {
+						onSuccess: (data: Element[]) => {
 							if (data) {
-								const elements = data.map((element) => ({
+								const elements = data.map((element: Element) => ({
 									element,
 									isSelected: false,
 								}));
