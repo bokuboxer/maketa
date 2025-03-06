@@ -293,30 +293,18 @@ resource "azurerm_container_app" "weaviate" {
         transport = "HTTP"
         port      = 8080
         path      = "/v1/.well-known/ready"
-        initial_delay = 30
-        interval      = 10
-        timeout       = 5
-        retries       = 3
       }
 
       readiness_probe {
         transport = "HTTP"
         port      = 8080
         path      = "/v1/.well-known/ready"
-        initial_delay = 30
-        interval      = 10
-        timeout       = 5
-        retries       = 3
       }
 
       startup_probe {
         transport = "HTTP"
         port      = 8080
         path      = "/v1/.well-known/ready"
-        initial_delay = 30
-        interval      = 10
-        timeout       = 5
-        retries       = 3
       }
     }
 
@@ -333,4 +321,31 @@ resource "azurerm_container_app" "weaviate" {
       percentage     = 100
     }
   }
+}
+
+# Storage Account
+resource "azurerm_storage_account" "main" {
+  name                     = "${var.project_name}storage"
+  resource_group_name      = azurerm_resource_group.main.name
+  location                 = azurerm_resource_group.main.location
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+
+  blob_properties {
+    cors_rule {
+      allowed_headers    = ["*"]
+      allowed_methods    = ["GET", "POST", "PUT", "DELETE"]
+      # allowed_origins    = ["https://${azurerm_linux_web_app.frontend.default_hostname}"] TODO:deploy時に有効にする
+      allowed_origins    = ["*"]
+      exposed_headers    = ["*"]
+      max_age_in_seconds = 3600
+    }
+  }
+}
+
+# Blob Container
+resource "azurerm_storage_container" "main" {
+  name                  = "uploads"
+  storage_account_id    = azurerm_storage_account.main.id
+  container_access_type = "private"
 } 
