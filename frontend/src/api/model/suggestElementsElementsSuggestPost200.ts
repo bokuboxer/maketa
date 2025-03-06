@@ -4,7 +4,6 @@
  * FastAPI
  * OpenAPI spec version: 0.1.0
  */
-import type { Element } from "./element";
-import type { BeliefAnalysisResponse } from "./beliefAnalysisResponse";
+import type { Element } from './element';
 
-export type SuggestElementsElementsSuggestPost200 = Element[] | BeliefAnalysisResponse | null;
+export type SuggestElementsElementsSuggestPost200 = Element[] | null;

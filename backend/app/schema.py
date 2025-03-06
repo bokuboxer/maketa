@@ -66,7 +66,7 @@ class SuggestInput(BaseModel):
     text: str
     type: model.ElementType
     elements: List[Element]
-    selected_labels: List[BeliefLabel] | None = None
+    selected_label: BeliefLabel | None = None
 
 
 class AnalyzeInput(BaseModel):

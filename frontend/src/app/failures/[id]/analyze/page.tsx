@@ -8,8 +8,9 @@ import {
 import { Element } from "@/api/model/element";
 import { ElementType } from "@/api/model/elementType";
 import type { Failure } from "@/api/model/failure";
-import type { BeliefAnalysisResponse, BeliefExplanation } from "@/api/model/beliefAnalysisResponse";
+import type { BeliefAnalysisResponse } from "@/api/model/beliefAnalysisResponse";
 import type { BeliefLabel } from "@/api/model/beliefLabel";
+import type { SuggestInput } from "@/api/model/suggestInput";
 import type { SuggestElementsElementsSuggestPost200 } from "@/api/model/suggestElementsElementsSuggestPost200";
 import { useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
@@ -24,10 +25,23 @@ import {
 	steps,
 } from "@/components/analyze";
 import { IconArrowLeft } from "@tabler/icons-react";
-import type { SuggestInput } from "@/api/model/suggestInput";
 
 interface PageParams {
 	id: string;
+}
+
+type ApiResponse = {
+	elements?: Element[] | null;
+	belief_analysis?: {
+		labels: BeliefLabel[];
+	} | null;
+} | Element[] | null;
+
+interface AnalysisResult {
+	elements?: Element[] | null;
+	belief_analysis?: {
+		labels: BeliefLabel[];
+	} | null;
 }
 
 // Main component
@@ -84,8 +98,12 @@ export default function AnalyzePage({
 				},
 			},
 			{
-				onSuccess: (data: Element[]) => {
-					if (data) {
+				onSuccess: (
+					data: SuggestElementsElementsSuggestPost200,
+					variables: { data: SuggestInput },
+					context: unknown
+				) => {
+					if (Array.isArray(data)) {
 						const elements = data.map((element: Element) => ({
 							element,
 							isSelected: false,
@@ -185,7 +203,11 @@ export default function AnalyzePage({
 						},
 					},
 					{
-						onSuccess: (data: Element[]) => {
+						onSuccess: (
+							data: SuggestElementsElementsSuggestPost200,
+							variables: { data: SuggestInput },
+							context: unknown
+						) => {
 							console.log("Belief elements suggestion response:", {
 								receivedElements: data?.length || 0,
 								elements: data,
@@ -226,112 +248,63 @@ export default function AnalyzePage({
 					return;
 				}
 
-				const requestData: SuggestInput = {
+				const requestData = {
 					type: ElementType.belief,
 					text: failure?.description || "",
 					elements: [],
-					selected_labels: [{
+					selected_label: {
 						id: selectedBelief.id,
 						description: selectedBelief.description,
 						type: 'internal' as const,
 						explanation: null
-					}]
+					}
 				};
 
 				console.log("Sending belief explanation request:", {
 					selectedBelief,
 					requestData,
 					currentSubType: activeSubType,
-					currentStep: activeStep
+					currentStep: activeStep,
+					requestDataKeys: Object.keys(requestData),
+					selectedLabel: requestData.selected_label
 				});
 
-				// B-1からB-2への遷移時は必ずexplanation生成APIを呼び出す
+				// B-1からB-2への遷移時
 				suggestElements(
 					{
 						data: requestData,
 					},
 					{
-						onSuccess: (data: BeliefAnalysisResponse | null) => {
-							console.log("Raw API response:", {
-								data,
-								type: typeof data,
-								keys: data ? Object.keys(data) : null,
-								isNull: data === null,
-							});
-
-							if (data === null) {
-								console.error("Received null response from API");
-								setNextLoading(false);
-								return;
-							}
-
-							console.log("Belief explanation API response:", {
-								responseType: typeof data,
-								hasBeliefAnalysis: !!data?.belief_analysis,
-								labels: data?.belief_analysis?.labels,
-								rawData: data
-							});
-
-							// belief_analysisプロパティが存在する場合のみ処理
-							if (data?.belief_analysis?.labels) {
-								const explanations = data.belief_analysis.labels;
-								console.log("Processing belief explanations:", {
-									count: explanations.length,
-									explanations,
-									firstExplanation: explanations[0],
-								});
-
-								const elements = explanations.map((explanation: BeliefExplanation) => ({
+						onSuccess: (
+							data: ApiResponse,
+							variables: { data: SuggestInput },
+							context: unknown
+						) => {
+							if (data && typeof data === 'object' && !Array.isArray(data) && 'belief_analysis' in data && data.belief_analysis?.labels) {
+								const elements = data.belief_analysis.labels.map((label: BeliefLabel) => ({
 									element: {
-										...explanation,
 										id: Date.now() + Math.random(),
-										type: "belief" as const,
+										description: label.description,
+										type: ElementType.belief,
+										created_at: new Date().toISOString(),
+										failure_id: failure?.id || 0,
+										explanation: label.explanation || undefined,
 									},
 									isSelected: false,
 								}));
 
-								console.log("Created elements for suggestions:", {
-									elements,
-									firstElement: elements[0],
-								});
+								setSuggestedElements((prev) => ({
+									...prev,
+									[ElementType.belief]: elements,
+								}));
 
-								setSuggestedElements((prev) => {
-									console.log("Updating suggested elements:", {
-										previousElements: prev[ElementType.belief],
-										newElements: elements,
-										elementType: ElementType.belief,
-									});
-									return {
-										...prev,
-										[ElementType.belief]: elements,
-									};
-								});
-
-								// 選択された要素を保持
-								setSelectedElements((prev) => {
-									console.log("Updating selected elements:", {
-										previousElements: prev[ElementType.belief],
-										keepingElement: selectedElements[ElementType.belief][0],
-									});
-									return {
-										...prev,
-										[ElementType.belief]: [selectedElements[ElementType.belief][0]],
-									};
-								});
-							} else {
-								console.warn("Invalid API response format:", {
-									data,
-									expectedFormat: "{ belief_analysis: { labels: BeliefExplanation[] } }",
-								});
+								// Keep the selected belief
+								setSelectedElements((prev) => ({
+									...prev,
+									[ElementType.belief]: [selectedElements[ElementType.belief][0]],
+								}));
 							}
 							setActiveSubType('explanation');
-							setNextLoading(false);
-						},
-						onError: (error) => {
-							console.error("Error suggesting belief explanations:", {
-								error,
-								requestData,
-							});
 							setNextLoading(false);
 						},
 					},
@@ -349,8 +322,12 @@ export default function AnalyzePage({
 						},
 					},
 					{
-						onSuccess: (data: Element[]) => {
-							if (data) {
+						onSuccess: (
+							data: SuggestElementsElementsSuggestPost200,
+							variables: { data: SuggestInput },
+							context: unknown
+						) => {
+							if (Array.isArray(data)) {
 								const elements = data.map((element: Element) => ({
 									element,
 									isSelected: false,
@@ -385,8 +362,12 @@ export default function AnalyzePage({
 						},
 					},
 					{
-						onSuccess: (data: Element[]) => {
-							if (data) {
+						onSuccess: (
+							data: SuggestElementsElementsSuggestPost200,
+							variables: { data: SuggestInput },
+							context: unknown
+						) => {
+							if (Array.isArray(data)) {
 								const elements = data.map((element: Element) => ({
 									element,
 									isSelected: false,

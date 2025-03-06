@@ -4,13 +4,13 @@
  * FastAPI
  * OpenAPI spec version: 0.1.0
  */
-import type { Element } from "./element";
-import type { ElementType } from "./elementType";
-import type { BeliefLabel } from "./beliefLabel";
+import type { ElementType } from './elementType';
+import type { Element } from './element';
+import type { SuggestInputSelectedLabel } from './suggestInputSelectedLabel';
 
 export interface SuggestInput {
-	text: string;
-	elements: Element[];
-	type: ElementType;
-	selected_labels?: BeliefLabel[];
+  text: string;
+  type: ElementType;
+  elements: Element[];
+  selected_label?: SuggestInputSelectedLabel;
 }

@@ -43,17 +43,16 @@ class SuggestChain:
 
     def run(self, input: schema.SuggestInput) -> schema.AnalysisResult:
         logger.info(f"Processing {input.type} type request")
-        logger.debug(f"Input data: {input.dict()}")
+        logger.debug(f"Input data: {input.model_dump()}")
+        logger.debug(f"Raw input object: {input}")
 
         # Handle belief explanation
-        if input.type == model.ElementType.BELIEF and input.selected_labels:
-            logger.info("Processing belief explanation with selected labels")
-            logger.debug(
-                f"Selected labels: {[label.dict() for label in input.selected_labels]}"
-            )
+        if input.type == model.ElementType.BELIEF and input.selected_label:
+            logger.info("Processing belief explanation with selected label")
+            logger.debug(f"Selected label: {input.selected_label}")
             prompt = PromptTemplate(
                 template=belief_explanation_template,
-                input_variables=["text", "selected_labels"],
+                input_variables=["text", "selected_label"],
                 partial_variables={
                     "format_instructions": self.belief_parser.get_format_instructions()
                 },
@@ -62,28 +61,25 @@ class SuggestChain:
             belief_result = chain.invoke(
                 {
                     "text": input.text,
-                    "selected_labels": "\n".join(
-                        [f"- {label.description}" for label in input.selected_labels]
-                    ),
+                    "selected_label": input.selected_label,
                 }
             )
             logger.debug(f"Belief explanation result: {belief_result}")
             # Ensure the belief_result has the correct structure
-            if isinstance(belief_result, dict) and "labels" in belief_result:
+            if isinstance(belief_result, dict) and "explanations" in belief_result:
                 belief_result = schema.BeliefAnalysisResult(
-                    labels=[
-                        schema.BeliefLabel(
+                    explanations=[
+                        schema.BeliefExplanation(
                             id=i + 1,
-                            description=label.get("description", ""),
+                            description=explanation.get("description", ""),
                             type="belief",
-                            explanation=label.get("explanation"),
                         )
-                        for i, label in enumerate(belief_result["labels"])
+                        for i, explanation in enumerate(belief_result["explanations"])
                     ]
                 )
-                logger.debug(f"Structured belief result: {belief_result.dict()}")
+                logger.debug(f"Structured belief result: {belief_result.model_dump()}")
                 result = schema.AnalysisResult(belief_analysis=belief_result)
-                logger.debug(f"Final response: {result.dict()}")
+                logger.debug(f"Final response: {result.model_dump()}")
                 return result
             else:
                 logger.error(f"Invalid belief result format: {belief_result}")
