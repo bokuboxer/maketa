@@ -37,16 +37,25 @@ export default function AuthPage() {
 	}, [router]);
 
 	return (
-		<div className="min-h-screen flex items-center justify-center bg-gray-50">
+		<div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-white">
 			<div className="w-full max-w-md mx-4 space-y-8">
-				<div className="text-center space-y-2">
-					<h1 className="text-5xl font-bold tracking-tight">Maketa</h1>
-					<p className="text-base text-gray-600">
-						失敗から学び、成長するためのアプリ
-					</p>
+				<div className="text-center">
+					<div className="relative">
+						<div className="flex justify-center mb-4">
+							<img
+								src="/apple-icon.png"
+								alt="Maketa Logo"
+								className="w-20 h-20 object-contain drop-shadow-xl transform transition-transform hover:scale-105 duration-300"
+							/>
+						</div>
+						<h1 className="text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">Maketa</h1>
+						<p className="text-base text-gray-600 mt-3 tracking-wide">
+							失敗から学び、成長するためのアプリ
+						</p>
+					</div>
 				</div>
 
-				<div className="space-y-6 p-6 pt-2 bg-white rounded-lg shadow-lg">
+				<div className="space-y-6 p-8 bg-white rounded-xl shadow-2xl backdrop-blur-sm bg-opacity-80">
 					<form onSubmit={handleSubmit} className="mt-6 space-y-4">
 						<div className="rounded-md shadow-sm -space-y-px">
 							<div>
