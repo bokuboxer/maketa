@@ -33,7 +33,7 @@ def create_client() -> weaviate.Client:
             # 開発環境（Docker Compose）
             logger.info("Using development Weaviate configuration")
             client = weaviate.Client(
-                url="http://localhost:8080",
+                url="http://weaviate:8080",
                 additional_headers=headers,
             )
         return client
