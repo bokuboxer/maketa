@@ -36,7 +36,7 @@ docker compose restart
 
 ```bash
 # マイグレーションファイルの作成
-docker compose exec backend sh -c "cd /app && PYTHONPATH=/app alembic revision --autogenerate -m 'add models'"
+docker compose exec backend sh -c "cd /app && PYTHONPATH=/app alembic revision --autogenerate -m '<migration_name>'"
 
 # 作成されたマイグレーションファイルに追記後、マイグレーションを実行
 docker compose exec backend alembic upgrade head
