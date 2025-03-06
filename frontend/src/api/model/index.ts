@@ -37,4 +37,3 @@ export * from './beliefLabelNewPerspective';
 export * from './getHeroesHeroesPost200';
 export * from './getHeroesInput';
 export * from './suggestInputSelectedLabel';
-export * from './suggestInputSelectedLabels';

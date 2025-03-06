@@ -4,15 +4,14 @@
  * FastAPI
  * OpenAPI spec version: 0.1.0
  */
-import type { Element } from "./element";
 
-export interface BeliefExplanation extends Element {
+export interface BeliefExplanation {
     type: "belief";
     description: string;  // 説明文
 }
 
 export interface BeliefAnalysisResult {
-    labels: BeliefExplanation[];  // 3つの説明を含む配列
+    explanations: BeliefExplanation[];  // 3つの説明を含む配列
 }
 
 export interface BeliefAnalysisResponse {

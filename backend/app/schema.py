@@ -16,8 +16,13 @@ class BeliefLabel(BaseModel):
     new_perspective: str | None = None
 
 
+class BeliefExplanation(BaseModel):
+    type: str
+    description: str
+
+
 class BeliefAnalysisResult(BaseModel):
-    labels: List[BeliefLabel]
+    explanations: List[BeliefExplanation]
 
 
 class Element(BaseModel):

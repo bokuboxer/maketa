@@ -65,21 +65,10 @@ class SuggestChain:
                 }
             )
             logger.debug(f"Belief explanation result: {belief_result}")
-            # Ensure the belief_result has the correct structure
-            if isinstance(belief_result, dict) and "explanations" in belief_result:
-                belief_result = schema.BeliefAnalysisResult(
-                    explanations=[
-                        schema.BeliefExplanation(
-                            id=i + 1,
-                            description=explanation.get("description", ""),
-                            type="belief",
-                        )
-                        for i, explanation in enumerate(belief_result["explanations"])
-                    ]
-                )
-                logger.debug(f"Structured belief result: {belief_result.model_dump()}")
+            # Handle response format
+            if isinstance(belief_result, schema.BeliefAnalysisResult):
                 result = schema.AnalysisResult(belief_analysis=belief_result)
-                logger.debug(f"Final response: {result.model_dump()}")
+                logger.debug(f"Final response 1: {result.model_dump()}")
                 return result
             else:
                 logger.error(f"Invalid belief result format: {belief_result}")
@@ -89,7 +78,7 @@ class SuggestChain:
         if input.type == model.ElementType.BELIEF:
             logger.info(f"Processing belief suggestions with text: '{input.text}'")
             logger.debug(
-                f"No selected labels present, using regular belief suggestion flow"
+                f"No selected label present, using regular belief suggestion flow"
             )
             text_to_use = (
                 input.text if input.text else self.format_elements(input.elements)
