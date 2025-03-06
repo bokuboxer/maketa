@@ -94,8 +94,8 @@ const FailureDetailPage = dynamic(
 					</Modal>
 
 					<div className="min-h-screen bg-white">
-						<div className="container mx-auto px-4 py-8">
-							<div className="flex items-center mb-6">
+						<div className="container mx-auto px-4 py-4">
+							<div className="flex items-center pb-4">
 								<button
 									onClick={() => router.push("/failures")}
 									className="text-black hover:text-gray-600 mr-4 p-2 rounded-full hover:bg-gray-100"
