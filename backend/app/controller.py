@@ -14,6 +14,9 @@ class UserController:
             firebase_uid=input.firebase_uid,
             email=input.email,
         )
+        if self.db.in_transaction():
+            self.db.rollback()
+
         self.db.begin()
         try:
             self.db.add(user)
@@ -47,6 +50,9 @@ class FailureController:
             description=input.description,
             user_id=input.user_id,
         )
+        if self.db.in_transaction():
+            self.db.rollback()
+
         self.db.begin()
         try:
             self.db.add(failure)
@@ -87,12 +93,15 @@ class ElementController:
             for element in input.elements
         ]
 
+        if self.db.in_transaction():
+            self.db.rollback()
+
         self.db.begin()
         try:
             self.db.add_all(elements)
             self.db.commit()
             for element in elements:
-                    self.db.refresh(element)
+                self.db.refresh(element)
         except Exception as e:
             self.db.rollback()
             raise e
