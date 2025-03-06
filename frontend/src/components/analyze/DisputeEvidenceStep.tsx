@@ -15,8 +15,8 @@ type StandardStepComponentProps = {
 	setActiveStep: React.Dispatch<React.SetStateAction<ElementType>>;
 	setActiveSubType: React.Dispatch<React.SetStateAction<string | null>>;
 	setNextLoading: React.Dispatch<React.SetStateAction<boolean>>;
-	adversityText: string | null;
-	setAdversityText: React.Dispatch<React.SetStateAction<string | null>>;
+	disputeEvidenceText: string | null;
+	setDisputeEvidenceText: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 export const DisputeEvidenceStep = ({
@@ -28,28 +28,30 @@ export const DisputeEvidenceStep = ({
 	setActiveStep,
 	setActiveSubType,
 	setNextLoading,
-	adversityText,
-	setAdversityText,
+	disputeEvidenceText,
+	setDisputeEvidenceText,
 }: StandardStepComponentProps) => {
+	console.log("DisputeEvidenceStep");
+
 	const { mutate: suggestElements } =
 		useSuggestElementsElementsSuggestPost();
 	const handleSuggestionClick = (suggestionText: string) => {
-		if (adversityText) {
-			const newText = adversityText + "\n" + suggestionText;
-			setAdversityText(newText);
+		if (disputeEvidenceText) {
+			const newText = disputeEvidenceText + "\n" + suggestionText;
+			setDisputeEvidenceText(newText);
 		} else {
-			setAdversityText(suggestionText);
+			setDisputeEvidenceText(suggestionText);
 		}
 	};
 
 	const handlePrev = () => {};
 	const handleNext = async () => {
-		if (!adversityText) return;
+		if (!disputeEvidenceText) return;
 		setNextLoading(true);
 		suggestElements({
 			data: {
 				type: ElementType.belief,
-				text: adversityText,
+				text: disputeEvidenceText,
 				elements: [],
 			},
 		},{
@@ -77,8 +79,8 @@ export const DisputeEvidenceStep = ({
 					className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-sm"
 					rows={5}
 					placeholder="根拠を入力してください"
-					value={adversityText || ""}
-					onChange={(e) => setAdversityText(e.target.value)}
+					value={disputeEvidenceText || ""}
+					onChange={(e) => setDisputeEvidenceText(e.target.value)}
 				/>
 			</div>
 			<div className="border-t border-gray-200 my-3" />
@@ -109,7 +111,7 @@ export const DisputeEvidenceStep = ({
 				handleNext={handleNext}
 				nextLoading={nextLoading}
 				prevDisabled={false}
-				nextDisabled={adversityText?.length === 0 || adversityText === null}
+				nextDisabled={disputeEvidenceText?.length === 0 || disputeEvidenceText === null}
 			/>
 		</div>
 	);

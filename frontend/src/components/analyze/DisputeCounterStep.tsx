@@ -15,8 +15,8 @@ type StandardStepComponentProps = {
 	setActiveStep: React.Dispatch<React.SetStateAction<ElementType>>;
 	setActiveSubType: React.Dispatch<React.SetStateAction<string | null>>;
 	setNextLoading: React.Dispatch<React.SetStateAction<boolean>>;
-	adversityText: string | null;
-	setAdversityText: React.Dispatch<React.SetStateAction<string | null>>;
+	disputeCounterText: string | null;
+	setDisputeCounterText: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 export const DisputeCounterStep = ({
@@ -28,28 +28,28 @@ export const DisputeCounterStep = ({
 	setActiveStep,
 	setActiveSubType,
 	setNextLoading,
-	adversityText,
-	setAdversityText,
+	disputeCounterText,
+	setDisputeCounterText,
 }: StandardStepComponentProps) => {
 	const { mutate: suggestElements } =
 		useSuggestElementsElementsSuggestPost();
 	const handleSuggestionClick = (suggestionText: string) => {
-		if (adversityText) {
-			const newText = adversityText + "\n" + suggestionText;
-			setAdversityText(newText);
+		if (disputeCounterText) {
+			const newText = disputeCounterText + "\n" + suggestionText;
+			setDisputeCounterText(newText);
 		} else {
-			setAdversityText(suggestionText);
+			setDisputeCounterText(suggestionText);
 		}
 	};
 
 	const handlePrev = () => {};
 	const handleNext = async () => {
-		if (!adversityText) return;
+		if (!disputeCounterText) return;
 		setNextLoading(true);
 		suggestElements({
 			data: {
 				type: ElementType.belief,
-				text: adversityText,
+				text: disputeCounterText,
 				elements: [],
 			},
 		},{
@@ -77,8 +77,8 @@ export const DisputeCounterStep = ({
 					className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-sm"
 					rows={5}
 					placeholder="反証の可能性を入力してください"
-					value={adversityText || ""}
-					onChange={(e) => setAdversityText(e.target.value)}
+					value={disputeCounterText || ""}
+					onChange={(e) => setDisputeCounterText(e.target.value)}
 				/>
 			</div>
 			<div className="border-t border-gray-200 my-3" />
@@ -109,7 +109,7 @@ export const DisputeCounterStep = ({
 				handleNext={handleNext}
 				nextLoading={nextLoading}
 				prevDisabled={false}
-				nextDisabled={adversityText?.length === 0 || adversityText === null}
+				nextDisabled={disputeCounterText?.length === 0 || disputeCounterText === null}
 			/>
 		</div>
 	);

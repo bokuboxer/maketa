@@ -18,10 +18,12 @@ import {
 	PreviousStepSummary,
 	BeliefExplanationStep,
 	AdversityStep,
+	DisputeEvidenceStep,
 	steps,
 	BeliefSelectionStep,
 } from "@/components/analyze";
 import { IconArrowLeft } from "@tabler/icons-react";
+import { DisputeCounterStep } from "@/components/analyze/DisputeCounterStep";
 
 interface PageParams {
 	id: string;
@@ -63,8 +65,8 @@ export default function AnalyzePage({
 	const [adversityText, setAdversityText] = useState<string | null>(null);
 	const [beliefSelectedElement, setBeliefSelectedElement] = useState<Element | null>(null);
 	const [beliefExplanationText, setBeliefExplanationText] = useState<string | null>(null);
-	const [disputationEvidenceId, setDisputationEvidenceId] = useState<string>("");
-	const [disputationCounterId, setDisputationCounterId] = useState<string>("");
+	const [disputeEvidenceText, setDisputeEvidenceText] = useState<string | null>(null);
+	const [disputeCounterText, setDisputeCounterText] = useState<string | null>(null);
 
 	const router = useRouter();
 	const [nextLoading, setNextLoading] = useState(false);
@@ -235,22 +237,23 @@ export default function AnalyzePage({
 				/>
 				<div className="space-y-4">
 					<div key={`${activeStep}-${activeSubType}`}>
-						{activeStep === ElementType.belief ?
-							activeSubType === "explanation" ? (
-								<BeliefExplanationStep
-									selectedElements={selectedElements}
-									suggestedElements={suggestedElements}
-									steps={steps}
-									beliefSelectedElement={beliefSelectedElement}
-									beliefExplanationText={beliefExplanationText}
-									setBeliefExplanationText={setBeliefExplanationText}
-									setActiveStep={setActiveStep}
-									setActiveSubType={setActiveSubType}
-									setNextLoading={setNextLoading}
-									nextLoading={nextLoading}
-									setSuggestedElements={setSuggestedElements}
-								/>
-						) : (
+						{activeStep === ElementType.adversity ?
+							 (
+								<AdversityStep
+								steps={steps}
+								selectedElements={selectedElements}
+								suggestedElements={suggestedElements}
+								nextLoading={nextLoading}
+								setSelectedElements={setSelectedElements}
+								setSuggestedElements={setSuggestedElements}
+								setActiveStep={setActiveStep}
+								setActiveSubType={setActiveSubType}
+								setNextLoading={setNextLoading}
+								adversityText={adversityText}
+								setAdversityText={setAdversityText}
+							/>
+						) : activeStep === ElementType.belief && activeSubType === "selection" ?
+						(
 							<BeliefSelectionStep
 								failure={failure}
 								steps={steps}
@@ -265,21 +268,53 @@ export default function AnalyzePage({
 								beliefSelectedElement={beliefSelectedElement}
 								setBeliefSelectedElement={setBeliefSelectedElement}
 							/>
-						) : (
-							<AdversityStep
+						) : activeStep === ElementType.belief && activeSubType === "explanation" ?
+						(
+							<BeliefExplanationStep
+							selectedElements={selectedElements}
+							suggestedElements={suggestedElements}
+							steps={steps}
+							beliefSelectedElement={beliefSelectedElement}
+							beliefExplanationText={beliefExplanationText}
+							setBeliefExplanationText={setBeliefExplanationText}
+							setActiveStep={setActiveStep}
+							setActiveSubType={setActiveSubType}
+							setNextLoading={setNextLoading}
+							nextLoading={nextLoading}
+							setSuggestedElements={setSuggestedElements}
+						/>
+						) : activeStep === ElementType.disputation && activeSubType === "evidence" ?
+						(
+							<DisputeEvidenceStep
 								steps={steps}
 								selectedElements={selectedElements}
 								suggestedElements={suggestedElements}
-								nextLoading={nextLoading}
 								setSelectedElements={setSelectedElements}
 								setSuggestedElements={setSuggestedElements}
 								setActiveStep={setActiveStep}
 								setActiveSubType={setActiveSubType}
 								setNextLoading={setNextLoading}
-								adversityText={adversityText}
-								setAdversityText={setAdversityText}
+								disputeEvidenceText={disputeEvidenceText}
+								setDisputeEvidenceText={setDisputeEvidenceText}
+								nextLoading={nextLoading}
 							/>
-						)}
+						) : activeStep === ElementType.disputation && activeSubType === "counter" ?
+						(
+							<DisputeCounterStep
+								steps={steps}
+								selectedElements={selectedElements}
+								suggestedElements={suggestedElements}
+								setSelectedElements={setSelectedElements}
+								setSuggestedElements={setSuggestedElements}
+								disputeCounterText={disputeCounterText}
+								setDisputeCounterText={setDisputeCounterText}
+								nextLoading={nextLoading}
+								setActiveStep={setActiveStep}
+								setActiveSubType={setActiveSubType}
+								setNextLoading={setNextLoading}
+							/>
+						) : null
+						}
 					</div>
 				</div>
 			</div>
