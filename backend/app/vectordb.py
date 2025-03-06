@@ -33,7 +33,7 @@ def create_client() -> weaviate.Client:
             # 開発環境（Docker Compose）
             logger.info("Using development Weaviate configuration")
             client = weaviate.Client(
-                url="http://localhost:8080",
+                url="http://weaviate:8080",
                 additional_headers=headers,
             )
         return client
@@ -90,11 +90,20 @@ def import_data(csv_path: str) -> None:
                 "failure": batch_df["Failure"],
                 "source": batch_df["Source"],
             }
-        batch.add_data_object(
-            data_object=properties,
-            class_name="Hero",
-            uuid=generate_uuid5(batch_df["Name"]),
-        )
+            # 既存のデータを確認
+            existing_data = client.data_object.get(
+                class_name="Hero",
+                uuid=generate_uuid5(batch_df["Name"]),
+            )
+            # データが存在する場合はスキップ
+            if existing_data:
+                continue
+
+            batch.add_data_object(
+                data_object=properties,
+                class_name="Hero",
+                uuid=generate_uuid5(batch_df["Name"]),
+            )
 
 
 def query_collection(search_query: str, limit: int) -> list[Hero] | None:

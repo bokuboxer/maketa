@@ -27,12 +27,11 @@ import type {
   UseQueryResult
 } from '@tanstack/react-query'
 import type {
+  ConcludeFailureInput,
   CreateElementInput,
   CreateFailureInput,
   CreateUserInput,
   GetFailureByIdFailureFailureIdGet200,
-  GetHeroesHeroesPost200,
-  GetHeroesInput,
   GetUserByFirebaseUidUserFirebaseUidGet200,
   HTTPValidationError,
   SuggestElementsElementsSuggestPost200,
@@ -477,6 +476,69 @@ export const useCreateFailureFailuresPost = <TError = HTTPValidationError,
       return useMutation(mutationOptions);
     }
     /**
+ * @summary Conclude Failure
+ */
+export const concludeFailureFailuresConcludePut = (
+    concludeFailureInput: ConcludeFailureInput,
+ ) => {
+      
+      
+      return customAxios<unknown>(
+      {url: `/failures/conclude`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: concludeFailureInput
+    },
+      );
+    }
+  
+
+
+export const getConcludeFailureFailuresConcludePutMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof concludeFailureFailuresConcludePut>>, TError,{data: ConcludeFailureInput}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof concludeFailureFailuresConcludePut>>, TError,{data: ConcludeFailureInput}, TContext> => {
+    
+const mutationKey = ['concludeFailureFailuresConcludePut'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof concludeFailureFailuresConcludePut>>, {data: ConcludeFailureInput}> = (props) => {
+          const {data} = props ?? {};
+
+          return  concludeFailureFailuresConcludePut(data,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ConcludeFailureFailuresConcludePutMutationResult = NonNullable<Awaited<ReturnType<typeof concludeFailureFailuresConcludePut>>>
+    export type ConcludeFailureFailuresConcludePutMutationBody = ConcludeFailureInput
+    export type ConcludeFailureFailuresConcludePutMutationError = HTTPValidationError
+
+    /**
+ * @summary Conclude Failure
+ */
+export const useConcludeFailureFailuresConcludePut = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof concludeFailureFailuresConcludePut>>, TError,{data: ConcludeFailureInput}, TContext>, }
+): UseMutationResult<
+        Awaited<ReturnType<typeof concludeFailureFailuresConcludePut>>,
+        TError,
+        {data: ConcludeFailureInput},
+        TContext
+      > => {
+
+      const mutationOptions = getConcludeFailureFailuresConcludePutMutationOptions(options);
+
+      return useMutation(mutationOptions);
+    }
+    /**
  * @summary Suggest Elements
  */
 export const suggestElementsElementsSuggestPost = (
@@ -601,70 +663,6 @@ export const useBulkCreateElementsElementsPost = <TError = HTTPValidationError,
       > => {
 
       const mutationOptions = getBulkCreateElementsElementsPostMutationOptions(options);
-
-      return useMutation(mutationOptions);
-    }
-    /**
- * @summary Get Heroes
- */
-export const getHeroesHeroesPost = (
-    getHeroesInput: GetHeroesInput,
- signal?: AbortSignal
-) => {
-      
-      
-      return customAxios<GetHeroesHeroesPost200>(
-      {url: `/heroes`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: getHeroesInput, signal
-    },
-      );
-    }
-  
-
-
-export const getGetHeroesHeroesPostMutationOptions = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof getHeroesHeroesPost>>, TError,{data: GetHeroesInput}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof getHeroesHeroesPost>>, TError,{data: GetHeroesInput}, TContext> => {
-    
-const mutationKey = ['getHeroesHeroesPost'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof getHeroesHeroesPost>>, {data: GetHeroesInput}> = (props) => {
-          const {data} = props ?? {};
-
-          return  getHeroesHeroesPost(data,)
-        }
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type GetHeroesHeroesPostMutationResult = NonNullable<Awaited<ReturnType<typeof getHeroesHeroesPost>>>
-    export type GetHeroesHeroesPostMutationBody = GetHeroesInput
-    export type GetHeroesHeroesPostMutationError = HTTPValidationError
-
-    /**
- * @summary Get Heroes
- */
-export const useGetHeroesHeroesPost = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof getHeroesHeroesPost>>, TError,{data: GetHeroesInput}, TContext>, }
-): UseMutationResult<
-        Awaited<ReturnType<typeof getHeroesHeroesPost>>,
-        TError,
-        {data: GetHeroesInput},
-        TContext
-      > => {
-
-      const mutationOptions = getGetHeroesHeroesPostMutationOptions(options);
 
       return useMutation(mutationOptions);
     }

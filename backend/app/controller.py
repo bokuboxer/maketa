@@ -15,8 +15,8 @@ class UserController:
             email=input.email,
         )
 
-        self.db.begin()
         try:
+            self.db.begin()
             self.db.add(user)
             self.db.commit()
             self.db.refresh(user)
@@ -24,21 +24,31 @@ class UserController:
             self.db.rollback()
             raise e
         finally:
-            self.db.rollback()
+            self.db.close()
+
         return None
 
     def get_by_firebase_uid(self, firebase_uid: str) -> schema.User | None:
-        user: model.User | None = (
-            self.db.query(model.User)
-            .options(joinedload(model.User.failures))
-            .filter(model.User.firebase_uid == firebase_uid)
-            .first()
-        )
+        try:
+            self.db.begin()
+            user: model.User | None = (
+                self.db.query(model.User)
+                .options(joinedload(model.User.failures))
+                .filter(model.User.firebase_uid == firebase_uid)
+                .first()
+            )
 
-        if not user:
-            return None
+            if not user:
+                return None
 
-        return schema.to_schema_user(user)
+            result = schema.to_schema_user(user)
+            self.db.commit()
+            return result
+        except Exception as e:
+            self.db.rollback()
+            raise e
+        finally:
+            self.db.close()
 
 
 class FailureController:
@@ -51,11 +61,9 @@ class FailureController:
             description=input.description,
             user_id=input.user_id,
         )
-        if self.db.in_transaction():
-            self.db.rollback()
 
-        self.db.begin()
         try:
+            self.db.begin()
             self.db.add(failure)
             self.db.commit()
             self.db.refresh(failure)
@@ -63,7 +71,7 @@ class FailureController:
             self.db.rollback()
             raise e
         finally:
-            self.db.rollback()
+            self.db.close()
         return None
 
     def conclude(self, input: schema.ConcludeFailureInput) -> None:
@@ -92,14 +100,13 @@ class FailureController:
             )
         )
 
-        self.db.begin()
         try:
             # 既存のレコードを更新
             failure.reason = reason
             failure.has_analyzed = True
             failure.hero_name = hero.name
             failure.hero_description = hero.description
-            failure.hero_failure = hero_failure
+            failure.hero_failure = hero.failure
             failure.hero_failure_reason = ""
             failure.hero_failure_source = hero.source
             failure.hero_failure_certainty = hero.certainty
@@ -111,17 +118,26 @@ class FailureController:
             self.db.rollback()
             raise e
         finally:
-            self.db.rollback()
+            self.db.close()
         return None
 
     def get_by_id(self, failure_id: int) -> schema.Failure | None:
-        failure: model.Failure | None = (
-            self.db.query(model.Failure)
-            .options(joinedload(model.Failure.elements))
-            .filter(model.Failure.id == failure_id)
-            .first()
-        )
-        return schema.to_schema_failure(failure) if failure else None
+        try:
+            self.db.begin()
+            failure: model.Failure | None = (
+                self.db.query(model.Failure)
+                .options(joinedload(model.Failure.elements))
+                .filter(model.Failure.id == failure_id)
+                .first()
+            )
+            result = schema.to_schema_failure(failure) if failure else None
+            self.db.commit()
+            return result
+        except Exception as e:
+            self.db.rollback()
+            raise e
+        finally:
+            self.db.close()
 
 
 class ElementController:
@@ -131,7 +147,6 @@ class ElementController:
 
     def suggest(self, input: schema.SuggestInput) -> list[schema.Element] | None:
         result = self.chain.run(input)
-
         return result.elements
 
     def bulk_create(self, input: schema.CreateElementInput) -> None:
@@ -144,8 +159,8 @@ class ElementController:
             for element in input.elements
         ]
 
-        self.db.begin()
         try:
+            self.db.begin()
             self.db.add_all(elements)
             self.db.commit()
             for element in elements:
@@ -154,6 +169,6 @@ class ElementController:
             self.db.rollback()
             raise e
         finally:
-            self.db.rollback()
+            self.db.close()
 
         return None
