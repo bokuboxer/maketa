@@ -47,10 +47,6 @@ export default function AuthPage() {
 				</div>
 
 				<div className="space-y-6 p-6 pt-2 bg-white rounded-lg shadow-lg">
-					{/* <h2 className="text-center text-3xl font-bold">
-						{isSignUp ? "新規登録" : "ログイン"}
-					</h2> */}
-
 					<form onSubmit={handleSubmit} className="mt-6 space-y-4">
 						<div className="rounded-md shadow-sm -space-y-px">
 							<div>

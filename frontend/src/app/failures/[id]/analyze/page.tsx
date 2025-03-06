@@ -4,6 +4,7 @@ import {
 	useGetFailureByIdFailureFailureIdGet,
 	useSuggestElementsElementsSuggestPost,
 	useBulkCreateElementsElementsPost,
+	useConcludeFailureFailuresConcludePut,
 } from "@/api/generated/default/default";
 import { Element } from "@/api/model/element";
 import { ElementType } from "@/api/model/elementType";
@@ -52,7 +53,10 @@ export default function AnalyzePage({
 	const { data: failure, isLoading: isFailureLoading } =
 		useGetFailureByIdFailureFailureIdGet(Number(resolvedParams.id)) as { data: Failure | undefined, isLoading: boolean };
 	const { mutate: suggestElements } = useSuggestElementsElementsSuggestPost();
-	const { mutate: createElements } = useBulkCreateElementsElementsPost();
+	const { mutateAsync: createElements } =
+		useBulkCreateElementsElementsPost();
+	const { mutateAsync: concludeFailure } =
+		useConcludeFailureFailuresConcludePut();
 	const [loading, setLoading] = useState(true);
 	const [activeStep, setActiveStep] = useState<ElementType>(() => {
 		// 最初のステップを取得

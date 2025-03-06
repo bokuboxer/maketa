@@ -9,6 +9,7 @@ from app.template import (
     belief_explanation_template,
     dispute_template,
     summary_template,
+    explain_template,
 )
 from langchain_core.output_parsers import PydanticOutputParser, StrOutputParser
 from langchain_core.prompts import PromptTemplate
@@ -138,3 +139,32 @@ class SuggestChain:
         return "\n".join(
             [f"{element.id}. {element.description}" for element in sorted_elements]
         )
+
+
+class ExplainChain:
+    def __init__(self, llm: BaseChatModel):
+        self.llm = llm
+        self.summarize_prompt = PromptTemplate(
+            template=explain_template,
+            input_variables=["user_failure", "hero_failure"],
+        )
+        self.chain = self.summarize_prompt | self.llm | StrOutputParser()
+
+    def run(self, input: schema.ExplainInput) -> str:
+        return self.chain.invoke(
+            {"user_failure": input.user_failure, "hero_failure": input.hero_failure}
+        )
+
+
+if __name__ == "__main__":
+    from langchain_openai import ChatOpenAI
+
+    chain = ExplainChain(llm=ChatOpenAI(model="gpt-4o-mini"))
+    print(
+        chain.run(
+            schema.ExplainInput(
+                user_failure="絵が独創的でクラスで1番下手だと言われた",
+                hero_failure="ピカソは新しすぎる発想で当初の作品が全く評価されず、芸術界に受け入れられるまで苦労した。",
+            )
+        )
+    )

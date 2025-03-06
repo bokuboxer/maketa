@@ -43,6 +43,14 @@ class Failure(BaseModel):
     has_analyzed: bool
     elements: list[Element]
 
+    hero_name: str | None
+    hero_description: str | None
+    hero_failure: str | None
+    hero_failure_source: str | None
+    hero_failure_certainty: float | None
+    explain_certainty: str | None
+    hero_failure_reason: str | None
+
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -101,6 +109,10 @@ class CreateFailureInput(BaseModel):
     description: str
 
 
+class ConcludeFailureInput(BaseModel):
+    failure_id: int
+
+
 class CreateElementInput(BaseModel):
     failure_id: int
     elements: list[Element]
@@ -113,6 +125,11 @@ class AnalysisResult(BaseModel):
 
 class GetHeroesInput(BaseModel):
     query: str
+
+
+class ExplainInput(BaseModel):
+    user_failure: str
+    hero_failure: str
 
 
 def to_schema_element(model_element: model.Element) -> Element:
@@ -132,6 +149,13 @@ def to_schema_failure(model_failure: model.Failure) -> Failure:
         created_at=model_failure.created_at,
         conclusion=model_failure.conclusion,
         has_analyzed=model_failure.has_analyzed,
+        hero_name=model_failure.hero_name,
+        hero_description=model_failure.hero_description,
+        hero_failure=model_failure.hero_failure,
+        hero_failure_source=model_failure.hero_failure_source,
+        hero_failure_certainty=model_failure.hero_failure_certainty,
+        explain_certainty=model_failure.explain_certainty,
+        hero_failure_reason=model_failure.hero_failure_reason,
         elements=[
             to_schema_element(element) for element in (model_failure.elements or [])
         ],

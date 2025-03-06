@@ -90,11 +90,20 @@ def import_data(csv_path: str) -> None:
                 "failure": batch_df["Failure"],
                 "source": batch_df["Source"],
             }
-        batch.add_data_object(
-            data_object=properties,
-            class_name="Hero",
-            uuid=generate_uuid5(batch_df["Name"]),
-        )
+            # 既存のデータを確認
+            existing_data = client.data_object.get(
+                class_name="Hero",
+                uuid=generate_uuid5(batch_df["Name"]),
+            )
+            # データが存在する場合はスキップ
+            if existing_data:
+                continue
+
+            batch.add_data_object(
+                data_object=properties,
+                class_name="Hero",
+                uuid=generate_uuid5(batch_df["Name"]),
+            )
 
 
 def query_collection(search_query: str, limit: int) -> list[Hero] | None:

@@ -93,21 +93,17 @@ export default function Failures() {
 				onClose={close}
 				size="lg"
 				centered
+				title={<span className="text-xl font-bold">新しい失敗カードを作成</span>}
 				classNames={{
 					content: "p-0 bg-white rounded-lg mx-4",
 					header: "hidden",
 				}}
 			>
 				<div className="">
-					<div className="flex justify-between items-center mb-4">
-						<h1 className="text-xl font-bold text-black">
-							新しい失敗カードを作成
-						</h1>
-					</div>
 					<form className="space-y-4" onSubmit={handleSubmit}>
 						<div>
 							<label className="block text-sm font-medium text-black mb-1">
-								失敗の内容
+								失敗の詳細
 							</label>
 							<textarea
 								className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-black focus:border-black text-black bg-white text-base leading-relaxed"
@@ -138,7 +134,7 @@ export default function Failures() {
 			<div className="min-h-screen bg-white">
 				<header className="bg-white border-b border-gray-200 py-3 px-6 sticky top-0 z-50 shadow-sm backdrop-blur-sm bg-white/80">
 					<div className="container mx-auto flex justify-between items-center max-w-5xl">
-						<h1 className="text-2xl font-bold tracking-tight text-black">
+						<h1 className="text-3xl font-bold tracking-tight text-black">
 							Maketa
 						</h1>
 						<button
@@ -146,7 +142,7 @@ export default function Failures() {
 							className="hover:bg-gray-100 rounded-full transition-all duration-200"
 							title="ログアウト"
 						>
-							<ArrowRightStartOnRectangleIcon className="w-5 h-5" />
+							<ArrowRightStartOnRectangleIcon className="w-6 h-6" />
 						</button>
 					</div>
 				</header>
@@ -183,9 +179,49 @@ export default function Failures() {
 																	: `/failures/${failure.id}/analyze`,
 															)
 														}
-														className="w-[60px] py-2 bg-black text-white rounded hover:bg-gray-800"
+														className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
+															failure.has_analyzed
+																? 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+																: 'bg-black text-white hover:bg-gray-800'
+														} flex items-center space-x-1`}
 													>
-														{failure.has_analyzed ? "詳細" : "分析"}
+														{failure.has_analyzed ? (
+															<>
+																<span>詳細</span>
+																<svg
+																	className="w-4 h-4"
+																	fill="none"
+																	stroke="currentColor"
+																	viewBox="0 0 24 24"
+																	xmlns="http://www.w3.org/2000/svg"
+																>
+																	<path
+																		strokeLinecap="round"
+																		strokeLinejoin="round"
+																		strokeWidth={2}
+																		d="M9 5l7 7-7 7"
+																	/>
+																</svg>
+															</>
+														) : (
+															<>
+																<span>分析</span>
+																<svg
+																	className="w-4 h-4"
+																	fill="none"
+																	stroke="currentColor"
+																	viewBox="0 0 24 24"
+																	xmlns="http://www.w3.org/2000/svg"
+																>
+																	<path
+																		strokeLinecap="round"
+																		strokeLinejoin="round"
+																		strokeWidth={2}
+																		d="M13 10V3L4 14h7v7l9-11h-7z"
+																	/>
+																</svg>
+															</>
+														)}
 													</button>
 													<span className="text-sm text-gray-500">
 														{new Date(failure.created_at).toLocaleDateString()}

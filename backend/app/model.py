@@ -2,17 +2,19 @@ from datetime import UTC, datetime
 from enum import Enum as PyEnum
 from typing import List
 
-from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, Text
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, Text, Float, String
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
-from .database import Base
+
+class Base(DeclarativeBase):
+    pass
 
 
 class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    firebase_uid: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
+    firebase_uid: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     email: Mapped[str] = mapped_column(Text, nullable=False)
     display_name: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
@@ -27,11 +29,21 @@ class Failure(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     description: Mapped[str] = mapped_column(Text, nullable=False)
+    reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     has_analyzed: Mapped[bool] = mapped_column(Boolean, default=False)
     conclusion: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=lambda: datetime.now(UTC)
     )
+
+    hero_name: Mapped[str | None] = mapped_column(Text, nullable=True)
+    hero_description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    hero_failure: Mapped[str | None] = mapped_column(Text, nullable=True)
+    hero_failure_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    hero_failure_source: Mapped[str | None] = mapped_column(Text, nullable=True)
+    hero_failure_certainty: Mapped[float | None] = mapped_column(Float, nullable=True)
+
+    explain_certainty: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     user_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id"), nullable=False
