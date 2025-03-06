@@ -10,6 +10,7 @@ from app.schema import Hero
 
 logger = logging.getLogger(__name__)
 
+
 def create_client() -> weaviate.Client:
     try:
         api_key = os.environ.get("OPENAI_API_KEY", "")
@@ -39,6 +40,7 @@ def create_client() -> weaviate.Client:
     except Exception as e:
         logger.error(f"Failed to create Weaviate client: {e}")
         raise
+
 
 def create_collection() -> None:
     client = create_client()
@@ -91,8 +93,8 @@ def import_data(csv_path: str) -> None:
         batch.add_data_object(
             data_object=properties,
             class_name="Hero",
-                uuid=generate_uuid5(batch_df["Name"]),
-            )
+            uuid=generate_uuid5(batch_df["Name"]),
+        )
 
 
 def query_collection(search_query: str, limit: int) -> list[Hero] | None:
