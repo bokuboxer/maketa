@@ -29,12 +29,12 @@ export default function AuthPage() {
 		}
 	};
 
-	useEffect(() => {
-		const unsubscribe = onAuthStateChanged(auth, (user) => {
-			if (user) router.push("/failures");
-		});
-		return () => unsubscribe();
-	}, [router]);
+	// useEffect(() => {
+	// 	const unsubscribe = onAuthStateChanged(auth, (user) => {
+	// 		if (user) router.push("/failures");
+	// 	});
+	// 	return () => unsubscribe();
+	// }, [router]);
 
 	return (
 		<div className="min-h-screen flex items-center justify-center bg-gray-50">
