@@ -24,6 +24,7 @@ import {
 } from "@/components/analyze";
 import { IconArrowLeft } from "@tabler/icons-react";
 import { DisputeCounterStep } from "@/components/analyze/DisputeCounterStep";
+import { LoadingModal } from "@/components/analyze/LoadingModal";
 
 interface PageParams {
 	id: string;
@@ -42,20 +43,9 @@ export default function AnalyzePage({
 		};
 	const { mutateAsync: suggestElements } =
 		useSuggestElementsElementsSuggestPost();
-	const { mutateAsync: createElements } = useBulkCreateElementsElementsPost();
-	const { mutateAsync: concludeFailure } =
-		useConcludeFailureFailuresConcludePut();
-	
+
 	const [loading, setLoading] = useState(true);
 	const [activeStep, setActiveStep] = useState<ElementType>(steps[0].type);
-	const [summarizedText, setSummarizedText] = useState<string>("");
-	const [selectedElements, setSelectedElements] = useState<GroupedElements>({
-		adversity: [],
-		belief_selection: [],
-		belief_explanation: [],
-		dispute_evidence: [],
-		dispute_counter: [],
-	});
 	const [suggestedElements, setSuggestedElements] = useState<GroupedElements>({
 		adversity: [],
 		belief_selection: [],
@@ -64,10 +54,17 @@ export default function AnalyzePage({
 		dispute_counter: [],
 	});
 	const [adversityText, setAdversityText] = useState<string | null>(null);
-	const [beliefSelectedElement, setBeliefSelectedElement] = useState<Element | null>(null);
-	const [beliefExplanationText, setBeliefExplanationText] = useState<string | null>(null);
-	const [disputeEvidenceText, setDisputeEvidenceText] = useState<string | null>(null);
-	const [disputeCounterText, setDisputeCounterText] = useState<string | null>(null);
+	const [beliefSelectedElement, setBeliefSelectedElement] =
+		useState<Element | null>(null);
+	const [beliefExplanationText, setBeliefExplanationText] = useState<
+		string | null
+	>(null);
+	const [disputeEvidenceText, setDisputeEvidenceText] = useState<string | null>(
+		null,
+	);
+	const [disputeCounterText, setDisputeCounterText] = useState<string | null>(
+		null,
+	);
 
 	const router = useRouter();
 	const [nextLoading, setNextLoading] = useState(false);
@@ -80,24 +77,19 @@ export default function AnalyzePage({
 			data: {
 				type: element_type,
 				text: text,
-				adversity: element_type === ElementType.adversity ? adversityText : null,
+				adversity:
+					element_type === ElementType.adversity ? adversityText : null,
 			},
 		});
-		console.log("[fetchSuggestElements] Response data:", data);
 		setSuggestedElements((prev) => ({
 			...prev,
 			[element_type]: data || [],
-		}));
-		setSelectedElements((prev) => ({
-			...prev,
-			[element_type]: [],
 		}));
 		setLoading(false);
 	};
 
 	useEffect(() => {
 		if (failure?.description) {
-			console.log("[Initial Adversity] Starting with description:", failure.description);
 			fetchSuggestElements(ElementType.adversity, failure?.description);
 		}
 	}, [failure?.description]);
@@ -119,6 +111,7 @@ export default function AnalyzePage({
 
 	return (
 		<div className="min-h-screen bg-white">
+			{nextLoading && <LoadingModal />}
 			<div className="container mx-auto px-4 py-8">
 				<div className="flex items-center mb-4">
 					<button
@@ -136,33 +129,24 @@ export default function AnalyzePage({
 					beliefSelectedElement={beliefSelectedElement?.description || ""}
 					beliefExplanationText={beliefExplanationText}
 					disputeEvidenceText={disputeEvidenceText}
-					selectedElements={selectedElements}
-					summarizedText={summarizedText}
 					steps={steps}
 				/>
-				<StepperComponent
-					activeStep={activeStep}
-					steps={steps}
-				/>
+				<StepperComponent activeStep={activeStep} steps={steps} />
 				<div className="space-y-4">
 					<div key={`${activeStep}`}>
-						{activeStep === ElementType.adversity ?
-							 (
-								<AdversityStep
+						{activeStep === ElementType.adversity ? (
+							<AdversityStep
 								steps={steps}
 								failure={failure}
-								selectedElements={selectedElements}
 								suggestedElements={suggestedElements}
 								nextLoading={nextLoading}
-								setSelectedElements={setSelectedElements}
 								setSuggestedElements={setSuggestedElements}
 								setActiveStep={setActiveStep}
 								setNextLoading={setNextLoading}
 								adversityText={adversityText}
 								setAdversityText={setAdversityText}
 							/>
-						) : activeStep === ElementType.belief_selection ?
-						(
+						) : activeStep === ElementType.belief_selection ? (
 							<BeliefSelectionStep
 								failure={failure}
 								adversityText={adversityText}
@@ -170,19 +154,16 @@ export default function AnalyzePage({
 								activeStep={activeStep}
 								nextLoading={nextLoading}
 								setActiveStep={setActiveStep}
-								selectedElements={selectedElements}
 								suggestedElements={suggestedElements}
 								setSuggestedElements={setSuggestedElements}
 								setNextLoading={setNextLoading}
 								beliefSelectedElement={beliefSelectedElement}
 								setBeliefSelectedElement={setBeliefSelectedElement}
 							/>
-						) : activeStep === ElementType.belief_explanation ?
-						(
+						) : activeStep === ElementType.belief_explanation ? (
 							<BeliefExplanationStep
 								failure={failure}
 								adversityText={adversityText}
-								selectedElements={selectedElements}
 								suggestedElements={suggestedElements}
 								steps={steps}
 								beliefSelectedElement={beliefSelectedElement?.description || ""}
@@ -193,17 +174,14 @@ export default function AnalyzePage({
 								nextLoading={nextLoading}
 								setSuggestedElements={setSuggestedElements}
 							/>
-						) : activeStep === ElementType.dispute_evidence ?
-						(
+						) : activeStep === ElementType.dispute_evidence ? (
 							<DisputeEvidenceStep
 								steps={steps}
 								failure={failure}
 								adversityText={adversityText}
 								beliefSelectedElement={beliefSelectedElement?.description || ""}
 								beliefExplanationText={beliefExplanationText}
-								selectedElements={selectedElements}
 								suggestedElements={suggestedElements}
-								setSelectedElements={setSelectedElements}
 								setSuggestedElements={setSuggestedElements}
 								setActiveStep={setActiveStep}
 								setNextLoading={setNextLoading}
@@ -211,8 +189,7 @@ export default function AnalyzePage({
 								setDisputeEvidenceText={setDisputeEvidenceText}
 								nextLoading={nextLoading}
 							/>
-						) : activeStep === ElementType.dispute_counter ?
-						(
+						) : activeStep === ElementType.dispute_counter ? (
 							<DisputeCounterStep
 								failure={failure}
 								adversityText={adversityText}
@@ -220,7 +197,6 @@ export default function AnalyzePage({
 								beliefExplanationText={beliefExplanationText}
 								disputeEvidenceText={disputeEvidenceText}
 								steps={steps}
-								selectedElements={selectedElements}
 								suggestedElements={suggestedElements}
 								disputeCounterText={disputeCounterText}
 								setDisputeCounterText={setDisputeCounterText}
@@ -228,8 +204,7 @@ export default function AnalyzePage({
 								setActiveStep={setActiveStep}
 								setNextLoading={setNextLoading}
 							/>
-						) : null
-						}
+						) : null}
 					</div>
 				</div>
 			</div>

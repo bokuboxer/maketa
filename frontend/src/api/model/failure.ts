@@ -4,28 +4,28 @@
  * FastAPI
  * OpenAPI spec version: 0.1.0
  */
-import type { FailureDetail } from './failureDetail';
-import type { FailureReason } from './failureReason';
-import type { Element } from './element';
-import type { FailureHeroName } from './failureHeroName';
-import type { FailureHeroDescription } from './failureHeroDescription';
-import type { FailureHeroFailure } from './failureHeroFailure';
-import type { FailureHeroFailureSource } from './failureHeroFailureSource';
-import type { FailureHeroFailureCertainty } from './failureHeroFailureCertainty';
-import type { FailureExplainCertainty } from './failureExplainCertainty';
+import type { FailureDetail } from "./failureDetail";
+import type { FailureReason } from "./failureReason";
+import type { Element } from "./element";
+import type { FailureHeroName } from "./failureHeroName";
+import type { FailureHeroDescription } from "./failureHeroDescription";
+import type { FailureHeroFailure } from "./failureHeroFailure";
+import type { FailureHeroFailureSource } from "./failureHeroFailureSource";
+import type { FailureHeroFailureCertainty } from "./failureHeroFailureCertainty";
+import type { FailureExplainCertainty } from "./failureExplainCertainty";
 
 export interface Failure {
-  id: number;
-  description: string;
-  detail: FailureDetail;
-  reason: FailureReason;
-  created_at: string;
-  has_analyzed: boolean;
-  elements: Element[];
-  hero_name: FailureHeroName;
-  hero_description: FailureHeroDescription;
-  hero_failure: FailureHeroFailure;
-  hero_failure_source: FailureHeroFailureSource;
-  hero_failure_certainty: FailureHeroFailureCertainty;
-  explain_certainty: FailureExplainCertainty;
+	id: number;
+	description: string;
+	detail: FailureDetail;
+	reason: FailureReason;
+	created_at: string;
+	has_analyzed: boolean;
+	elements: Element[];
+	hero_name: FailureHeroName;
+	hero_description: FailureHeroDescription;
+	hero_failure: FailureHeroFailure;
+	hero_failure_source: FailureHeroFailureSource;
+	hero_failure_certainty: FailureHeroFailureCertainty;
+	explain_certainty: FailureExplainCertainty;
 }
