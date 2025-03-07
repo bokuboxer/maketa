@@ -27,14 +27,12 @@ export const PreviousStepSummary = ({
 				<h2 className="font-semibold mb-2 text-black">
 					{activeStep === ElementType.adversity
 						? "失敗の内容"
-						: activeStep === ElementType.belief_selection
+						: activeStep === ElementType.belief_selection || activeStep === ElementType.belief_explanation
 							? "失敗の詳細"
-							: activeStep === ElementType.belief_explanation
-								? "失敗の原因"
-								: activeStep === ElementType.dispute_evidence
+							: activeStep === ElementType.dispute_evidence
 									? "失敗の原因"
 									: activeStep === ElementType.dispute_counter
-										? "原因の根拠"
+										? "失敗の原因"
 										: steps.find(
 												(step) =>
 													step.type ===
@@ -51,9 +49,9 @@ export const PreviousStepSummary = ({
 							: activeStep === ElementType.belief_explanation
 								? adversityText
 								: activeStep === ElementType.dispute_evidence
-									? beliefExplanationText
+									? beliefSelectedElement
 									: activeStep === ElementType.dispute_counter
-										? disputeEvidenceText
+										? beliefSelectedElement
 										: steps.find(
 												(step) =>
 													step.type ===

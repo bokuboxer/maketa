@@ -73,14 +73,17 @@ export const AdversityStep = ({
 				<textarea
 					className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-sm"
 					rows={5}
-					placeholder="詳しく説明してください"
+					placeholder={`入力例：
+試合会場には緊張感が漂っていた
+試合前は全く寝れなかった
+セコンドの指示が聞こえなかった`}
 					value={adversityText || ""}
 					onChange={(e) => setAdversityText(e.target.value)}
 				/>
 			</div>
 			<div className="border-t border-gray-200 my-3" />
 			<div>
-				<h4 className="text-sm font-medium text-black mb-2">入力候補</h4>
+				<h4 className="text-sm font-medium text-black mb-2">入力のヒント（選択すると入力欄に追加されます）</h4>
 				<div className="space-y-2">
 					{suggestedElements[ElementType.adversity].length === 0 ? (
 						<div className="text-gray-500 text-sm p-3 bg-gray-50 rounded-lg">

@@ -97,7 +97,7 @@ export const BeliefExplanationStep = ({
 			</div>
 			<div className="border-t border-gray-200 my-2" />
 			<div>
-				<h4 className="text-sm font-medium text-black mb-2">説明の候補</h4>
+				<h4 className="text-sm font-medium text-black mb-2">入力のヒント（選択すると入力欄に追加されます）</h4>
 				<div className="space-y-2">
 					{suggestedElements["belief_explanation"].map((element) => (
 						<button

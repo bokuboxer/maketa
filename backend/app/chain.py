@@ -125,12 +125,11 @@ class SuggestChain:
 
         if input.type == model.ElementType.DISPUTE_EVIDENCE:
             logger.info(
-                f"Processing dispute evidence with text: '{input.text}', adversity: '{input.adversity}', selected label: '{input.selected_label}', explanation: '{input.belief_explanation}'"
+                f"Processing dispute evidence with text: '{input.text}', adversity: '{input.adversity}', selected label: '{input.selected_label}'"
             )
             logger.debug(f"text: {input.text}")
             logger.debug(f"adversity: {input.adversity}")
             logger.debug(f"selected label: {input.selected_label}")
-            logger.debug(f"explanation: {input.belief_explanation}")
             # input.belief_summary = self.belief_summary_chain.invoke({"adversity_summary": input.adversity_summary, "selected_label": input.selected_label, "belief_explanation": self.format_elements(input.elements)})
             prompt = PromptTemplate(
                 template=dispute_evidence_template,
@@ -138,7 +137,6 @@ class SuggestChain:
                     "text",
                     "adversity",
                     "selected_label",
-                    "belief_explanation",
                 ],
                 partial_variables={
                     "format_instructions": self.json_parser.get_format_instructions()
@@ -150,7 +148,6 @@ class SuggestChain:
                     "text": input.text,
                     "adversity": input.adversity,
                     "selected_label": input.selected_label,
-                    "belief_explanation": input.belief_explanation,
                 }
             )
             logger.debug(f"Dispute evidence result: {result}")
@@ -158,12 +155,11 @@ class SuggestChain:
 
         if input.type == model.ElementType.DISPUTE_COUNTER:
             logger.info(
-                f"Processing dispute counter with text: '{input.text}', adversity: '{input.adversity}', selected label: '{input.selected_label}', explanation: '{input.belief_explanation}, disputation_evidence: '{input.dispute_evidence}'"
+                f"Processing dispute counter with text: '{input.text}', adversity: '{input.adversity}', selected label: '{input.selected_label}', disputation_evidence: '{input.dispute_evidence}'"
             )
             logger.debug(f"text: {input.text}")
             logger.debug(f"adversity: {input.adversity}")
             logger.debug(f"selected label: {input.selected_label}")
-            logger.debug(f"explanation: {input.belief_explanation}")
             logger.debug(f"disputation evidence: {input.dispute_evidence}")
             # input.dispute_evidence_summary = self.dispute_evidence_summary_chain.invoke({"adversity_summary": input.adversity_summary, "belief_summary": input.belief_summary, "dispute_evidence": self.format_elements(input.elements)})
             prompt = PromptTemplate(
@@ -172,7 +168,6 @@ class SuggestChain:
                     "text",
                     "adversity",
                     "selected_label",
-                    "belief_explanation",
                     "dispute_evidence",
                 ],
                 partial_variables={
@@ -185,7 +180,6 @@ class SuggestChain:
                     "text": input.text,
                     "adversity": input.adversity,
                     "selected_label": input.selected_label,
-                    "belief_explanation": input.belief_explanation,
                     "dispute_evidence": input.dispute_evidence,
                 }
             )
