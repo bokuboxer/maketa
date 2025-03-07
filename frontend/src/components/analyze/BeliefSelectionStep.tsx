@@ -7,6 +7,7 @@ import { Failure } from "@/api/model/failure";
 import { Element } from "@/api/model/element";
 type BeliefSelectionComponentProps = {
 	failure: Failure | undefined;
+	adversityText: string | null;
 	steps: StepConfig[];
 	activeStep: ElementType;
 	selectedElements: GroupedElements;
@@ -14,7 +15,6 @@ type BeliefSelectionComponentProps = {
 	nextLoading: boolean;
 	setSuggestedElements: React.Dispatch<React.SetStateAction<GroupedElements>>;
 	setActiveStep: React.Dispatch<React.SetStateAction<ElementType>>;
-	setActiveSubType: React.Dispatch<React.SetStateAction<string | null>>;
 	setNextLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	beliefSelectedElement: Element | null;
 	setBeliefSelectedElement: React.Dispatch<React.SetStateAction<Element | null>>;
@@ -26,10 +26,10 @@ export const BeliefSelectionStep = ({
 	steps,
 	nextLoading,
 	suggestedElements,
+	adversityText,
 	selectedElements,
 	setSuggestedElements,
 	setActiveStep,
-	setActiveSubType,
 	setNextLoading,
 	beliefSelectedElement,
 	setBeliefSelectedElement,
@@ -49,29 +49,28 @@ export const BeliefSelectionStep = ({
 
 	const handleNext = () => {
 		if (beliefSelectedElement === null) return;
-
+		console.log("beliefSelectedElement", beliefSelectedElement);
 		const requestData = {
-			type: ElementType.belief,
+			type: ElementType.belief_explanation,
 			text: failure?.description || "",
+			adversity: adversityText,
 			elements: [],
-			selected_label: {
-				id: beliefSelectedElement.id,
-				description: beliefSelectedElement.description,
-				type: "internal" as const,
-				explanation: null,
-			},
+			selected_label: beliefSelectedElement?.description || "",
 		};
+		console.log("requestData", requestData);
 		// B-1からB-2への遷移時
 		setNextLoading(true);
 		suggestElements({
 			data: requestData,
 		}, {
 			onSuccess: (data) => {
+				console.log("data", data);
 				setSuggestedElements((prev) => ({
 					...prev,
 					"belief_explanation": data || [],
 				}));
-				setActiveSubType("explanation");
+				setActiveStep(ElementType.belief_explanation);
+				console.log("suggestedElements", suggestedElements);
 				setNextLoading(false);
 			},
 		});
@@ -79,7 +78,7 @@ export const BeliefSelectionStep = ({
 
 	return (
 		<div className="border rounded-lg p-3 bg-white">
-			<StepHeader currentStep={steps.find((step) => step.type === ElementType.belief)} />
+			<StepHeader currentStep={steps.find((step) => step.type === ElementType.belief_selection)} />
 			<div className="grid grid-cols-2 gap-3">
 				<div className="space-y-2">
 					{firstColumn.map((element) => {
@@ -121,8 +120,7 @@ export const BeliefSelectionStep = ({
 				</div>
 			</div>
 			<NavigationButtons
-				activeStep={ElementType.adversity}
-				activeSubType="selection"
+				activeStep={ElementType.belief_selection}
 				handlePrev={handlePrev}
 				handleNext={handleNext}
 				nextLoading={nextLoading}

@@ -76,11 +76,13 @@ class Hero(BaseModel):
 
 
 class SuggestInput(BaseModel):
-    text: str
     type: model.ElementType
-    elements: List[Element]
-    selected_label: BeliefLabel | None = None
-
+    text: str
+    selected_label: str | None = None
+    adversity: str | None = None
+    belief_explanation: str | None = None
+    dispute_evidence: str | None = None
+    dispute_counter: str | None = None
 
 class AnalyzeInput(BaseModel):
     text: str

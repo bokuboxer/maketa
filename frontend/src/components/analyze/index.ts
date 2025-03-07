@@ -7,3 +7,4 @@ export * from "./StepHeader";
 export * from "./BeliefExplanationStep";
 export * from "./AdversityStep";
 export * from "./BeliefSelectionStep";
+export * from "./DisputeEvidenceStep";

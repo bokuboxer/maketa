@@ -6,7 +6,7 @@
  */
 
 export interface BeliefExplanation {
-	type: "belief";
+	type: "belief_explanation";
 	description: string; // 説明文
 }
 

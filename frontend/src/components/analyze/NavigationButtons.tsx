@@ -9,7 +9,6 @@ import clsx from "clsx";
 
 type NavigationButtonsProps = {
 	activeStep: ElementType;
-	activeSubType: string | null;
 	handlePrev: () => void;
 	handleNext: () => void;
 	nextLoading: boolean;
@@ -20,7 +19,6 @@ type NavigationButtonsProps = {
 // Navigation buttons component
 export const NavigationButtons = ({
 	activeStep,
-	activeSubType,
 	handlePrev,
 	handleNext,
 	nextLoading,
@@ -56,7 +54,7 @@ export const NavigationButtons = ({
 					<div className="w-5 h-5 flex items-center justify-center">
 						<Loader color="gray" variant="dots" size="xs" />
 					</div>
-				) : activeStep === ElementType.disputation && activeSubType === "counter" ? (
+				) : activeStep === ElementType.dispute_counter ? (
 					<>
 						保存
 						<IconDeviceFloppy size={20} />

@@ -4,7 +4,6 @@ import { StepperComponentProps } from "./types";
 // Stepper component
 export const StepperComponent = ({
 	activeStep,
-	activeSubType,
 	steps,
 }: StepperComponentProps) => {
 	return (
@@ -19,7 +18,7 @@ export const StepperComponent = ({
 						)
 						.map((step, index) => (
 							<div
-								key={`${step.type}-${step.subType || "main"}`}
+								key={`${step.type}`}
 								className="flex flex-col items-center"
 							>
 								<button

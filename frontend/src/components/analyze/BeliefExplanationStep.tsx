@@ -4,21 +4,25 @@ import { StepHeader } from "./StepHeader";
 import { NavigationButtons } from "./NavigationButtons";
 import { Element } from "@/api/model/element";
 import { useSuggestElementsElementsSuggestPost } from "@/api/generated/default/default";
+import { Failure } from "@/api/model";
 export interface BeliefExplanationComponentProps {
 	selectedElements: GroupedElements;
 	suggestedElements: GroupedElements;
 	steps: StepConfig[];
-	beliefSelectedElement: Element | null;
+	failure: Failure | undefined;
+	adversityText: string | null;
+	beliefSelectedElement: string | null;
 	beliefExplanationText: string | null;
 	nextLoading: boolean;
 	setBeliefExplanationText: React.Dispatch<React.SetStateAction<string | null>>;
 	setSuggestedElements: React.Dispatch<React.SetStateAction<GroupedElements>>;
 	setActiveStep: React.Dispatch<React.SetStateAction<ElementType>>;
-	setActiveSubType: React.Dispatch<React.SetStateAction<string | null>>;
 	setNextLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const BeliefExplanationStep = ({
+	failure,
+	adversityText,
 	selectedElements,
 	suggestedElements,
 	steps,
@@ -27,14 +31,13 @@ export const BeliefExplanationStep = ({
 	setBeliefExplanationText,
 	setSuggestedElements,
 	setActiveStep,
-	setActiveSubType,
 	setNextLoading,
 	nextLoading,
 }: BeliefExplanationComponentProps) => {
 	const { mutate: suggestElements } = useSuggestElementsElementsSuggestPost();
 	const currentStep = steps.find(
 		(step) =>
-			step.type === ElementType.belief && step.subType === "explanation",
+			step.type === ElementType.belief_explanation,
 	);
 
 	const handleSuggestionClick = (suggestionText: string, elementId: number) => {
@@ -47,27 +50,27 @@ export const BeliefExplanationStep = ({
 	};
 
 	const handlePrev = () => {
-		setActiveStep(ElementType.belief);
-		setActiveSubType("selection");
+		setActiveStep(ElementType.belief_selection);
 	};
 
 	const handleNext = () => {
-		let currentElements = selectedElements[ElementType.belief];
+		
 		suggestElements({
 			data: {
-				type: ElementType.disputation,
-				text: "",
-				elements: currentElements,
+				type: ElementType.dispute_evidence,
+				text: failure?.description || "",
+				adversity: adversityText,
+				selected_label: beliefSelectedElement || "",
+				belief_explanation: beliefExplanationText || "",
 			},
 		},{
 			onSuccess: (data) => {
 				setSuggestedElements((prev) => ({
 					...prev,
-					[ElementType.disputation]: data || [],
+					[ElementType.dispute_evidence]: data || [],
 				}));
 				setNextLoading(false);
-				setActiveStep(ElementType.disputation);
-				setActiveSubType("evidence");
+				setActiveStep(ElementType.dispute_evidence);
 			},
 		});
 	};
@@ -78,7 +81,7 @@ export const BeliefExplanationStep = ({
 			<div className="mt-4">
 				<div className="space-y-2">
 					<div className="bg-black text-white p-3 rounded-lg">
-						<p className="font-medium">{beliefSelectedElement?.description}</p>
+						<p className="font-medium">{beliefSelectedElement}</p>
 					</div>
 					<div className="w-full space-y-2">
 						<textarea
@@ -101,7 +104,7 @@ export const BeliefExplanationStep = ({
 							onClick={() =>
 								handleSuggestionClick(
 									element.description,
-									selectedElements.belief[0]?.id,
+									selectedElements.belief_explanation[0]?.id,
 								)
 							}
 							className="w-full text-left bg-gray-50 p-3 rounded-lg text-sm hover:bg-gray-100 transition-colors"
@@ -112,8 +115,7 @@ export const BeliefExplanationStep = ({
 				</div>
 			</div>
 			<NavigationButtons
-				activeStep={ElementType.adversity}
-				activeSubType="explanation"
+				activeStep={ElementType.belief_explanation}
 				handlePrev={handlePrev}
 				handleNext={handleNext}
 				nextLoading={nextLoading}

@@ -20,13 +20,16 @@ export interface StepConfig {
 // コンポーネントのProps型定義
 export interface StepperComponentProps {
 	activeStep: ElementType;
-	activeSubType: string | null;
 	steps: StepConfig[];
 }
 
 export interface PreviousStepSummaryProps {
 	activeStep: ElementType;
 	failure: any; // Using 'any' for now as we don't have the full failure type
+	adversityText: string | null;
+	beliefSelectedElement: string | null;
+	beliefExplanationText: string | null;
+	disputeEvidenceText: string | null;
 	selectedElements: GroupedElements;
 	summarizedText: string;
 	steps: StepConfig[];

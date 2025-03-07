@@ -2,18 +2,19 @@ import { ElementType } from "@/api/model/elementType";
 import { GroupedElements, StepConfig } from "./types";
 import { StepHeader } from "./StepHeader";
 import { useState } from "react";
+import { Failure } from "@/api/model";
 import { NavigationButtons } from "./NavigationButtons";
-import { useSuggestElementsElementsSuggestPost } from "@/api/generated/default/default";;
+import { useSuggestElementsElementsSuggestPost } from "@/api/generated/default/default";
 
 type StandardStepComponentProps = {
 	selectedElements: GroupedElements;
 	suggestedElements: GroupedElements;
 	steps: StepConfig[];
+	failure: Failure | undefined;
 	nextLoading: boolean;
 	setSelectedElements: React.Dispatch<React.SetStateAction<GroupedElements>>;
 	setSuggestedElements: React.Dispatch<React.SetStateAction<GroupedElements>>;
 	setActiveStep: React.Dispatch<React.SetStateAction<ElementType>>;
-	setActiveSubType: React.Dispatch<React.SetStateAction<string | null>>;
 	setNextLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	adversityText: string | null;
 	setAdversityText: React.Dispatch<React.SetStateAction<string | null>>;
@@ -22,11 +23,11 @@ type StandardStepComponentProps = {
 export const AdversityStep = ({
 	suggestedElements,
 	steps,
+	failure,
 	nextLoading,
 	setSelectedElements,
 	setSuggestedElements,
 	setActiveStep,
-	setActiveSubType,
 	setNextLoading,
 	adversityText,
 	setAdversityText,
@@ -48,22 +49,22 @@ export const AdversityStep = ({
 		setNextLoading(true);
 		suggestElements({
 			data: {
-				type: ElementType.belief,
-				text: adversityText,
-				elements: [],
+				type: ElementType.belief_selection,
+				text: failure?.description || "",
+				adversity: adversityText,
 			},
 		},{
 			onSuccess: (data) => {
+				console.log("data", data);
 				setSuggestedElements((prev) => ({
 					...prev,
-					[ElementType.belief]: data || [],
+					[ElementType.belief_selection]: data || [],
 				}));
 				setSelectedElements((prev) => ({
 				...prev,
-				[ElementType.belief]: [],
+				[ElementType.belief_selection]: [],
 				}));
-				setActiveStep(ElementType.belief);
-				setActiveSubType("selection");
+				setActiveStep(ElementType.belief_selection);
 				setNextLoading(false);
 			},
 		});
@@ -104,7 +105,6 @@ export const AdversityStep = ({
 			</div>
 			<NavigationButtons
 				activeStep={ElementType.adversity}
-				activeSubType={null}
 				handlePrev={handlePrev}
 				handleNext={handleNext}
 				nextLoading={nextLoading}
