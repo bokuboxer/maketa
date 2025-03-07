@@ -90,7 +90,6 @@ class FailureController:
         if not failure:
             return None
 
-        # TODO: 関連した要素を原因としてまとめる
         summarized_detail, summarized_reason, summarized_all = self.conclude_chain.run(
             input, failure.description
         )

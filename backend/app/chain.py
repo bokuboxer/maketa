@@ -35,22 +35,6 @@ class SuggestChain:
     def __init__(self, llm: BaseChatModel):
         self.llm = llm
         self.json_parser = PydanticOutputParser(pydantic_object=schema.AnalysisResult)
-        # self.adversity_summary_chain = PromptTemplate(
-        #     template=adversity_summary_template,
-        #     input_variables=["text", "elements_text"],
-        # ) | self.llm | StrOutputParser()
-        # self.belief_summary_chain = PromptTemplate(
-        #     template=belief_summary_template,
-        #     input_variables=["adversity_summary", "selected_label", "belief_explanation"],
-        # ) | self.llm | StrOutputParser()
-        # self.dispute_evidence_summary_chain = PromptTemplate(
-        #     template=dispute_evidence_summary_template,
-        #     input_variables=["adversity_summary", "belief_summary", "dispute_evidence"],
-        # ) | self.llm | StrOutputParser()
-        # self.dispute_counter_summary_chain = PromptTemplate(
-        #     template=dispute_counter_summary_template,
-        #     input_variables=["adversity_summary", "belief_summary", "dispute_evidence_summary", "dispute_counter"],
-        # ) | self.llm | StrOutputParser()
 
     def run(self, input: schema.SuggestInput) -> schema.AnalysisResult:
         logger.info(f"Processing {input.type} type request")
@@ -78,7 +62,6 @@ class SuggestChain:
             logger.info(
                 f"Processing belief suggestions with text: '{input.text}' and adversity: '{input.adversity}'"
             )
-            # input.adversity_summary = self.adversity_summary_chain.invoke({"text": input.text, "elements_text": self.format_elements(input.elements)})
             prompt = PromptTemplate(
                 template=template_map[input.type],
                 input_variables=["text", "adversity"],
