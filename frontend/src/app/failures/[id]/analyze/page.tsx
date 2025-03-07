@@ -175,6 +175,10 @@ export default function AnalyzePage({
 				<PreviousStepSummary
 					activeStep={activeStep}
 					failure={failure}
+					adversityText={adversityText}
+					beliefSelectedElement={beliefSelectedElement?.description || ""}
+					beliefExplanationText={beliefExplanationText}
+					disputeEvidenceText={disputeEvidenceText}
 					selectedElements={selectedElements}
 					summarizedText={summarizedText}
 					steps={steps}
