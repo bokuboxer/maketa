@@ -5,6 +5,8 @@ import { NavigationButtons } from "./NavigationButtons";
 import { useSuggestElementsElementsSuggestPost } from "@/api/generated/default/default";
 import { Failure } from "@/api/model/failure";
 import { Element } from "@/api/model/element";
+import { useState } from "react";
+
 type BeliefSelectionComponentProps = {
 	failure: Failure | undefined;
 	adversityText: string | null;
@@ -35,7 +37,23 @@ export const BeliefSelectionStep = ({
 	setBeliefSelectedElement,
 }: BeliefSelectionComponentProps) => {
 	const displayElements = [...suggestedElements[activeStep]];
+	const [label, setLabel] = useState("");
 	const { mutate: suggestElements } = useSuggestElementsElementsSuggestPost();
+
+	const handleAddBelief = () => {
+		const newElement: Element = {
+			id: 0,
+			description: label,
+			type: ElementType.belief_selection,
+			created_at: new Date().toISOString(),
+			failure_id: failure?.id || 0
+		};
+		setSuggestedElements((prev) => ({
+			...prev,
+			belief_selection: [...prev.belief_selection, newElement]
+		}));
+		setLabel("");  // 入力フィールドをクリア
+	};
 
 	const handleBeliefSelect = (element: any) => {
 		setBeliefSelectedElement((prev) => (prev == element ? null : element));
@@ -83,7 +101,7 @@ export const BeliefSelectionStep = ({
 			/>
 			<div className="grid grid-cols-2 gap-3">
 				{displayElements.map((element) => {
-					const isSelected = beliefSelectedElement?.id === element.id;
+					const isSelected = beliefSelectedElement?.description === element.description;
 					return (
 						<button
 							key={element.id}
@@ -98,6 +116,23 @@ export const BeliefSelectionStep = ({
 						</button>
 					);
 				})}
+			</div>
+			<div className="flex justify-center items-center gap-2 mt-4">
+				<input 
+					id="inputLabel" 
+					type="text" 
+					value={label} 
+					onChange={(e) => setLabel(e.target.value)} 
+					placeholder="新しい原因を入力"
+					className="flex-1 border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+				/>
+				<button
+					onClick={handleAddBelief}
+					disabled={!label.trim()}
+					className="px-4 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+				>
+					追加
+				</button>
 			</div>
 			<NavigationButtons
 				handlePrev={handlePrev}
