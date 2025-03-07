@@ -78,6 +78,7 @@ export default function Failures() {
 	}
 
 	if (!user || error) {
+		router.push("/");
 		return null;
 	}
 
