@@ -17,7 +17,6 @@ import {
 } from "../../api/generated/default/default";
 
 export default function Failures() {
-	const [uid, setUid] = useState<string | null>(null);
 	const router = useRouter();
 
 	const [opened, { close, open }] = useDisclosure(false);
@@ -29,9 +28,9 @@ export default function Failures() {
 		refetch,
 		isLoading,
 		error,
-	} = useGetUserByFirebaseUidUserFirebaseUidGet(uid ?? "", {
+	} = useGetUserByFirebaseUidUserFirebaseUidGet(auth.currentUser?.uid ?? "", {
 		query: {
-			enabled: !!uid,
+			enabled: !!auth.currentUser,
 		},
 	});
 
@@ -58,11 +57,7 @@ export default function Failures() {
 
 	useEffect(() => {
 		const unsubscribe = onAuthStateChanged(auth, (user) => {
-			if (!user) {
-				router.push("/");
-			} else {
-				setUid(user.uid);
-			}
+			if (!user) router.push("/");
 		});
 		return () => unsubscribe();
 	}, [router]);

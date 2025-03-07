@@ -60,6 +60,9 @@ export const AdversityStep = ({
 					setActiveStep(ElementType.belief_selection);
 					setNextLoading(false);
 				},
+				onError: () => {
+					setNextLoading(false);
+				}
 			},
 		);
 	};

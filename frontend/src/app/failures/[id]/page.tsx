@@ -35,7 +35,6 @@ const FailureDetailPage = dynamic(
 							size={250}
 							color="black"
 							secondaryColor="gray"
-							text="読み込み中"
 							isLoading={isLoading}
 							ringCount={5}
 						/>

@@ -72,7 +72,10 @@ export const BeliefExplanationStep = ({
 					setNextLoading(false);
 					setActiveStep(ElementType.dispute_evidence);
 				},
-			},
+				onError: () => {
+					setNextLoading(false);
+				}
+			},	
 		);
 	};
 
