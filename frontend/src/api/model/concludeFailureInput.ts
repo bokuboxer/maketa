@@ -7,4 +7,9 @@
 
 export interface ConcludeFailureInput {
   failure_id: number;
+  selected_label: string;
+  adversity: string;
+  belief_explanation: string;
+  dispute_evidence: string;
+  dispute_counter: string;
 }

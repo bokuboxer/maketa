@@ -37,8 +37,6 @@ export const DisputeEvidenceStep = ({
 	disputeEvidenceText,
 	setDisputeEvidenceText,
 }: StandardStepComponentProps) => {
-	console.log("DisputeEvidenceStep");
-
 	const { mutate: suggestElements } =
 		useSuggestElementsElementsSuggestPost();
 	const handleSuggestionClick = (suggestionText: string) => {
@@ -119,7 +117,7 @@ export const DisputeEvidenceStep = ({
 				handlePrev={handlePrev}
 				handleNext={handleNext}
 				nextLoading={nextLoading}
-				prevDisabled={false}
+				prevDisabled={nextLoading}
 				nextDisabled={disputeEvidenceText?.length === 0 || disputeEvidenceText === null}
 			/>
 		</div>

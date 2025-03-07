@@ -76,13 +76,6 @@ export default function AnalyzePage({
 		element_type: ElementType,
 		text: string,
 	) => {
-		console.log("activeStep", activeStep);
-		console.log("[fetchSuggestElements] Start", {
-			element_type,
-			text,
-			adversity: element_type === ElementType.belief_selection ? adversityText : null,
-			selectedElements,
-		});
 		const data = await suggestElements({
 			data: {
 				type: element_type,
@@ -108,42 +101,6 @@ export default function AnalyzePage({
 			fetchSuggestElements(ElementType.adversity, failure?.description);
 		}
 	}, [failure?.description]);
-
-	useEffect(() => {
-		if (activeStep === ElementType.belief_selection) {
-			const elements = selectedElements[ElementType.adversity];
-			console.log("[Belief Selection Step] Current state:", {
-				activeStep,
-				selectedAdversityElements: elements,
-				adversityText,
-			});
-		}
-	}, [activeStep, selectedElements[ElementType.adversity]]);
-
-
-
-	// const handleSave = () => {
-	// 	if (!failure?.id) {
-	// 		return;
-	// 	}
-	// 	setNextLoading(true);
-	// 	createElements(
-	// 		{
-	// 			data: {
-	// 				failure_id: failure.id,
-	// 				elements: Object.values(selectedElements).flatMap(
-	// 					(elements) => elements,
-	// 				),
-	// 			},
-	// 		},
-	// 		{
-	// 			onSuccess: () => {
-	// 				setNextLoading(false);
-	// 				router.push(`/failures/${failure.id}`);
-	// 			},
-	// 		},
-	// 	);
-	// };
 
 	if (isFailureLoading || loading) {
 		return (
@@ -265,8 +222,6 @@ export default function AnalyzePage({
 								steps={steps}
 								selectedElements={selectedElements}
 								suggestedElements={suggestedElements}
-								setSelectedElements={setSelectedElements}
-								setSuggestedElements={setSuggestedElements}
 								disputeCounterText={disputeCounterText}
 								setDisputeCounterText={setDisputeCounterText}
 								nextLoading={nextLoading}

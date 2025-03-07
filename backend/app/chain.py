@@ -10,6 +10,9 @@ from app.template import (
     dispute_evidence_template,
     dispute_counter_template,
     explain_template,
+    summarize_failure_template,
+    summarize_reason_template,
+    summarize_all_template,
 )
 from langchain_core.output_parsers import PydanticOutputParser, StrOutputParser
 from langchain_core.prompts import PromptTemplate
@@ -55,7 +58,7 @@ class SuggestChain:
         logger.debug(f"Raw input object: {input}")
 
         if input.type == model.ElementType.ADVERSITY:
-            logger.info(f"Processing adversity type request")
+            logger.info("Processing adversity type request")
             logger.debug(f"Input data: {input.model_dump()}")
             logger.debug(f"Raw input object: {input}")
             prompt = PromptTemplate(
@@ -131,7 +134,12 @@ class SuggestChain:
             # input.belief_summary = self.belief_summary_chain.invoke({"adversity_summary": input.adversity_summary, "selected_label": input.selected_label, "belief_explanation": self.format_elements(input.elements)})
             prompt = PromptTemplate(
                 template=dispute_evidence_template,
-                input_variables=["text", "adversity", "selected_label", "belief_explanation"],
+                input_variables=[
+                    "text",
+                    "adversity",
+                    "selected_label",
+                    "belief_explanation",
+                ],
                 partial_variables={
                     "format_instructions": self.json_parser.get_format_instructions()
                 },
@@ -160,7 +168,13 @@ class SuggestChain:
             # input.dispute_evidence_summary = self.dispute_evidence_summary_chain.invoke({"adversity_summary": input.adversity_summary, "belief_summary": input.belief_summary, "dispute_evidence": self.format_elements(input.elements)})
             prompt = PromptTemplate(
                 template=dispute_counter_template,
-                input_variables=["text", "adversity", "selected_label", "belief_explanation", "dispute_evidence"], 
+                input_variables=[
+                    "text",
+                    "adversity",
+                    "selected_label",
+                    "belief_explanation",
+                    "dispute_evidence",
+                ],
                 partial_variables={
                     "format_instructions": self.json_parser.get_format_instructions()
                 },
@@ -198,6 +212,70 @@ class ExplainChain:
         return self.chain.invoke(
             {"user_failure": input.user_failure, "hero_failure": input.hero_failure}
         )
+
+
+class ConcludeChain:
+    def __init__(self, llm: BaseChatModel):
+        self.llm = llm
+
+    def _summarize_failure(self, failure_text: str, adversity: str) -> str:
+        prompt = PromptTemplate(
+            template=summarize_failure_template,
+            input_variables=["failure_text", "adversity"],
+        )
+        chain = prompt | self.llm | StrOutputParser()
+        return chain.invoke(
+            {
+                "failure_text": failure_text,
+                "adversity": adversity,
+            }
+        )
+
+    def _summarize_reason(
+        self,
+        selected_label: str,
+        belief_explanation: str,
+        dispute_evidence: str,
+        dispute_counter: str,
+    ) -> str:
+        prompt = PromptTemplate(
+            template=summarize_reason_template,
+            input_variables=[
+                "summarized_failure",
+                "selected_label",
+                "belief_explanation",
+                "dispute_evidence",
+                "dispute_counter",
+            ],
+        )
+        chain = prompt | self.llm | StrOutputParser()
+        return chain.invoke(
+            {
+                "selected_label": selected_label,
+                "belief_explanation": belief_explanation,
+                "dispute_evidence": dispute_evidence,
+                "dispute_counter": dispute_counter,
+            }
+        )
+
+    def _summarize_all(self, summarized_failure: str, summarized_reason: str) -> str:
+        prompt = PromptTemplate(
+            template=summarize_all_template,
+            input_variables=["summarized_failure", "summarized_reason"],
+        )
+        chain = prompt | self.llm | StrOutputParser()
+        return chain.invoke({"summarized_failure": summarized_failure, "summarized_reason": summarized_reason})
+
+    def run(self, input: schema.ConcludeFailureInput, failure_text: str) -> tuple[str, str, str]:
+        summarized_failure = self._summarize_failure(failure_text, input.adversity)
+        summarized_reason = self._summarize_reason(
+            selected_label=input.selected_label,
+            belief_explanation=input.belief_explanation,
+            dispute_evidence=input.dispute_evidence,
+            dispute_counter=input.dispute_counter,
+        )
+        summarized_all = self._summarize_all(summarized_failure, summarized_reason)
+        return summarized_failure, summarized_reason, summarized_all
 
 
 if __name__ == "__main__":

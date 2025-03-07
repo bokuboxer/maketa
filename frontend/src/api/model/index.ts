@@ -45,6 +45,8 @@ export * from "./user";
 export * from "./userDisplayName";
 export * from "./validationError";
 export * from "./validationErrorLocItem";
+export * from './failureDetail';
+export * from './failureReason';
 export * from './suggestInputAdversity';
 export * from './suggestInputBeliefExplanation';
 export * from './suggestInputBeliefSummary';

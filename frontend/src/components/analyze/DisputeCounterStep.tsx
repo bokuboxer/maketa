@@ -1,11 +1,10 @@
 import { ElementType } from "@/api/model/elementType";
 import { GroupedElements, StepConfig } from "./types";
 import { StepHeader } from "./StepHeader";
-import { useState } from "react";
 import { Failure } from "@/api/model";
 import { NavigationButtons } from "./NavigationButtons";
-import { useSuggestElementsElementsSuggestPost } from "@/api/generated/default/default";
-;
+import { useConcludeFailureFailuresConcludePut } from "@/api/generated/default/default";
+import { useRouter } from "next/navigation";
 
 type StandardStepComponentProps = {
 	selectedElements: GroupedElements;
@@ -17,8 +16,6 @@ type StandardStepComponentProps = {
 	beliefExplanationText: string | null;
 	disputeEvidenceText: string | null;
 	nextLoading: boolean;
-	setSelectedElements: React.Dispatch<React.SetStateAction<GroupedElements>>;
-	setSuggestedElements: React.Dispatch<React.SetStateAction<GroupedElements>>;
 	setActiveStep: React.Dispatch<React.SetStateAction<ElementType>>;
 	setNextLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	disputeCounterText: string | null;
@@ -34,15 +31,14 @@ export const DisputeCounterStep = ({
 	beliefSelectedElement,
 	beliefExplanationText,
 	disputeEvidenceText,
-	setSelectedElements,
-	setSuggestedElements,
 	setActiveStep,
 	setNextLoading,
 	disputeCounterText,
 	setDisputeCounterText,
 }: StandardStepComponentProps) => {
-	const { mutate: suggestElements } =
-		useSuggestElementsElementsSuggestPost();
+	const router = useRouter();
+	const { mutate: concludeFailure } =
+		useConcludeFailureFailuresConcludePut();
 	const handleSuggestionClick = (suggestionText: string) => {
 		if (disputeCounterText) {
 			const newText = disputeCounterText + "\n" + suggestionText;
@@ -56,26 +52,21 @@ export const DisputeCounterStep = ({
 		setActiveStep(ElementType.dispute_evidence);
 	};
 	const handleNext = async () => {
+		if (!failure?.id) return;
 		if (!disputeCounterText) return;
 		setNextLoading(true);
-		suggestElements({
+		concludeFailure({
 			data: {
-				type: ElementType.dispute_counter,
-				text: failure?.description || "",
-				adversity: adversityText,
-				selected_label: beliefSelectedElement,
-				belief_explanation: beliefExplanationText,
-				dispute_evidence: disputeEvidenceText,
-			},		},{
-			onSuccess: (data) => {
-				setSuggestedElements((prev) => ({
-					...prev,
-					[ElementType.dispute_counter]: data || [],
-				}));
-				setSelectedElements((prev) => ({
-				...prev,
-				[ElementType.dispute_counter]: [],
-				}));
+				failure_id: failure?.id,
+				selected_label: beliefSelectedElement ?? "",
+				adversity: adversityText ?? "",
+				belief_explanation: beliefExplanationText ?? "",
+				dispute_evidence: disputeEvidenceText ?? "",
+				dispute_counter: disputeCounterText ?? "",
+			},
+		}, {
+			onSuccess: () => {
+				router.push(`/failures/${failure?.id}`);
 				setNextLoading(false);
 			},
 		});
@@ -119,7 +110,7 @@ export const DisputeCounterStep = ({
 				handlePrev={handlePrev}
 				handleNext={handleNext}
 				nextLoading={nextLoading}
-				prevDisabled={false}
+				prevDisabled={nextLoading}
 				nextDisabled={disputeCounterText?.length === 0 || disputeCounterText === null}
 			/>
 		</div>

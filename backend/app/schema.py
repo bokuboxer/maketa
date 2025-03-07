@@ -38,8 +38,9 @@ class Element(BaseModel):
 class Failure(BaseModel):
     id: int
     description: str
+    detail: str | None
+    reason: str | None
     created_at: datetime
-    conclusion: str | None
     has_analyzed: bool
     elements: list[Element]
 
@@ -49,7 +50,6 @@ class Failure(BaseModel):
     hero_failure_source: str | None
     hero_failure_certainty: float | None
     explain_certainty: str | None
-    hero_failure_reason: str | None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -84,6 +84,7 @@ class SuggestInput(BaseModel):
     dispute_evidence: str | None = None
     dispute_counter: str | None = None
 
+
 class AnalyzeInput(BaseModel):
     text: str
 
@@ -113,6 +114,11 @@ class CreateFailureInput(BaseModel):
 
 class ConcludeFailureInput(BaseModel):
     failure_id: int
+    selected_label: str
+    adversity: str
+    belief_explanation: str
+    dispute_evidence: str
+    dispute_counter: str
 
 
 class CreateElementInput(BaseModel):
@@ -147,8 +153,9 @@ def to_schema_failure(model_failure: model.Failure) -> Failure:
     return Failure(
         id=model_failure.id,
         description=model_failure.description,
+        detail=model_failure.detail,
+        reason=model_failure.reason,
         created_at=model_failure.created_at,
-        conclusion=model_failure.conclusion,
         has_analyzed=model_failure.has_analyzed,
         hero_name=model_failure.hero_name,
         hero_description=model_failure.hero_description,
@@ -156,7 +163,6 @@ def to_schema_failure(model_failure: model.Failure) -> Failure:
         hero_failure_source=model_failure.hero_failure_source,
         hero_failure_certainty=model_failure.hero_failure_certainty,
         explain_certainty=model_failure.explain_certainty,
-        hero_failure_reason=model_failure.hero_failure_reason,
         elements=[
             to_schema_element(element) for element in (model_failure.elements or [])
         ],

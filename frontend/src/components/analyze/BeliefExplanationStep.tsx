@@ -54,7 +54,8 @@ export const BeliefExplanationStep = ({
 	};
 
 	const handleNext = () => {
-		
+		if (!beliefExplanationText) return;
+		setNextLoading(true);
 		suggestElements({
 			data: {
 				type: ElementType.dispute_evidence,
