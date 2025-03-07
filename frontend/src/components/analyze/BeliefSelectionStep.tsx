@@ -55,7 +55,7 @@ export const BeliefSelectionStep = ({
 		setLabel("");  // 入力フィールドをクリア
 	};
 
-	const handleBeliefSelect = (element: any) => {
+	const handleBeliefSelect = (element: Element) => {
 		setBeliefSelectedElement((prev) => (prev == element ? null : element));
 	};
 	const handlePrev = () => {
