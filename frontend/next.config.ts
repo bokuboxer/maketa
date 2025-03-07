@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
 				protocol: "https",
 				hostname: "maketastorage.blob.core.windows.net",
 				port: "",
-				pathname: "/uploads/**",
+				pathname: "/**",
 			},
 		],
 	},
