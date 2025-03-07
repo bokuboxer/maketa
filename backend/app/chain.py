@@ -5,14 +5,10 @@ import app.model as model
 import app.schema as schema
 from app.template import (
     adversity_template,
-    adversity_summary_template,
     belief_suggest_template,
     belief_explanation_template,
-    belief_summary_template,
     dispute_evidence_template,
-    dispute_evidence_summary_template,
     dispute_counter_template,
-    dispute_counter_summary_template,
     explain_template,
 )
 from langchain_core.output_parsers import PydanticOutputParser, StrOutputParser
@@ -36,22 +32,22 @@ class SuggestChain:
     def __init__(self, llm: BaseChatModel):
         self.llm = llm
         self.json_parser = PydanticOutputParser(pydantic_object=schema.AnalysisResult)
-        self.adversity_summary_chain = PromptTemplate(
-            template=adversity_summary_template,
-            input_variables=["text", "elements_text"],
-        ) | self.llm | StrOutputParser()
-        self.belief_summary_chain = PromptTemplate(
-            template=belief_summary_template,
-            input_variables=["adversity_summary", "selected_label", "belief_explanation"],
-        ) | self.llm | StrOutputParser()
-        self.dispute_evidence_summary_chain = PromptTemplate(
-            template=dispute_evidence_summary_template,
-            input_variables=["adversity_summary", "belief_summary", "dispute_evidence"],
-        ) | self.llm | StrOutputParser()
-        self.dispute_counter_summary_chain = PromptTemplate(
-            template=dispute_counter_summary_template,
-            input_variables=["adversity_summary", "belief_summary", "dispute_evidence_summary", "dispute_counter"],
-        ) | self.llm | StrOutputParser()
+        # self.adversity_summary_chain = PromptTemplate(
+        #     template=adversity_summary_template,
+        #     input_variables=["text", "elements_text"],
+        # ) | self.llm | StrOutputParser()
+        # self.belief_summary_chain = PromptTemplate(
+        #     template=belief_summary_template,
+        #     input_variables=["adversity_summary", "selected_label", "belief_explanation"],
+        # ) | self.llm | StrOutputParser()
+        # self.dispute_evidence_summary_chain = PromptTemplate(
+        #     template=dispute_evidence_summary_template,
+        #     input_variables=["adversity_summary", "belief_summary", "dispute_evidence"],
+        # ) | self.llm | StrOutputParser()
+        # self.dispute_counter_summary_chain = PromptTemplate(
+        #     template=dispute_counter_summary_template,
+        #     input_variables=["adversity_summary", "belief_summary", "dispute_evidence_summary", "dispute_counter"],
+        # ) | self.llm | StrOutputParser()
 
     def run(self, input: schema.SuggestInput) -> schema.AnalysisResult:
         logger.info(f"Processing {input.type} type request")
@@ -72,17 +68,17 @@ class SuggestChain:
             chain = prompt | self.llm | self.json_parser
             result = chain.invoke({"text": input.text})
             logger.info(f"Generated {len(result.elements)} adversity elements")
-            input.adversity_summary = self.adversity_summary_chain.invoke({"text": input.text, "elements_text": self.format_elements(result.elements)})
             return schema.AnalysisResult(elements=result.elements)
 
         # Handle initial suggestions for belief type
         if input.type == model.ElementType.BELIEF_SELECTION:
             logger.info(
-                f"Processing belief suggestions with text: '{input.text}' and adversity summary: '{input.adversity_summary}'"
+                f"Processing belief suggestions with text: '{input.text}' and adversity: '{input.adversity}'"
             )
+            # input.adversity_summary = self.adversity_summary_chain.invoke({"text": input.text, "elements_text": self.format_elements(input.elements)})
             prompt = PromptTemplate(
                 template=template_map[input.type],
-                input_variables=["text", "adversity_summary"],
+                input_variables=["text", "adversity"],
                 partial_variables={
                     "format_instructions": self.json_parser.get_format_instructions()
                 },
@@ -91,7 +87,7 @@ class SuggestChain:
             result = chain.invoke(
                 {
                     "text": input.text,
-                    "adversity_summary": input.adversity_summary,
+                    "adversity": input.adversity,
                 }
             )
             logger.info(f"Generated {len(result.elements)} belief elements")
@@ -100,14 +96,14 @@ class SuggestChain:
         # Handle belief explanation
         if input.type == model.ElementType.BELIEF_EXPLANATION:
             logger.info(
-                f"Processing belief explanation with text: '{input.text}', adversity summary: '{input.adversity_summary}', selected label: '{input.selected_label}'"
+                f"Processing belief explanation with text: '{input.text}', adversity: '{input.adversity}', selected label: '{input.selected_label}'"
             )
             logger.debug(f"text: {input.text}")
-            logger.debug(f"adversity summary: {input.adversity_summary}")
+            logger.debug(f"adversity: {input.adversity}")
             logger.debug(f"selected label: {input.selected_label}")
             prompt = PromptTemplate(
                 template=belief_explanation_template,
-                input_variables=["text", "adversity_summary", "selected_label"],
+                input_variables=["text", "adversity", "selected_label"],
                 partial_variables={
                     "format_instructions": self.json_parser.get_format_instructions()
                 },
@@ -116,26 +112,26 @@ class SuggestChain:
             result = chain.invoke(
                 {
                     "text": input.text,
-                    "adversity_summary": input.adversity_summary,
+                    "adversity": input.adversity,
                     "selected_label": input.selected_label,
                 }
             )
             logger.debug(f"Belief explanation result: {result}")
-            input.belief_summary = self.belief_summary_chain.invoke({"adversity_summary": input.adversity_summary, "selected_label": input.selected_label, "belief_explanation": self.format_elements(result.elements)})
             # Handle response format
             return result
 
         if input.type == model.ElementType.DISPUTE_EVIDENCE:
             logger.info(
-                f"Processing dispute evidence with text: '{input.text}', adversity summary: '{input.adversity_summary}', selected label: '{input.selected_label}', explanation: '{input.explanation}'"
+                f"Processing dispute evidence with text: '{input.text}', adversity: '{input.adversity}', selected label: '{input.selected_label}', explanation: '{input.belief_explanation}'"
             )
             logger.debug(f"text: {input.text}")
-            logger.debug(f"adversity summary: {input.adversity_summary}")
+            logger.debug(f"adversity: {input.adversity}")
             logger.debug(f"selected label: {input.selected_label}")
-            logger.debug(f"explanation: {input.explanation}")
+            logger.debug(f"explanation: {input.belief_explanation}")
+            # input.belief_summary = self.belief_summary_chain.invoke({"adversity_summary": input.adversity_summary, "selected_label": input.selected_label, "belief_explanation": self.format_elements(input.elements)})
             prompt = PromptTemplate(
                 template=dispute_evidence_template,
-                input_variables=["text", "adversity_summary", "selected_label", "explanation"],
+                input_variables=["text", "adversity", "selected_label", "belief_explanation"],
                 partial_variables={
                     "format_instructions": self.json_parser.get_format_instructions()
                 },
@@ -144,27 +140,27 @@ class SuggestChain:
             result = chain.invoke(
                 {
                     "text": input.text,
-                    "adversity_summary": input.adversity_summary,
+                    "adversity": input.adversity,
                     "selected_label": input.selected_label,
-                    "explanation": input.explanation,
+                    "belief_explanation": input.belief_explanation,
                 }
             )
             logger.debug(f"Dispute evidence result: {result}")
-            input.dispute_evidence_summary = self.dispute_evidence_summary_chain.invoke({"adversity_summary": input.adversity_summary, "belief_summary": input.belief_summary, "dispute_evidence": self.format_elements(result.elements)})
             return result
 
         if input.type == model.ElementType.DISPUTE_COUNTER:
             logger.info(
-                f"Processing dispute counter with text: '{input.text}', adversity summary: '{input.adversity_summary}', selected label: '{input.selected_label}', explanation: '{input.explanation}, disputation_evidence: '{input.disputation_evidence}'"
+                f"Processing dispute counter with text: '{input.text}', adversity: '{input.adversity}', selected label: '{input.selected_label}', explanation: '{input.belief_explanation}, disputation_evidence: '{input.dispute_evidence}'"
             )
             logger.debug(f"text: {input.text}")
-            logger.debug(f"adversity summary: {input.adversity_summary}")
+            logger.debug(f"adversity: {input.adversity}")
             logger.debug(f"selected label: {input.selected_label}")
-            logger.debug(f"explanation: {input.explanation}")
-            logger.debug(f"disputation evidence: {input.disputation_evidence}")
+            logger.debug(f"explanation: {input.belief_explanation}")
+            logger.debug(f"disputation evidence: {input.dispute_evidence}")
+            # input.dispute_evidence_summary = self.dispute_evidence_summary_chain.invoke({"adversity_summary": input.adversity_summary, "belief_summary": input.belief_summary, "dispute_evidence": self.format_elements(input.elements)})
             prompt = PromptTemplate(
                 template=dispute_counter_template,
-                input_variables=["text", "adversity_summary", "selected_label", "explanation", "disputation_evidence"], 
+                input_variables=["text", "adversity", "selected_label", "belief_explanation", "dispute_evidence"], 
                 partial_variables={
                     "format_instructions": self.json_parser.get_format_instructions()
                 },
@@ -173,14 +169,13 @@ class SuggestChain:
             result = chain.invoke(
                 {
                     "text": input.text,
-                    "adversity_summary": input.adversity_summary,
+                    "adversity": input.adversity,
                     "selected_label": input.selected_label,
-                    "explanation": input.explanation,
-                    "disputation_evidence": input.disputation_evidence,
+                    "belief_explanation": input.belief_explanation,
+                    "dispute_evidence": input.dispute_evidence,
                 }
             )
             logger.debug(f"Dispute counter result: {result}")
-            input.dispute_counter_summary = self.dispute_counter_summary_chain.invoke({"adversity_summary": input.adversity_summary, "belief_summary": input.belief_summary, "dispute_evidence_summary": input.dispute_evidence_summary, "dispute_counter": self.format_elements(result.elements)})
             return result
 
     def format_elements(self, elements: List[schema.Element]) -> str:

@@ -80,10 +80,10 @@ class SuggestInput(BaseModel):
     text: str
     elements: List[Element]
     selected_label: BeliefLabel | None = None
-    adversity_summary: str | None = None
-    belief_summary: str | None = None
-    dispute_evidence_summary: str | None = None
-    dispute_counter_summary: str | None = None
+    adversity: str | None = None
+    belief_explanation: str | None = None
+    dispute_evidence: str | None = None
+    dispute_counter: str | None = None
 
 class AnalyzeInput(BaseModel):
     text: str
