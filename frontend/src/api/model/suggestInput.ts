@@ -7,18 +7,18 @@
 import type { ElementType } from './elementType';
 import type { Element } from './element';
 import type { SuggestInputSelectedLabel } from './suggestInputSelectedLabel';
-import type { SuggestInputAdversitySummary } from './suggestInputAdversitySummary';
-import type { SuggestInputBeliefSummary } from './suggestInputBeliefSummary';
-import type { SuggestInputDisputeEvidenceSummary } from './suggestInputDisputeEvidenceSummary';
-import type { SuggestInputDisputeCounterSummary } from './suggestInputDisputeCounterSummary';
+import type { SuggestInputAdversity } from './suggestInputAdversity';
+import type { SuggestInputBeliefExplanation } from './suggestInputBeliefExplanation';
+import type { SuggestInputDisputeEvidence } from './suggestInputDisputeEvidence';
+import type { SuggestInputDisputeCounter } from './suggestInputDisputeCounter';
 
 export interface SuggestInput {
   type: ElementType;
   text: string;
   elements: Element[];
   selected_label?: SuggestInputSelectedLabel;
-  adversity_summary?: SuggestInputAdversitySummary;
-  belief_summary?: SuggestInputBeliefSummary;
-  dispute_evidence_summary?: SuggestInputDisputeEvidenceSummary;
-  dispute_counter_summary?: SuggestInputDisputeCounterSummary;
+  adversity?: SuggestInputAdversity;
+  belief_explanation?: SuggestInputBeliefExplanation;
+  dispute_evidence?: SuggestInputDisputeEvidence;
+  dispute_counter?: SuggestInputDisputeCounter;
 }
