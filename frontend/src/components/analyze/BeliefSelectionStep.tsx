@@ -88,10 +88,10 @@ export const BeliefSelectionStep = ({
 						<button
 							key={element.id}
 							onClick={() => handleBeliefSelect(element)}
-							className={`w-full p-3 rounded-lg text-left transition-all text-xs ${
+							className={`w-full p-3 py-2 rounded-lg text-left transition-all text-xs ${
 								isSelected
 									? "bg-black text-white"
-									: "bg-gray-50 hover:bg-gray-100 text-black"
+									: "bg-gray-200 hover:bg-gray-100 text-black"
 							}`}
 						>
 							<p className="font-medium">{element.description}</p>

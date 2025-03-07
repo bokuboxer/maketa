@@ -91,9 +91,9 @@ export const AdversityStep = ({
 							<button
 								key={element.id}
 								onClick={() => handleSuggestionClick(element.description)}
-								className="w-full p-3 rounded-lg text-left bg-gray-50 hover:bg-gray-100 text-sm"
+								className="p-3 py-2 mr-2 rounded-lg text-left bg-gray-200 hover:bg-gray-100 text-xs"
 							>
-								{element.description}
+								+ {element.description}
 							</button>
 						))
 					)}
@@ -103,7 +103,7 @@ export const AdversityStep = ({
 				handlePrev={handlePrev}
 				handleNext={handleNext}
 				prevDisabled
-				nextDisabled={adversityText?.length === 0 || adversityText === null}
+				nextDisabled={adversityText?.length === 0 || adversityText === null || nextLoading}
 			/>
 		</div>
 	);

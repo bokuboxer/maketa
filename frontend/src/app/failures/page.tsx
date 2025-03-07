@@ -181,10 +181,10 @@ export default function Failures() {
 																	: `/failures/${failure.id}/analyze`,
 															)
 														}
-														className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
+														className={`flex justify-center items-center w-20 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
 															failure.has_analyzed
-																? "bg-gray-100 text-gray-800 hover:bg-gray-200"
-																: "bg-black text-white hover:bg-gray-800"
+																? "bg-black text-white hover:bg-gray-800"
+																: "bg-[#6366f1] text-white hover:bg-gray-800"
 														} flex items-center space-x-1`}
 													>
 														{failure.has_analyzed ? (
