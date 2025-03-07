@@ -17,10 +17,7 @@ export const StepperComponent = ({
 								index === self.findIndex((s) => s.type === step.type),
 						)
 						.map((step, index) => (
-							<div
-								key={`${step.type}`}
-								className="flex flex-col items-center"
-							>
+							<div key={`${step.type}`} className="flex flex-col items-center">
 								<button
 									className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
 										step.type === activeStep

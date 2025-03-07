@@ -6,7 +6,6 @@ import { Element } from "@/api/model/element";
 import { useSuggestElementsElementsSuggestPost } from "@/api/generated/default/default";
 import { Failure } from "@/api/model";
 export interface BeliefExplanationComponentProps {
-	selectedElements: GroupedElements;
 	suggestedElements: GroupedElements;
 	steps: StepConfig[];
 	failure: Failure | undefined;
@@ -23,7 +22,6 @@ export interface BeliefExplanationComponentProps {
 export const BeliefExplanationStep = ({
 	failure,
 	adversityText,
-	selectedElements,
 	suggestedElements,
 	steps,
 	beliefSelectedElement,
@@ -36,11 +34,10 @@ export const BeliefExplanationStep = ({
 }: BeliefExplanationComponentProps) => {
 	const { mutate: suggestElements } = useSuggestElementsElementsSuggestPost();
 	const currentStep = steps.find(
-		(step) =>
-			step.type === ElementType.belief_explanation,
+		(step) => step.type === ElementType.belief_explanation,
 	);
 
-	const handleSuggestionClick = (suggestionText: string, elementId: number) => {
+	const handleSuggestionClick = (suggestionText: string) => {
 		if (beliefExplanationText) {
 			const newText = beliefExplanationText + "\n" + suggestionText;
 			setBeliefExplanationText(newText);
@@ -56,24 +53,27 @@ export const BeliefExplanationStep = ({
 	const handleNext = () => {
 		if (!beliefExplanationText) return;
 		setNextLoading(true);
-		suggestElements({
-			data: {
-				type: ElementType.dispute_evidence,
-				text: failure?.description || "",
-				adversity: adversityText,
-				selected_label: beliefSelectedElement || "",
-				belief_explanation: beliefExplanationText || "",
+		suggestElements(
+			{
+				data: {
+					type: ElementType.dispute_evidence,
+					text: failure?.description || "",
+					adversity: adversityText,
+					selected_label: beliefSelectedElement || "",
+					belief_explanation: beliefExplanationText || "",
+				},
 			},
-		},{
-			onSuccess: (data) => {
-				setSuggestedElements((prev) => ({
-					...prev,
-					[ElementType.dispute_evidence]: data || [],
-				}));
-				setNextLoading(false);
-				setActiveStep(ElementType.dispute_evidence);
+			{
+				onSuccess: (data) => {
+					setSuggestedElements((prev) => ({
+						...prev,
+						[ElementType.dispute_evidence]: data || [],
+					}));
+					setNextLoading(false);
+					setActiveStep(ElementType.dispute_evidence);
+				},
 			},
-		});
+		);
 	};
 
 	return (
@@ -93,7 +93,7 @@ export const BeliefExplanationStep = ({
 							onChange={(e) => setBeliefExplanationText(e.target.value)}
 						/>
 					</div>
-				</div>	
+				</div>
 			</div>
 			<div className="border-t border-gray-200 my-4" />
 			<div>
@@ -102,12 +102,7 @@ export const BeliefExplanationStep = ({
 					{suggestedElements["belief_explanation"].map((element) => (
 						<button
 							key={element.id}
-							onClick={() =>
-								handleSuggestionClick(
-									element.description,
-									selectedElements.belief_explanation[0]?.id,
-								)
-							}
+							onClick={() => handleSuggestionClick(element.description)}
 							className="w-full text-left bg-gray-50 p-3 rounded-lg text-sm hover:bg-gray-100 transition-colors"
 						>
 							{element.description}
@@ -116,7 +111,6 @@ export const BeliefExplanationStep = ({
 				</div>
 			</div>
 			<NavigationButtons
-				activeStep={ElementType.belief_explanation}
 				handlePrev={handlePrev}
 				handleNext={handleNext}
 				nextLoading={nextLoading}
