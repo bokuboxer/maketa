@@ -124,7 +124,7 @@ export const BeliefSelectionStep = ({
 					type="text" 
 					value={label} 
 					onChange={(e) => setLabel(e.target.value)} 
-					placeholder="新しい原因を入力"
+					placeholder="ラベルを新規追加"
 					className="flex-1 border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
 				/>
 				<button

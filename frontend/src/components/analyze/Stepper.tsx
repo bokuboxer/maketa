@@ -32,7 +32,7 @@ export function Stepper({activeStep}: StepperProps) {
 				ElementType.dispute_counter,
 			] as ElementType[],
 			button: "D",
-			label: "反証",
+			label: "発見",
 		},
 	];
 

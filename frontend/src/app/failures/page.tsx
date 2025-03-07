@@ -89,7 +89,7 @@ export default function Failures() {
 				size="lg"
 				centered
 				title={
-					<span className="text-xl font-bold">新しい失敗カードを作成</span>
+					<span className="text-xl font-bold">Maketaカードを新規作成</span>
 				}
 				classNames={{
 					content: "p-0 bg-white rounded-lg mx-4",
@@ -100,12 +100,12 @@ export default function Failures() {
 					<form className="space-y-4" onSubmit={handleSubmit}>
 						<div>
 							<label className="block text-sm font-medium text-black mb-1">
-								失敗の詳細
+								失敗や敗北の内容を簡潔に記入してください
 							</label>
 							<textarea
 								className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-black focus:border-black text-black bg-white text-base leading-relaxed"
 								rows={5}
-								placeholder="失敗の概要を記入してください"
+								placeholder="記入例：昨日の試合に負けた"
 								value={description}
 								onChange={(e) => setDescription(e.target.value)}
 							/>
@@ -148,9 +148,9 @@ export default function Failures() {
 						{user?.failures.length === 0 ? (
 							<div className="text-center py-10">
 								<p className="text-black text-lg">
-									まだ失敗記録がありません。
+									まだMaketaカード（失敗記録）がありません。
 									<br />
-									右下の「＋」ボタンから新しい記録を追加してください。
+									右下の「＋」ボタンから追加してください。
 								</p>
 							</div>
 						) : (
