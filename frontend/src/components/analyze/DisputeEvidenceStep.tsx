@@ -114,10 +114,9 @@ export const DisputeEvidenceStep = ({
 			<NavigationButtons
 				handlePrev={handlePrev}
 				handleNext={handleNext}
-				nextLoading={nextLoading}
 				prevDisabled={nextLoading}
 				nextDisabled={
-					disputeEvidenceText?.length === 0 || disputeEvidenceText === null
+					disputeEvidenceText?.length === 0 || disputeEvidenceText === null || nextLoading
 				}
 			/>
 		</div>

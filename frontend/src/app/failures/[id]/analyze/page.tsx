@@ -24,6 +24,7 @@ import {
 } from "@/components/analyze";
 import { IconArrowLeft } from "@tabler/icons-react";
 import { DisputeCounterStep } from "@/components/analyze/DisputeCounterStep";
+import { LoadingModal } from "@/components/analyze/LoadingModal";
 
 interface PageParams {
 	id: string;
@@ -42,13 +43,9 @@ export default function AnalyzePage({
 		};
 	const { mutateAsync: suggestElements } =
 		useSuggestElementsElementsSuggestPost();
-	const { mutateAsync: createElements } = useBulkCreateElementsElementsPost();
-	const { mutateAsync: concludeFailure } =
-		useConcludeFailureFailuresConcludePut();
 
 	const [loading, setLoading] = useState(true);
 	const [activeStep, setActiveStep] = useState<ElementType>(steps[0].type);
-	const [summarizedText, setSummarizedText] = useState<string>("");
 	const [suggestedElements, setSuggestedElements] = useState<GroupedElements>({
 		adversity: [],
 		belief_selection: [],
@@ -114,6 +111,7 @@ export default function AnalyzePage({
 
 	return (
 		<div className="min-h-screen bg-white">
+			{nextLoading && <LoadingModal />}
 			<div className="container mx-auto px-4 py-8">
 				<div className="flex items-center mb-4">
 					<button
@@ -131,7 +129,6 @@ export default function AnalyzePage({
 					beliefSelectedElement={beliefSelectedElement?.description || ""}
 					beliefExplanationText={beliefExplanationText}
 					disputeEvidenceText={disputeEvidenceText}
-					summarizedText={summarizedText}
 					steps={steps}
 				/>
 				<StepperComponent activeStep={activeStep} steps={steps} />

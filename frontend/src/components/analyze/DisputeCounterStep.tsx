@@ -113,10 +113,9 @@ export const DisputeCounterStep = ({
 			<NavigationButtons
 				handlePrev={handlePrev}
 				handleNext={handleNext}
-				nextLoading={nextLoading}
 				prevDisabled={nextLoading}
 				nextDisabled={
-					disputeCounterText?.length === 0 || disputeCounterText === null
+					disputeCounterText?.length === 0 || disputeCounterText === null || nextLoading
 				}
 				isSaveButton
 			/>

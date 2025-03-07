@@ -17,12 +17,6 @@ export interface StepConfig {
 	example: string;
 }
 
-// コンポーネントのProps型定義
-export interface StepperComponentProps {
-	activeStep: ElementType;
-	steps: StepConfig[];
-}
-
 export interface DraggableElementListProps {
 	elementType: ElementType;
 	elements: Element[];

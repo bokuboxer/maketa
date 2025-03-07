@@ -102,9 +102,8 @@ export const BeliefSelectionStep = ({
 			<NavigationButtons
 				handlePrev={handlePrev}
 				handleNext={handleNext}
-				nextLoading={nextLoading}
 				prevDisabled={nextLoading}
-				nextDisabled={beliefSelectedElement === null}
+				nextDisabled={beliefSelectedElement === null || nextLoading}
 			/>
 		</div>
 	);

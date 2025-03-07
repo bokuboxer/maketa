@@ -102,7 +102,6 @@ export const AdversityStep = ({
 			<NavigationButtons
 				handlePrev={handlePrev}
 				handleNext={handleNext}
-				nextLoading={nextLoading}
 				prevDisabled
 				nextDisabled={adversityText?.length === 0 || adversityText === null}
 			/>

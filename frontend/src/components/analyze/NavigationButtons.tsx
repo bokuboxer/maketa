@@ -1,16 +1,13 @@
-import { ElementType } from "@/api/model/elementType";
 import {
 	IconArrowLeft,
 	IconArrowRight,
 	IconDeviceFloppy,
 } from "@tabler/icons-react";
-import { Loader } from "@mantine/core";
 import clsx from "clsx";
 
 type NavigationButtonsProps = {
 	handlePrev: () => void;
 	handleNext: () => void;
-	nextLoading: boolean;
 	prevDisabled: boolean;
 	nextDisabled: boolean;
 	isSaveButton?: boolean;
@@ -20,7 +17,6 @@ type NavigationButtonsProps = {
 export const NavigationButtons = ({
 	handlePrev,
 	handleNext,
-	nextLoading,
 	prevDisabled,
 	nextDisabled,
 	isSaveButton,
@@ -50,11 +46,7 @@ export const NavigationButtons = ({
 						: "bg-black text-white hover:bg-gray-800",
 				)}
 			>
-				{nextLoading ? (
-					<div className="w-5 h-5 flex items-center justify-center">
-						<Loader color="gray" variant="dots" size="xs" />
-					</div>
-				) : isSaveButton ? (
+				{isSaveButton ? (
 					<>
 						保存
 						<IconDeviceFloppy size={20} />

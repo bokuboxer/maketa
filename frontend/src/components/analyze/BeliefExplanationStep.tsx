@@ -113,9 +113,8 @@ export const BeliefExplanationStep = ({
 			<NavigationButtons
 				handlePrev={handlePrev}
 				handleNext={handleNext}
-				nextLoading={nextLoading}
 				prevDisabled={nextLoading}
-				nextDisabled={beliefExplanationText === null}
+				nextDisabled={beliefExplanationText === null || nextLoading}
 			/>
 		</div>
 	);

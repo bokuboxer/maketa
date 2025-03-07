@@ -9,7 +9,6 @@ type PreviousStepSummaryProps = {
 	beliefSelectedElement: string | null;
 	beliefExplanationText: string | null;
 	disputeEvidenceText: string | null;
-	summarizedText: string;
 	steps: StepConfig[];
 };
 
