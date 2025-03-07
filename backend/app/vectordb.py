@@ -68,7 +68,15 @@ def create_collection() -> None:
                 "dataType": ["text"],
             },
             {
+                "name": "energy",
+                "dataType": ["text"],
+            },
+            {
                 "name": "source",
+                "dataType": ["text"],
+            },
+            {
+                "name": "image_url",
                 "dataType": ["text"],
             },
         ],
@@ -88,7 +96,9 @@ def import_data(csv_path: str) -> None:
                 "name": batch_df["Name"],
                 "description": batch_df["Description"],
                 "failure": batch_df["Failure"],
+                "energy": batch_df["Energy"],
                 "source": batch_df["Source"],
+                "image_url": batch_df["ImageURL"],
             }
             # 既存のデータを確認
             existing_data = client.data_object.get(
@@ -109,7 +119,7 @@ def import_data(csv_path: str) -> None:
 def query_collection(search_query: str, limit: int) -> list[Hero] | None:
     client = create_client()
     response = (
-        client.query.get("Hero", ["name", "description", "failure", "source"])
+        client.query.get("Hero", ["name", "description", "failure", "source", "energy", "image_url"])
         .with_near_text({"concepts": [search_query]})
         .with_limit(limit)
         .with_additional(["certainty"])
@@ -131,6 +141,8 @@ def query_collection(search_query: str, limit: int) -> list[Hero] | None:
                 description=obj["description"],
                 failure=obj["failure"],
                 source=obj["source"],
+                energy=obj["energy"],
+                image_url=obj["image_url"],
                 certainty=obj.get("_additional", {}).get("certainty", 0),
             )
         )

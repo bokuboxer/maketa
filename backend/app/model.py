@@ -41,6 +41,8 @@ class Failure(Base):
     hero_failure: Mapped[str | None] = mapped_column(Text, nullable=True)
     hero_failure_source: Mapped[str | None] = mapped_column(Text, nullable=True)
     hero_failure_certainty: Mapped[float | None] = mapped_column(Float, nullable=True)
+    hero_energy: Mapped[str | None] = mapped_column(Text, nullable=True)
+    hero_image_url: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     explain_certainty: Mapped[str | None] = mapped_column(Text, nullable=True)
 

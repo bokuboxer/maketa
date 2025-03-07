@@ -59,7 +59,7 @@ const FailureDetailPage = dynamic(
 						<div className="space-y-4">
 							<div className="flex items-center justify-center">
 								<Image
-									src={`https://maketastorage.blob.core.windows.net/uploads/Bill-Gates.png`}
+									src={failure.hero_image_url || ""}
 									alt={failure.hero_name || "偉人の画像"}
 									width={300}
 									height={300}

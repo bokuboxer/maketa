@@ -47,8 +47,10 @@ class Failure(BaseModel):
     hero_name: str | None
     hero_description: str | None
     hero_failure: str | None
+    hero_energy: str | None
     hero_failure_source: str | None
     hero_failure_certainty: float | None
+    hero_image_url: str | None
     explain_certainty: str | None
 
     model_config = ConfigDict(from_attributes=True)
@@ -70,6 +72,8 @@ class Hero(BaseModel):
     description: str
     failure: str
     source: str
+    energy: str
+    image_url: str
     certainty: float
 
     model_config = ConfigDict(from_attributes=True)
@@ -160,8 +164,10 @@ def to_schema_failure(model_failure: model.Failure) -> Failure:
         hero_name=model_failure.hero_name,
         hero_description=model_failure.hero_description,
         hero_failure=model_failure.hero_failure,
+        hero_energy=model_failure.hero_energy,
         hero_failure_source=model_failure.hero_failure_source,
         hero_failure_certainty=model_failure.hero_failure_certainty,
+        hero_image_url=model_failure.hero_image_url,
         explain_certainty=model_failure.explain_certainty,
         elements=[
             to_schema_element(element) for element in (model_failure.elements or [])

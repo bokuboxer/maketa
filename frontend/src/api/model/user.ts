@@ -4,14 +4,14 @@
  * FastAPI
  * OpenAPI spec version: 0.1.0
  */
-import type { UserDisplayName } from "./userDisplayName";
-import type { Failure } from "./failure";
+import type { UserDisplayName } from './userDisplayName';
+import type { Failure } from './failure';
 
 export interface User {
-	id: number;
-	firebase_uid: string;
-	email: string;
-	display_name: UserDisplayName;
-	created_at: string;
-	failures: Failure[];
+  id: number;
+  firebase_uid: string;
+  email: string;
+  display_name: UserDisplayName;
+  created_at: string;
+  failures: Failure[];
 }

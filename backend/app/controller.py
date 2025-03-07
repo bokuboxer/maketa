@@ -8,6 +8,7 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+
 class UserController:
     def __init__(self, db: Session):
         self.db = db
@@ -122,6 +123,8 @@ class FailureController:
             failure.hero_failure_source = hero.source
             failure.hero_failure_certainty = hero.certainty
             failure.explain_certainty = explain_result
+            failure.hero_energy = hero.energy
+            failure.hero_image_url = hero.image_url
 
             self.db.commit()
             self.db.refresh(failure)
