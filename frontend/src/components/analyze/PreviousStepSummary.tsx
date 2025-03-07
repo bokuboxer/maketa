@@ -13,8 +13,8 @@ export const PreviousStepSummary = ({
 				<h2 className="font-semibold mb-2 text-black">
 					{activeStep === ElementType.adversity
 						? "失敗の内容"
-						: activeStep === ElementType.disputation
-							? "信念"
+						: activeStep === ElementType.dispute_evidence
+							? "失敗の原因"
 							: steps.find(
 									(step) =>
 										step.type ===
@@ -25,8 +25,8 @@ export const PreviousStepSummary = ({
 				<p className="text-black text-sm">
 					{activeStep === ElementType.adversity
 						? failure?.description
-						: activeStep === ElementType.disputation
-							? selectedElements[ElementType.belief]
+						: activeStep === ElementType.dispute_evidence
+							? selectedElements[ElementType.dispute_evidence]
 									.map((element) => element.description)
 									.join("\n")
 							: selectedElements[

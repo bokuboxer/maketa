@@ -13,7 +13,6 @@ type StandardStepComponentProps = {
 	setSelectedElements: React.Dispatch<React.SetStateAction<GroupedElements>>;
 	setSuggestedElements: React.Dispatch<React.SetStateAction<GroupedElements>>;
 	setActiveStep: React.Dispatch<React.SetStateAction<ElementType>>;
-	setActiveSubType: React.Dispatch<React.SetStateAction<string | null>>;
 	setNextLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	disputeCounterText: string | null;
 	setDisputeCounterText: React.Dispatch<React.SetStateAction<string | null>>;
@@ -26,7 +25,6 @@ export const DisputeCounterStep = ({
 	setSelectedElements,
 	setSuggestedElements,
 	setActiveStep,
-	setActiveSubType,
 	setNextLoading,
 	disputeCounterText,
 	setDisputeCounterText,
@@ -48,7 +46,7 @@ export const DisputeCounterStep = ({
 		setNextLoading(true);
 		suggestElements({
 			data: {
-				type: ElementType.belief,
+				type: ElementType.dispute_counter,
 				text: disputeCounterText,
 				elements: [],
 			},
@@ -56,14 +54,13 @@ export const DisputeCounterStep = ({
 			onSuccess: (data) => {
 				setSuggestedElements((prev) => ({
 					...prev,
-					[ElementType.belief]: data || [],
+					[ElementType.dispute_counter]: data || [],
 				}));
 				setSelectedElements((prev) => ({
 				...prev,
-				[ElementType.belief]: [],
+				[ElementType.dispute_counter]: [],
 				}));
-				setActiveStep(ElementType.belief);
-				setActiveSubType("selection");
+				setActiveStep(ElementType.dispute_counter);
 				setNextLoading(false);
 			},
 		});
@@ -71,7 +68,7 @@ export const DisputeCounterStep = ({
 
 	return (
 		<div className="border rounded-lg p-3 bg-white">
-			<StepHeader currentStep={steps.find((step) => step.type === ElementType.disputation && step.subType === "counter")} />
+			<StepHeader currentStep={steps.find((step) => step.type === ElementType.dispute_counter)} />
 			<div className="w-full space-y-2">
 				<textarea
 					className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-sm"
@@ -85,12 +82,12 @@ export const DisputeCounterStep = ({
 			<div>
 				<h4 className="text-sm font-medium text-black mb-2">入力候補</h4>
 				<div className="space-y-2">
-					{suggestedElements[ElementType.disputation].length === 0 ? (
+					{suggestedElements[ElementType.dispute_counter].length === 0 ? (
 						<div className="text-gray-500 text-sm p-3 bg-gray-50 rounded-lg">
 							入力候補はありません
 						</div>
 					) : (
-						suggestedElements[ElementType.disputation].map((element) => (
+						suggestedElements[ElementType.dispute_counter].map((element) => (
 							<button
 								key={element.id}
 								onClick={() => handleSuggestionClick(element.description)}
@@ -100,11 +97,10 @@ export const DisputeCounterStep = ({
 							</button>
 						))
 					)}
-				</div>
+				</div>		
 			</div>
 			<NavigationButtons
-				activeStep={ElementType.disputation}
-				activeSubType="counter"
+				activeStep={ElementType.dispute_counter}
 				handlePrev={handlePrev}
 				handleNext={handleNext}
 				nextLoading={nextLoading}

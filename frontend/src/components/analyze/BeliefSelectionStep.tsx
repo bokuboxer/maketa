@@ -14,7 +14,6 @@ type BeliefSelectionComponentProps = {
 	nextLoading: boolean;
 	setSuggestedElements: React.Dispatch<React.SetStateAction<GroupedElements>>;
 	setActiveStep: React.Dispatch<React.SetStateAction<ElementType>>;
-	setActiveSubType: React.Dispatch<React.SetStateAction<string | null>>;
 	setNextLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	beliefSelectedElement: Element | null;
 	setBeliefSelectedElement: React.Dispatch<React.SetStateAction<Element | null>>;
@@ -29,7 +28,6 @@ export const BeliefSelectionStep = ({
 	selectedElements,
 	setSuggestedElements,
 	setActiveStep,
-	setActiveSubType,
 	setNextLoading,
 	beliefSelectedElement,
 	setBeliefSelectedElement,
@@ -51,7 +49,7 @@ export const BeliefSelectionStep = ({
 		if (beliefSelectedElement === null) return;
 
 		const requestData = {
-			type: ElementType.belief,
+			type: ElementType.belief_selection,
 			text: failure?.description || "",
 			elements: [],
 			selected_label: {
@@ -71,7 +69,6 @@ export const BeliefSelectionStep = ({
 					...prev,
 					"belief_explanation": data || [],
 				}));
-				setActiveSubType("explanation");
 				setNextLoading(false);
 			},
 		});
@@ -79,7 +76,7 @@ export const BeliefSelectionStep = ({
 
 	return (
 		<div className="border rounded-lg p-3 bg-white">
-			<StepHeader currentStep={steps.find((step) => step.type === ElementType.belief)} />
+			<StepHeader currentStep={steps.find((step) => step.type === ElementType.belief_selection)} />
 			<div className="grid grid-cols-2 gap-3">
 				<div className="space-y-2">
 					{firstColumn.map((element) => {
@@ -121,8 +118,7 @@ export const BeliefSelectionStep = ({
 				</div>
 			</div>
 			<NavigationButtons
-				activeStep={ElementType.adversity}
-				activeSubType="selection"
+				activeStep={ElementType.belief_selection}
 				handlePrev={handlePrev}
 				handleNext={handleNext}
 				nextLoading={nextLoading}

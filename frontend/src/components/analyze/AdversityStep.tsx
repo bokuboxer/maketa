@@ -13,7 +13,6 @@ type StandardStepComponentProps = {
 	setSelectedElements: React.Dispatch<React.SetStateAction<GroupedElements>>;
 	setSuggestedElements: React.Dispatch<React.SetStateAction<GroupedElements>>;
 	setActiveStep: React.Dispatch<React.SetStateAction<ElementType>>;
-	setActiveSubType: React.Dispatch<React.SetStateAction<string | null>>;
 	setNextLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	adversityText: string | null;
 	setAdversityText: React.Dispatch<React.SetStateAction<string | null>>;
@@ -26,7 +25,6 @@ export const AdversityStep = ({
 	setSelectedElements,
 	setSuggestedElements,
 	setActiveStep,
-	setActiveSubType,
 	setNextLoading,
 	adversityText,
 	setAdversityText,
@@ -48,7 +46,7 @@ export const AdversityStep = ({
 		setNextLoading(true);
 		suggestElements({
 			data: {
-				type: ElementType.belief,
+				type: ElementType.belief_selection,
 				text: adversityText,
 				elements: [],
 			},
@@ -56,14 +54,13 @@ export const AdversityStep = ({
 			onSuccess: (data) => {
 				setSuggestedElements((prev) => ({
 					...prev,
-					[ElementType.belief]: data || [],
+					[ElementType.belief_selection]: data || [],
 				}));
 				setSelectedElements((prev) => ({
 				...prev,
-				[ElementType.belief]: [],
+				[ElementType.belief_selection]: [],
 				}));
-				setActiveStep(ElementType.belief);
-				setActiveSubType("selection");
+				setActiveStep(ElementType.belief_selection);
 				setNextLoading(false);
 			},
 		});
@@ -104,7 +101,6 @@ export const AdversityStep = ({
 			</div>
 			<NavigationButtons
 				activeStep={ElementType.adversity}
-				activeSubType={null}
 				handlePrev={handlePrev}
 				handleNext={handleNext}
 				nextLoading={nextLoading}

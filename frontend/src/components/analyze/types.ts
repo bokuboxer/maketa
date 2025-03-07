@@ -20,7 +20,6 @@ export interface StepConfig {
 // コンポーネントのProps型定義
 export interface StepperComponentProps {
 	activeStep: ElementType;
-	activeSubType: string | null;
 	steps: StepConfig[];
 }
 

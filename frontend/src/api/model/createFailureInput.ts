@@ -6,6 +6,6 @@
  */
 
 export interface CreateFailureInput {
-	user_id: number;
-	description: string;
+  user_id: number;
+  description: string;
 }

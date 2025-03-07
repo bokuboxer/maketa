@@ -4,13 +4,21 @@
  * FastAPI
  * OpenAPI spec version: 0.1.0
  */
-import type { ElementType } from "./elementType";
-import type { Element } from "./element";
-import type { SuggestInputSelectedLabel } from "./suggestInputSelectedLabel";
+import type { ElementType } from './elementType';
+import type { Element } from './element';
+import type { SuggestInputSelectedLabel } from './suggestInputSelectedLabel';
+import type { SuggestInputAdversitySummary } from './suggestInputAdversitySummary';
+import type { SuggestInputBeliefSummary } from './suggestInputBeliefSummary';
+import type { SuggestInputDisputeEvidenceSummary } from './suggestInputDisputeEvidenceSummary';
+import type { SuggestInputDisputeCounterSummary } from './suggestInputDisputeCounterSummary';
 
 export interface SuggestInput {
-	text: string;
-	type: ElementType;
-	elements: Element[];
-	selected_label?: SuggestInputSelectedLabel;
+  type: ElementType;
+  text: string;
+  elements: Element[];
+  selected_label?: SuggestInputSelectedLabel;
+  adversity_summary?: SuggestInputAdversitySummary;
+  belief_summary?: SuggestInputBeliefSummary;
+  dispute_evidence_summary?: SuggestInputDisputeEvidenceSummary;
+  dispute_counter_summary?: SuggestInputDisputeCounterSummary;
 }

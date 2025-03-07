@@ -48,19 +48,20 @@ export default function AnalyzePage({
 	
 	const [loading, setLoading] = useState(true);
 	const [activeStep, setActiveStep] = useState<ElementType>(steps[0].type);
-	const [activeSubType, setActiveSubType] = useState<string | null>(null);
 	const [summarizedText, setSummarizedText] = useState<string>("");
 	const [selectedElements, setSelectedElements] = useState<GroupedElements>({
 		adversity: [],
-		belief: [],
+		belief_selection: [],
 		belief_explanation: [],
-		disputation: [],
+		dispute_evidence: [],
+		dispute_counter: [],
 	});
 	const [suggestedElements, setSuggestedElements] = useState<GroupedElements>({
 		adversity: [],
-		belief: [],
+		belief_selection: [],
 		belief_explanation: [],
-		disputation: [],
+		dispute_evidence: [],
+		dispute_counter: [],
 	});
 	const [adversityText, setAdversityText] = useState<string | null>(null);
 	const [beliefSelectedElement, setBeliefSelectedElement] = useState<Element | null>(null);
@@ -117,7 +118,7 @@ export default function AnalyzePage({
 	}, [failure?.description]);
 
 	useEffect(() => {
-		if (activeStep === ElementType.belief) {
+		if (activeStep === ElementType.belief_selection) {
 			const elements = selectedElements[ElementType.adversity];
 			if (elements.length > 0) {
 				fetchSummary(ElementType.adversity, elements);
@@ -128,45 +129,40 @@ export default function AnalyzePage({
 	const handleNext = async () => {
 		const currentStep = steps.find(
 			(step) =>
-				step.type === activeStep &&
-				(!step.subType || step.subType === activeSubType),
+				step.type === activeStep,
 		);
 		const currentIndex = steps.indexOf(currentStep!);
 
 		if (currentIndex < steps.length - 1) {
 			if (activeStep === ElementType.adversity) {
 			} else if (
-				activeStep === ElementType.belief &&
-				activeSubType === "selection"
+				activeStep === ElementType.belief_selection
 			) {
 				
 			} else if (
-				activeStep === ElementType.belief &&
-				activeSubType === "explanation"
+				activeStep === ElementType.belief_explanation
 			) {
 				
 			} else if (
-				activeStep === ElementType.disputation &&
-				activeSubType === "evidence"
+				activeStep === ElementType.dispute_evidence
 			) {
-				let currentElements = selectedElements[ElementType.disputation];
+				let currentElements = selectedElements[ElementType.dispute_evidence];
 				const data = await suggestElements({
 					data: {
-						type: ElementType.disputation,
+						type: ElementType.dispute_evidence,
 						text: "",
 						elements: currentElements,
 					},
 				});
 				setSuggestedElements((prev) => ({
 					...prev,
-					[ElementType.disputation]: data || [],
+					[ElementType.dispute_evidence]: data || [],
 				}));
 				setSelectedElements((prev) => ({
 					...prev,
-					[ElementType.disputation]: [],
+					[ElementType.dispute_evidence]: [],
 				}));
 				setNextLoading(false);
-				setActiveSubType("counter");
 			}
 
 			setNextLoading(false);
@@ -232,11 +228,10 @@ export default function AnalyzePage({
 				/>
 				<StepperComponent
 					activeStep={activeStep}
-					activeSubType={activeSubType}
 					steps={steps}
 				/>
 				<div className="space-y-4">
-					<div key={`${activeStep}-${activeSubType}`}>
+					<div key={`${activeStep}`}>
 						{activeStep === ElementType.adversity ?
 							 (
 								<AdversityStep
@@ -247,12 +242,11 @@ export default function AnalyzePage({
 								setSelectedElements={setSelectedElements}
 								setSuggestedElements={setSuggestedElements}
 								setActiveStep={setActiveStep}
-								setActiveSubType={setActiveSubType}
 								setNextLoading={setNextLoading}
 								adversityText={adversityText}
 								setAdversityText={setAdversityText}
 							/>
-						) : activeStep === ElementType.belief && activeSubType === "selection" ?
+						) : activeStep === ElementType.belief_selection ?
 						(
 							<BeliefSelectionStep
 								failure={failure}
@@ -260,7 +254,6 @@ export default function AnalyzePage({
 								activeStep={activeStep}
 								nextLoading={nextLoading}
 								setActiveStep={setActiveStep}
-								setActiveSubType={setActiveSubType}
 								selectedElements={selectedElements}
 								suggestedElements={suggestedElements}
 								setSuggestedElements={setSuggestedElements}
@@ -268,7 +261,7 @@ export default function AnalyzePage({
 								beliefSelectedElement={beliefSelectedElement}
 								setBeliefSelectedElement={setBeliefSelectedElement}
 							/>
-						) : activeStep === ElementType.belief && activeSubType === "explanation" ?
+						) : activeStep === ElementType.belief_explanation ?
 						(
 							<BeliefExplanationStep
 							selectedElements={selectedElements}
@@ -276,14 +269,13 @@ export default function AnalyzePage({
 							steps={steps}
 							beliefSelectedElement={beliefSelectedElement}
 							beliefExplanationText={beliefExplanationText}
-							setBeliefExplanationText={setBeliefExplanationText}
 							setActiveStep={setActiveStep}
-							setActiveSubType={setActiveSubType}
+							setBeliefExplanationText={setBeliefExplanationText}
 							setNextLoading={setNextLoading}
 							nextLoading={nextLoading}
 							setSuggestedElements={setSuggestedElements}
 						/>
-						) : activeStep === ElementType.disputation && activeSubType === "evidence" ?
+						) : activeStep === ElementType.dispute_evidence ?
 						(
 							<DisputeEvidenceStep
 								steps={steps}
@@ -292,13 +284,12 @@ export default function AnalyzePage({
 								setSelectedElements={setSelectedElements}
 								setSuggestedElements={setSuggestedElements}
 								setActiveStep={setActiveStep}
-								setActiveSubType={setActiveSubType}
 								setNextLoading={setNextLoading}
 								disputeEvidenceText={disputeEvidenceText}
 								setDisputeEvidenceText={setDisputeEvidenceText}
 								nextLoading={nextLoading}
 							/>
-						) : activeStep === ElementType.disputation && activeSubType === "counter" ?
+						) : activeStep === ElementType.dispute_counter ?
 						(
 							<DisputeCounterStep
 								steps={steps}
@@ -310,7 +301,6 @@ export default function AnalyzePage({
 								setDisputeCounterText={setDisputeCounterText}
 								nextLoading={nextLoading}
 								setActiveStep={setActiveStep}
-								setActiveSubType={setActiveSubType}
 								setNextLoading={setNextLoading}
 							/>
 						) : null

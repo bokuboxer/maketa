@@ -14,7 +14,6 @@ export interface BeliefExplanationComponentProps {
 	setBeliefExplanationText: React.Dispatch<React.SetStateAction<string | null>>;
 	setSuggestedElements: React.Dispatch<React.SetStateAction<GroupedElements>>;
 	setActiveStep: React.Dispatch<React.SetStateAction<ElementType>>;
-	setActiveSubType: React.Dispatch<React.SetStateAction<string | null>>;
 	setNextLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
@@ -27,14 +26,13 @@ export const BeliefExplanationStep = ({
 	setBeliefExplanationText,
 	setSuggestedElements,
 	setActiveStep,
-	setActiveSubType,
 	setNextLoading,
 	nextLoading,
 }: BeliefExplanationComponentProps) => {
 	const { mutate: suggestElements } = useSuggestElementsElementsSuggestPost();
 	const currentStep = steps.find(
 		(step) =>
-			step.type === ElementType.belief && step.subType === "explanation",
+			step.type === ElementType.belief_explanation,
 	);
 
 	const handleSuggestionClick = (suggestionText: string, elementId: number) => {
@@ -47,15 +45,14 @@ export const BeliefExplanationStep = ({
 	};
 
 	const handlePrev = () => {
-		setActiveStep(ElementType.belief);
-		setActiveSubType("selection");
+		setActiveStep(ElementType.belief_selection);
 	};
 
 	const handleNext = () => {
-		let currentElements = selectedElements[ElementType.belief];
+		let currentElements = selectedElements[ElementType.belief_selection];
 		suggestElements({
 			data: {
-				type: ElementType.disputation,
+				type: ElementType.belief_explanation,
 				text: "",
 				elements: currentElements,
 			},
@@ -63,11 +60,10 @@ export const BeliefExplanationStep = ({
 			onSuccess: (data) => {
 				setSuggestedElements((prev) => ({
 					...prev,
-					[ElementType.disputation]: data || [],
+					[ElementType.belief_explanation]: data || [],
 				}));
 				setNextLoading(false);
-				setActiveStep(ElementType.disputation);
-				setActiveSubType("evidence");
+				setActiveStep(ElementType.belief_explanation);
 			},
 		});
 	};
@@ -101,7 +97,7 @@ export const BeliefExplanationStep = ({
 							onClick={() =>
 								handleSuggestionClick(
 									element.description,
-									selectedElements.belief[0]?.id,
+									selectedElements.belief_explanation[0]?.id,
 								)
 							}
 							className="w-full text-left bg-gray-50 p-3 rounded-lg text-sm hover:bg-gray-100 transition-colors"
@@ -112,8 +108,7 @@ export const BeliefExplanationStep = ({
 				</div>
 			</div>
 			<NavigationButtons
-				activeStep={ElementType.adversity}
-				activeSubType="explanation"
+				activeStep={ElementType.belief_explanation}
 				handlePrev={handlePrev}
 				handleNext={handleNext}
 				nextLoading={nextLoading}

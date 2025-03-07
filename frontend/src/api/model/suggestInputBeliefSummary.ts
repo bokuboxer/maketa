@@ -4,6 +4,5 @@
  * FastAPI
  * OpenAPI spec version: 0.1.0
  */
-import type { BeliefLabel } from './beliefLabel';
 
-export type SuggestInputSelectedLabel = BeliefLabel | null;
+export type SuggestInputBeliefSummary = string | null;
