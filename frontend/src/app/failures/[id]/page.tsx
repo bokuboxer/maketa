@@ -1,8 +1,6 @@
 "use client";
 
-import {
-	useGetFailureByIdFailureFailureIdGet,
-} from "@/api/generated/default/default";
+import { useGetFailureByIdFailureFailureIdGet } from "@/api/generated/default/default";
 import { ElementType } from "@/api/model/elementType";
 import { Hero } from "@/api/model/hero";
 import { IconArrowLeft } from "@tabler/icons-react";
@@ -30,14 +28,8 @@ const FailureDetailPage = dynamic(
 			const router = useRouter();
 			const [opened, { open, close }] = useDisclosure(false);
 
-			const steps = [
-				{ type: ElementType.adversity, label: "逆境" },
-				{ type: ElementType.belief, label: "信念" },
-				{ type: ElementType.disputation, label: "反論" },
-			];
-
 			if (isLoading || !failure) {
-				return ( 
+				return (
 					<div className="min-h-screen bg-white flex items-center justify-center">
 						<HypnoticLoader
 							size={250}
@@ -58,7 +50,11 @@ const FailureDetailPage = dynamic(
 						onClose={close}
 						size="lg"
 						centered
-						title={<span className="text-xl font-bold">{failure.hero_name}の失敗</span>}
+						title={
+							<span className="text-xl font-bold">
+								{failure.hero_name}の失敗
+							</span>
+						}
 					>
 						<div className="space-y-4">
 							<div className="flex items-center justify-center">
@@ -76,10 +72,13 @@ const FailureDetailPage = dynamic(
 										{failure.hero_description}
 									</div>
 									<div className="text-sm text-gray-500">
-										類似度: {Math.round((failure.hero_failure_certainty ?? 0) * 100)}%
+										類似度:{" "}
+										{Math.round((failure.hero_failure_certainty ?? 0) * 100)}%
 									</div>
 								</div>
-								<p className="text-base text-gray-600 whitespace-pre-wrap">{failure.hero_failure}</p>
+								<p className="text-base text-gray-600 whitespace-pre-wrap">
+									{failure.hero_failure}
+								</p>
 								<p className="text-sm text-gray-400">
 									出典: {failure.hero_failure_source}
 								</p>
@@ -108,39 +107,15 @@ const FailureDetailPage = dynamic(
 							<div className="space-y-6">
 								<div className="border rounded-lg p-4 bg-white">
 									<h2 className="font-semibold mb-2 text-black">失敗の内容</h2>
+									<p className="text-black text-sm whitespace-pre-wrap mb-4">
+										{failure.detail}
+									</p>
+
+									<h2 className="font-semibold mb-2 text-black">失敗の原因</h2>
 									<p className="text-black text-sm whitespace-pre-wrap">
-										{failure.description}
+										{failure.reason}
 									</p>
 								</div>
-
-								{steps.map((step) => {
-									const elements = failure.elements.filter(
-										(e: Element) => e.type === step.type,
-									);
-									return (
-										<div
-											key={step.type}
-											className="border rounded-lg p-4 bg-white"
-										>
-											<h2 className="font-semibold mb-2 text-black">
-												{step.label}
-											</h2>
-											{elements.length > 0 ? (
-												<div className="space-y-2">
-													{elements.map((element: Element) => (
-														<div key={element.id} className="text-sm text-black">
-															{element.description}
-														</div>
-													))}
-												</div>
-											) : (
-												<p className="text-sm text-gray-500">要素がありません</p>
-											)}
-										</div>
-									);
-								})}
-
-								{/* 似ている偉人の失敗 */}
 								<button
 									onClick={open}
 									className="w-full border border-gray-800 rounded-lg p-3 bg-gray-50 hover:bg-gray-100 active:bg-gray-200 transition-colors text-left group relative overflow-hidden shadow-sm hover:shadow-md"
@@ -173,7 +148,8 @@ const FailureDetailPage = dynamic(
 											</div>
 										</div>
 										<div className="text-xs font-medium text-gray-700 group-hover:text-black bg-gray-200 px-2 py-1 rounded-full">
-											類似度: {Math.round((failure.hero_failure_certainty ?? 0) * 100)}%
+											類似度:{" "}
+											{Math.round((failure.hero_failure_certainty ?? 0) * 100)}%
 										</div>
 									</div>
 								</button>

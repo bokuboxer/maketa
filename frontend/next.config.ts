@@ -11,10 +11,10 @@ const nextConfig: NextConfig = {
 	images: {
 		remotePatterns: [
 			{
-				protocol: 'https',
-				hostname: 'maketastorage.blob.core.windows.net',
-				port: '',
-				pathname: '/uploads/**',
+				protocol: "https",
+				hostname: "maketastorage.blob.core.windows.net",
+				port: "",
+				pathname: "/uploads/**",
 			},
 		],
 	},

@@ -1,9 +1,12 @@
 import app.model as model
 import app.schema as schema
-from app.chain import SuggestChain, ExplainChain
+from app.chain import SuggestChain, ExplainChain, ConcludeChain
 from sqlalchemy.orm import Session, joinedload
 import app.vectordb as vectordb
+import logging
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 class UserController:
     def __init__(self, db: Session):
@@ -52,9 +55,12 @@ class UserController:
 
 
 class FailureController:
-    def __init__(self, db: Session, chain: ExplainChain):
+    def __init__(
+        self, db: Session, explain_chain: ExplainChain, conclude_chain: ConcludeChain
+    ):
         self.db = db
-        self.chain = chain
+        self.explain_chain = explain_chain
+        self.conclude_chain = conclude_chain
 
     def create(self, input: schema.CreateFailureInput) -> None:
         failure: model.Failure = model.Failure(
@@ -84,7 +90,13 @@ class FailureController:
             return None
 
         # TODO: 関連した要素を原因としてまとめる
-        reason = ""
+        summarized_detail, summarized_reason, summarized_all = self.conclude_chain.run(
+            input, failure.description
+        )
+
+        logger.info(f"summarized_detail: {summarized_detail}")
+        logger.info(f"summarized_reason: {summarized_reason}")
+        logger.info(f"summarized_all: {summarized_all}")
 
         # 類似する偉人の失敗談を取得
         heroes = vectordb.query_collection(failure.description, 1)
@@ -94,20 +106,19 @@ class FailureController:
         # 偉人の失敗談との類似点を説明
         hero = heroes[0]
         hero_failure = hero.description
-        explain_result = self.chain.run(
-            schema.ExplainInput(
-                user_failure=failure.description, hero_failure=hero_failure
-            )
+        explain_result = self.explain_chain.run(
+            schema.ExplainInput(user_failure=summarized_all, hero_failure=hero_failure)
         )
 
         try:
             # 既存のレコードを更新
-            failure.reason = reason
+            failure.detail = summarized_detail
+            failure.reason = summarized_reason
             failure.has_analyzed = True
+            failure.hero_name = hero.name
             failure.hero_name = hero.name
             failure.hero_description = hero.description
             failure.hero_failure = hero.failure
-            failure.hero_failure_reason = ""
             failure.hero_failure_source = hero.source
             failure.hero_failure_certainty = hero.certainty
             failure.explain_certainty = explain_result

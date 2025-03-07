@@ -6,9 +6,9 @@
  */
 
 export interface Hero {
-  name: string;
-  description: string;
-  failure: string;
-  source: string;
-  certainty: number;
+	name: string;
+	description: string;
+	failure: string;
+	source: string;
+	certainty: number;
 }

@@ -11,6 +11,8 @@ export type ElementType = typeof ElementType[keyof typeof ElementType];
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const ElementType = {
   adversity: 'adversity',
-  belief: 'belief',
-  disputation: 'disputation',
+  belief_selection: 'belief_selection',
+  belief_explanation: 'belief_explanation',
+  dispute_evidence: 'dispute_evidence',
+  dispute_counter: 'dispute_counter',
 } as const;

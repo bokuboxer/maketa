@@ -29,9 +29,9 @@ class Failure(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     description: Mapped[str] = mapped_column(Text, nullable=False)
+    detail: Mapped[str | None] = mapped_column(Text, nullable=True)
     reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     has_analyzed: Mapped[bool] = mapped_column(Boolean, default=False)
-    conclusion: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=lambda: datetime.now(UTC)
     )
@@ -39,7 +39,6 @@ class Failure(Base):
     hero_name: Mapped[str | None] = mapped_column(Text, nullable=True)
     hero_description: Mapped[str | None] = mapped_column(Text, nullable=True)
     hero_failure: Mapped[str | None] = mapped_column(Text, nullable=True)
-    hero_failure_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     hero_failure_source: Mapped[str | None] = mapped_column(Text, nullable=True)
     hero_failure_certainty: Mapped[float | None] = mapped_column(Float, nullable=True)
 
@@ -57,8 +56,10 @@ class Failure(Base):
 
 class ElementType(PyEnum):
     ADVERSITY = "adversity"
-    BELIEF = "belief"
-    DISPUTATION = "disputation"
+    BELIEF_SELECTION = "belief_selection"
+    BELIEF_EXPLANATION = "belief_explanation"
+    DISPUTE_EVIDENCE = "dispute_evidence"
+    DISPUTE_COUNTER = "dispute_counter"
 
 
 class Element(Base):

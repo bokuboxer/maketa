@@ -3,7 +3,7 @@ import logging
 
 import app.schema as schema
 import app.vectordb as vectordb
-from app.chain import SuggestChain, ExplainChain
+from app.chain import SuggestChain, ExplainChain, ConcludeChain
 from app.controller import (
     ElementController,
     FailureController,
@@ -18,8 +18,8 @@ from sqlalchemy.orm import Session
 from fastapi import Depends
 from app.database import get_db
 
-# ロギングの設定
-logging.basicConfig(level=logging.INFO)
+# ロガーの設定
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 load_dotenv()
@@ -61,6 +61,7 @@ logger.info("Data import completed")
 # コントローラーの初期化
 suggest_chain = SuggestChain(llm)
 explain_chain = ExplainChain(llm)
+conclude_chain = ConcludeChain(llm)
 logger.info("All controllers initialized successfully")
 
 
@@ -84,7 +85,7 @@ async def get_user_by_firebase_uid(
 async def get_failure_by_id(
     failure_id: int, db: Session = Depends(get_db)
 ) -> schema.Failure | None:
-    controller = FailureController(db, explain_chain)
+    controller = FailureController(db, explain_chain, conclude_chain)
     return controller.get_by_id(failure_id)
 
 
@@ -92,7 +93,7 @@ async def get_failure_by_id(
 async def create_failure(
     input: schema.CreateFailureInput, db: Session = Depends(get_db)
 ) -> None:
-    controller = FailureController(db, explain_chain)
+    controller = FailureController(db, explain_chain, conclude_chain)
     return controller.create(input)
 
 
@@ -100,7 +101,7 @@ async def create_failure(
 async def conclude_failure(
     input: schema.ConcludeFailureInput, db: Session = Depends(get_db)
 ) -> None:
-    controller = FailureController(db, explain_chain)
+    controller = FailureController(db, explain_chain, conclude_chain)
     return controller.conclude(input)
 
 
