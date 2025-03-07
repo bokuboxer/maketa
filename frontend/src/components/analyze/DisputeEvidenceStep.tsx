@@ -50,7 +50,9 @@ export const DisputeEvidenceStep = ({
 		}
 	};
 
-	const handlePrev = () => {};
+	const handlePrev = () => {
+		setActiveStep(ElementType.belief_explanation);
+	};
 	const handleNext = async () => {
 		if (!disputeEvidenceText) return;
 		setNextLoading(true);

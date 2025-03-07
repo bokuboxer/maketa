@@ -257,6 +257,11 @@ export default function AnalyzePage({
 						) : activeStep === ElementType.dispute_counter ?
 						(
 							<DisputeCounterStep
+								failure={failure}
+								adversityText={adversityText}
+								beliefSelectedElement={beliefSelectedElement?.description || ""}
+								beliefExplanationText={beliefExplanationText}
+								disputeEvidenceText={disputeEvidenceText}
 								steps={steps}
 								selectedElements={selectedElements}
 								suggestedElements={suggestedElements}

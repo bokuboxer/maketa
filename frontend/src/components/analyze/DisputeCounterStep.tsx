@@ -2,13 +2,20 @@ import { ElementType } from "@/api/model/elementType";
 import { GroupedElements, StepConfig } from "./types";
 import { StepHeader } from "./StepHeader";
 import { useState } from "react";
+import { Failure } from "@/api/model";
 import { NavigationButtons } from "./NavigationButtons";
-import { useSuggestElementsElementsSuggestPost } from "@/api/generated/default/default";;
+import { useSuggestElementsElementsSuggestPost } from "@/api/generated/default/default";
+;
 
 type StandardStepComponentProps = {
 	selectedElements: GroupedElements;
 	suggestedElements: GroupedElements;
 	steps: StepConfig[];
+	failure: Failure | undefined;
+	adversityText: string | null;
+	beliefSelectedElement: string | null;
+	beliefExplanationText: string | null;
+	disputeEvidenceText: string | null;
 	nextLoading: boolean;
 	setSelectedElements: React.Dispatch<React.SetStateAction<GroupedElements>>;
 	setSuggestedElements: React.Dispatch<React.SetStateAction<GroupedElements>>;
@@ -22,6 +29,11 @@ export const DisputeCounterStep = ({
 	suggestedElements,
 	steps,
 	nextLoading,
+	failure,
+	adversityText,
+	beliefSelectedElement,
+	beliefExplanationText,
+	disputeEvidenceText,
 	setSelectedElements,
 	setSuggestedElements,
 	setActiveStep,
@@ -40,17 +52,21 @@ export const DisputeCounterStep = ({
 		}
 	};
 
-	const handlePrev = () => {};
+	const handlePrev = () => {
+		setActiveStep(ElementType.dispute_evidence);
+	};
 	const handleNext = async () => {
 		if (!disputeCounterText) return;
 		setNextLoading(true);
 		suggestElements({
 			data: {
 				type: ElementType.dispute_counter,
-				text: disputeCounterText,
-				elements: [],
-			},
-		},{
+				text: failure?.description || "",
+				adversity: adversityText,
+				selected_label: beliefSelectedElement,
+				belief_explanation: beliefExplanationText,
+				dispute_evidence: disputeEvidenceText,
+			},		},{
 			onSuccess: (data) => {
 				setSuggestedElements((prev) => ({
 					...prev,
@@ -60,7 +76,6 @@ export const DisputeCounterStep = ({
 				...prev,
 				[ElementType.dispute_counter]: [],
 				}));
-				setActiveStep(ElementType.dispute_counter);
 				setNextLoading(false);
 			},
 		});
