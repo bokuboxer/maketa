@@ -82,11 +82,11 @@ export const BeliefExplanationStep = ({
 			<div className="mt-4">
 				<div className="space-y-2">
 					<div className="bg-black text-white p-3 rounded-lg">
-						<p className="font-medium">{beliefSelectedElement}</p>
+						<p className="font-medium text-sm">{beliefSelectedElement}</p>
 					</div>
-					<div className="w-full space-y-2">
+					<div className="w-full space">
 						<textarea
-							className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-sm"
+							className="w-full p-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-sm"
 							rows={5}
 							placeholder="この原因について詳しく説明してください"
 							value={beliefExplanationText || ""}
@@ -95,7 +95,7 @@ export const BeliefExplanationStep = ({
 					</div>
 				</div>
 			</div>
-			<div className="border-t border-gray-200 my-4" />
+			<div className="border-t border-gray-200 my-2" />
 			<div>
 				<h4 className="text-sm font-medium text-black mb-2">説明の候補</h4>
 				<div className="space-y-2">
@@ -103,9 +103,9 @@ export const BeliefExplanationStep = ({
 						<button
 							key={element.id}
 							onClick={() => handleSuggestionClick(element.description)}
-							className="w-full text-left bg-gray-50 p-3 rounded-lg text-sm hover:bg-gray-100 transition-colors"
+							className="text-left bg-gray-200 p-3 py-2 mr-2 rounded-lg text-xs hover:bg-gray-100 transition-colors"
 						>
-							{element.description}
+							+ {element.description}
 						</button>
 					))}
 				</div>

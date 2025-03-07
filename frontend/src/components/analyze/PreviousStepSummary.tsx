@@ -49,7 +49,7 @@ export const PreviousStepSummary = ({
 						: activeStep === ElementType.belief_selection
 							? adversityText
 							: activeStep === ElementType.belief_explanation
-								? beliefSelectedElement
+								? adversityText
 								: activeStep === ElementType.dispute_evidence
 									? beliefExplanationText
 									: activeStep === ElementType.dispute_counter

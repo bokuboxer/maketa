@@ -3,8 +3,6 @@
 import {
 	useGetFailureByIdFailureFailureIdGet,
 	useSuggestElementsElementsSuggestPost,
-	useBulkCreateElementsElementsPost,
-	useConcludeFailureFailuresConcludePut,
 } from "@/api/generated/default/default";
 import { Element } from "@/api/model/element";
 import { ElementType } from "@/api/model/elementType";
@@ -14,13 +12,13 @@ import { use, useEffect, useState } from "react";
 import HypnoticLoader from "@/components/HypnoticLoader";
 import {
 	GroupedElements,
-	StepperComponent,
 	PreviousStepSummary,
 	BeliefExplanationStep,
 	AdversityStep,
 	DisputeEvidenceStep,
 	steps,
 	BeliefSelectionStep,
+	Stepper,
 } from "@/components/analyze";
 import { IconArrowLeft } from "@tabler/icons-react";
 import { DisputeCounterStep } from "@/components/analyze/DisputeCounterStep";
@@ -99,8 +97,6 @@ export default function AnalyzePage({
 			<div className="min-h-screen bg-white flex items-center justify-center">
 				<HypnoticLoader
 					size={250}
-					color="black"
-					secondaryColor="gray"
 					text="分析の時間へ"
 					isLoading={isFailureLoading || loading}
 					ringCount={5}
@@ -131,7 +127,7 @@ export default function AnalyzePage({
 					disputeEvidenceText={disputeEvidenceText}
 					steps={steps}
 				/>
-				<StepperComponent activeStep={activeStep} steps={steps} />
+				<Stepper activeStep={activeStep} />
 				<div className="space-y-4">
 					<div key={`${activeStep}`}>
 						{activeStep === ElementType.adversity ? (
