@@ -55,7 +55,7 @@ export const BeliefSelectionStep = ({
 		setLabel("");  // 入力フィールドをクリア
 	};
 
-	const handleBeliefSelect = (element: any) => {
+	const handleBeliefSelect = (element: Element) => {
 		setBeliefSelectedElement((prev) => (prev == element ? null : element));
 	};
 	const handlePrev = () => {
@@ -79,15 +79,16 @@ export const BeliefSelectionStep = ({
 			},
 			{
 				onSuccess: (data) => {
-					console.log("data", data);
 					setSuggestedElements((prev) => ({
 						...prev,
 						belief_explanation: data || [],
 					}));
 					setActiveStep(ElementType.belief_explanation);
-					console.log("suggestedElements", suggestedElements);
 					setNextLoading(false);
 				},
+				onError: () => {
+					setNextLoading(false);
+				}
 			},
 		);
 	};

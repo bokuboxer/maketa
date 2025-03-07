@@ -69,6 +69,9 @@ export const DisputeCounterStep = ({
 					router.push(`/failures/${failure?.id}`);
 					setNextLoading(false);
 				},
+				onError: () => {
+					setNextLoading(false);
+				}
 			},
 		);
 	};
