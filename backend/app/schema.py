@@ -78,8 +78,7 @@ class Hero(BaseModel):
 class SuggestInput(BaseModel):
     type: model.ElementType
     text: str
-    elements: List[Element]
-    selected_label: BeliefLabel | None = None
+    selected_label: str | None = None
     adversity: str | None = None
     belief_explanation: str | None = None
     dispute_evidence: str | None = None

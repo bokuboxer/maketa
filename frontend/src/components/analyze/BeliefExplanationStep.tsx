@@ -4,11 +4,14 @@ import { StepHeader } from "./StepHeader";
 import { NavigationButtons } from "./NavigationButtons";
 import { Element } from "@/api/model/element";
 import { useSuggestElementsElementsSuggestPost } from "@/api/generated/default/default";
+import { Failure } from "@/api/model";
 export interface BeliefExplanationComponentProps {
 	selectedElements: GroupedElements;
 	suggestedElements: GroupedElements;
 	steps: StepConfig[];
-	beliefSelectedElement: Element | null;
+	failure: Failure | undefined;
+	adversityText: string | null;
+	beliefSelectedElement: string | null;
 	beliefExplanationText: string | null;
 	nextLoading: boolean;
 	setBeliefExplanationText: React.Dispatch<React.SetStateAction<string | null>>;
@@ -18,6 +21,8 @@ export interface BeliefExplanationComponentProps {
 }
 
 export const BeliefExplanationStep = ({
+	failure,
+	adversityText,
 	selectedElements,
 	suggestedElements,
 	steps,
@@ -49,21 +54,23 @@ export const BeliefExplanationStep = ({
 	};
 
 	const handleNext = () => {
-		let currentElements = selectedElements[ElementType.belief_selection];
+		
 		suggestElements({
 			data: {
-				type: ElementType.belief_explanation,
-				text: "",
-				elements: currentElements,
+				type: ElementType.dispute_evidence,
+				text: failure?.description || "",
+				adversity: adversityText,
+				selected_label: beliefSelectedElement || "",
+				belief_explanation: beliefExplanationText || "",
 			},
 		},{
 			onSuccess: (data) => {
 				setSuggestedElements((prev) => ({
 					...prev,
-					[ElementType.belief_explanation]: data || [],
+					[ElementType.dispute_evidence]: data || [],
 				}));
 				setNextLoading(false);
-				setActiveStep(ElementType.belief_explanation);
+				setActiveStep(ElementType.dispute_evidence);
 			},
 		});
 	};
@@ -74,7 +81,7 @@ export const BeliefExplanationStep = ({
 			<div className="mt-4">
 				<div className="space-y-2">
 					<div className="bg-black text-white p-3 rounded-lg">
-						<p className="font-medium">{beliefSelectedElement?.description}</p>
+						<p className="font-medium">{beliefSelectedElement}</p>
 					</div>
 					<div className="w-full space-y-2">
 						<textarea

@@ -7,6 +7,7 @@ import { Failure } from "@/api/model/failure";
 import { Element } from "@/api/model/element";
 type BeliefSelectionComponentProps = {
 	failure: Failure | undefined;
+	adversityText: string | null;
 	steps: StepConfig[];
 	activeStep: ElementType;
 	selectedElements: GroupedElements;
@@ -25,6 +26,7 @@ export const BeliefSelectionStep = ({
 	steps,
 	nextLoading,
 	suggestedElements,
+	adversityText,
 	selectedElements,
 	setSuggestedElements,
 	setActiveStep,
@@ -47,28 +49,28 @@ export const BeliefSelectionStep = ({
 
 	const handleNext = () => {
 		if (beliefSelectedElement === null) return;
-
+		console.log("beliefSelectedElement", beliefSelectedElement);
 		const requestData = {
-			type: ElementType.belief_selection,
+			type: ElementType.belief_explanation,
 			text: failure?.description || "",
+			adversity: adversityText,
 			elements: [],
-			selected_label: {
-				id: beliefSelectedElement.id,
-				description: beliefSelectedElement.description,
-				type: "internal" as const,
-				explanation: null,
-			},
+			selected_label: beliefSelectedElement?.description || "",
 		};
+		console.log("requestData", requestData);
 		// B-1からB-2への遷移時
 		setNextLoading(true);
 		suggestElements({
 			data: requestData,
 		}, {
 			onSuccess: (data) => {
+				console.log("data", data);
 				setSuggestedElements((prev) => ({
 					...prev,
 					"belief_explanation": data || [],
 				}));
+				setActiveStep(ElementType.belief_explanation);
+				console.log("suggestedElements", suggestedElements);
 				setNextLoading(false);
 			},
 		});

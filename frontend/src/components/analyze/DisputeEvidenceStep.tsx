@@ -4,11 +4,15 @@ import { StepHeader } from "./StepHeader";
 import { useState } from "react";
 import { NavigationButtons } from "./NavigationButtons";
 import { useSuggestElementsElementsSuggestPost } from "@/api/generated/default/default";;
-
+import { Failure } from "@/api/model";
 type StandardStepComponentProps = {
 	selectedElements: GroupedElements;
 	suggestedElements: GroupedElements;
 	steps: StepConfig[];
+	failure: Failure | undefined;
+	adversityText: string | null;
+	beliefSelectedElement: string | null;
+	beliefExplanationText: string | null;
 	nextLoading: boolean;
 	setSelectedElements: React.Dispatch<React.SetStateAction<GroupedElements>>;
 	setSuggestedElements: React.Dispatch<React.SetStateAction<GroupedElements>>;
@@ -21,6 +25,10 @@ type StandardStepComponentProps = {
 export const DisputeEvidenceStep = ({
 	suggestedElements,
 	steps,
+	failure,
+	adversityText,
+	beliefSelectedElement,
+	beliefExplanationText,
 	nextLoading,
 	setSelectedElements,
 	setSuggestedElements,
@@ -49,8 +57,11 @@ export const DisputeEvidenceStep = ({
 		suggestElements({
 			data: {
 				type: ElementType.dispute_counter,
-				text: disputeEvidenceText,
-				elements: [],
+				text: failure?.description || "",
+				adversity: adversityText,
+				selected_label: beliefSelectedElement,
+				belief_explanation: beliefExplanationText,
+				dispute_evidence: disputeEvidenceText,
 			},
 		},{
 			onSuccess: (data) => {

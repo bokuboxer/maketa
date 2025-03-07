@@ -5,7 +5,6 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { ElementType } from './elementType';
-import type { Element } from './element';
 import type { SuggestInputSelectedLabel } from './suggestInputSelectedLabel';
 import type { SuggestInputAdversity } from './suggestInputAdversity';
 import type { SuggestInputBeliefExplanation } from './suggestInputBeliefExplanation';
@@ -15,7 +14,6 @@ import type { SuggestInputDisputeCounter } from './suggestInputDisputeCounter';
 export interface SuggestInput {
   type: ElementType;
   text: string;
-  elements: Element[];
   selected_label?: SuggestInputSelectedLabel;
   adversity?: SuggestInputAdversity;
   belief_explanation?: SuggestInputBeliefExplanation;

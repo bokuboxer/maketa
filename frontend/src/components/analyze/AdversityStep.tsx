@@ -2,13 +2,15 @@ import { ElementType } from "@/api/model/elementType";
 import { GroupedElements, StepConfig } from "./types";
 import { StepHeader } from "./StepHeader";
 import { useState } from "react";
+import { Failure } from "@/api/model";
 import { NavigationButtons } from "./NavigationButtons";
-import { useSuggestElementsElementsSuggestPost } from "@/api/generated/default/default";;
+import { useSuggestElementsElementsSuggestPost } from "@/api/generated/default/default";
 
 type StandardStepComponentProps = {
 	selectedElements: GroupedElements;
 	suggestedElements: GroupedElements;
 	steps: StepConfig[];
+	failure: Failure | undefined;
 	nextLoading: boolean;
 	setSelectedElements: React.Dispatch<React.SetStateAction<GroupedElements>>;
 	setSuggestedElements: React.Dispatch<React.SetStateAction<GroupedElements>>;
@@ -21,6 +23,7 @@ type StandardStepComponentProps = {
 export const AdversityStep = ({
 	suggestedElements,
 	steps,
+	failure,
 	nextLoading,
 	setSelectedElements,
 	setSuggestedElements,
@@ -47,11 +50,12 @@ export const AdversityStep = ({
 		suggestElements({
 			data: {
 				type: ElementType.belief_selection,
-				text: adversityText,
-				elements: [],
+				text: failure?.description || "",
+				adversity: adversityText,
 			},
 		},{
 			onSuccess: (data) => {
+				console.log("data", data);
 				setSuggestedElements((prev) => ({
 					...prev,
 					[ElementType.belief_selection]: data || [],
