@@ -61,9 +61,12 @@ const FailureDetailPage = dynamic(
 								<Image
 									src={failure.hero_image_url || ""}
 									alt={failure.hero_name || "偉人の画像"}
-									width={300}
-									height={300}
+									width={200}
+									height={200}
 									className="rounded-lg"
+									onError={(e) => {
+										e.currentTarget.src = "https://maketastorage.blob.core.windows.net/uploads/pseude.png";
+									}}
 								/>
 							</div>
 							<div className="space-y-2">
