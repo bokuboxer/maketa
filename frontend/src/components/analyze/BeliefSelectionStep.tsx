@@ -79,15 +79,16 @@ export const BeliefSelectionStep = ({
 			},
 			{
 				onSuccess: (data) => {
-					console.log("data", data);
 					setSuggestedElements((prev) => ({
 						...prev,
 						belief_explanation: data || [],
 					}));
 					setActiveStep(ElementType.belief_explanation);
-					console.log("suggestedElements", suggestedElements);
 					setNextLoading(false);
 				},
+				onError: () => {
+					setNextLoading(false);
+				}
 			},
 		);
 	};

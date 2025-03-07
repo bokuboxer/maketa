@@ -70,6 +70,9 @@ export const DisputeEvidenceStep = ({
 					setActiveStep(ElementType.dispute_counter);
 					setNextLoading(false);
 				},
+				onError: () => {
+					setNextLoading(false);
+				}
 			},
 		);
 	};
