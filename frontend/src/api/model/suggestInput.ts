@@ -4,19 +4,19 @@
  * FastAPI
  * OpenAPI spec version: 0.1.0
  */
-import type { ElementType } from "./elementType";
-import type { SuggestInputSelectedLabel } from "./suggestInputSelectedLabel";
-import type { SuggestInputAdversity } from "./suggestInputAdversity";
-import type { SuggestInputBeliefExplanation } from "./suggestInputBeliefExplanation";
-import type { SuggestInputDisputeEvidence } from "./suggestInputDisputeEvidence";
-import type { SuggestInputDisputeCounter } from "./suggestInputDisputeCounter";
+import type { ElementType } from './elementType';
+import type { SuggestInputSelectedLabel } from './suggestInputSelectedLabel';
+import type { SuggestInputAdversity } from './suggestInputAdversity';
+import type { SuggestInputBeliefExplanation } from './suggestInputBeliefExplanation';
+import type { SuggestInputDisputeEvidence } from './suggestInputDisputeEvidence';
+import type { SuggestInputDisputeCounter } from './suggestInputDisputeCounter';
 
 export interface SuggestInput {
-	type: ElementType;
-	text: string;
-	selected_label?: SuggestInputSelectedLabel;
-	adversity?: SuggestInputAdversity;
-	belief_explanation?: SuggestInputBeliefExplanation;
-	dispute_evidence?: SuggestInputDisputeEvidence;
-	dispute_counter?: SuggestInputDisputeCounter;
+  type: ElementType;
+  text: string;
+  selected_label?: SuggestInputSelectedLabel;
+  adversity?: SuggestInputAdversity;
+  belief_explanation?: SuggestInputBeliefExplanation;
+  dispute_evidence?: SuggestInputDisputeEvidence;
+  dispute_counter?: SuggestInputDisputeCounter;
 }
