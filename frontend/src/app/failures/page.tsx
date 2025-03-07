@@ -78,7 +78,6 @@ export default function Failures() {
 	}
 
 	if (!user || error) {
-		router.push("/");
 		return null;
 	}
 
@@ -159,7 +158,7 @@ export default function Failures() {
 								{user?.failures.map((failure) => (
 									<div
 										key={failure.id}
-										className="bg-white p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
+										className="bg-white p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors shadow-sm hover:shadow-md"
 									>
 										<div className="flex flex-col">
 											<div className="flex justify-between items-start gap-3">

@@ -46,11 +46,11 @@ export function Stepper({activeStep}: StepperProps) {
             <div className="flex flex-col items-center">
               <div
                 className={cn(
-                  "flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium",
+                  "flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium",
                   step.id < activeStepId
-                    ? "bg-black text-white"
+                    ? "bg-[#6366f1] text-white"
                     : step.id === activeStepId
-                      ? "border-2 border-black bg-background text-black"
+                      ? "border-2 border-[#6366f1] bg-background text-[#6366f1]"
                       : "border border-border bg-muted text-muted-foreground",
                 )}
                 aria-current={step.id === activeStepId ? "step" : undefined}
@@ -60,7 +60,7 @@ export function Stepper({activeStep}: StepperProps) {
               <span
                 className={cn(
                   "mt-1 text-xs",
-                  step.id === activeStepId ? "font-medium text-black" : "text-gray-500",
+                  step.id === activeStepId ? "font-medium text-[#6366f1]" : "text-gray-500",
                 )}
               >
                 {step.label}
@@ -68,7 +68,7 @@ export function Stepper({activeStep}: StepperProps) {
             </div>
             {index < steps.length - 1 && (
               <div
-                className={cn("h-[1px] flex-1 mx-2", step.id < activeStepId ? "bg-black" : "bg-gray-300")}
+                className={cn("h-[1px] flex-1 mx-2", step.id < activeStepId ? "bg-[#6366f1]" : "bg-gray-300")}
                 aria-hidden="true"
               />
             )}
