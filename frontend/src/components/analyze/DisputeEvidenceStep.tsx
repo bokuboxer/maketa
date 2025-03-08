@@ -88,7 +88,7 @@ export const DisputeEvidenceStep = ({
 				<textarea
 					className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-sm"
 					rows={5}
-					placeholder="根拠を入力してください"
+					placeholder="入力例：〜という原因を解決すると、〜という改善が見込めるから"
 					value={disputeEvidenceText || ""}
 					onChange={(e) => setDisputeEvidenceText(e.target.value)}
 				/>

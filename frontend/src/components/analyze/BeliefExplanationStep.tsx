@@ -91,7 +91,9 @@ export const BeliefExplanationStep = ({
 						<textarea
 							className="w-full p-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-sm"
 							rows={5}
-							placeholder="この原因について詳しく説明してください"
+							placeholder="入力例：
+毎回試合前に緊張してしまう
+他のメンバーからの重圧も影響している"
 							value={beliefExplanationText || ""}
 							onChange={(e) => setBeliefExplanationText(e.target.value)}
 						/>

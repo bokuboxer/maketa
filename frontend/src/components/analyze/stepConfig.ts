@@ -17,7 +17,7 @@ export const steps: StepConfig[] = [
 		description: "失敗の原因の中で最も関係していると思われるものを選択しよう",
 		title: "<strong>B</strong>elief（原因の選択）",
 		example:
-			"例：\n・内的要因（自己）：\n - 準備不足だった\n - 経験が足りなかった\n・外的要因（環境・他者）：\n - 時間が足りなかった\n - チーム内のコミュニケーション不足",
+			"自身が原因だと思うものを選択してください\n感情による判断でも構いません",
 	},
 	{
 		type: ElementType.belief_explanation,
@@ -25,7 +25,7 @@ export const steps: StepConfig[] = [
 		description: "選択した原因について詳細な事実を書き出そう",
 		title: "<strong>B</strong>elief（原因の詳細）",
 		example:
-			"例：\n・なぜその原因が重要だと考えたのか\n・具体的にどのような影響があったのか\n・関連する事実は何か",
+			"自身のどんな行動が直接影響していますか？\n他者のどんな行動が直接影響していますか？\nどんな環境や設備が関係していますか？\nどんな期待があったのですか？\nどんな結果が期待されていたのですか？",
 	},
 	{
 		type: ElementType.dispute_evidence,
@@ -33,14 +33,14 @@ export const steps: StepConfig[] = [
 		description: "なぜこの原因が重要であるのか考えてみよう",
 		title: "<strong>D</strong>ispute（原因の重要性）",
 		example:
-			"例：\n直接影響しているといえるのは、どんな事実があるからですか？\n・客観的なデータや情報\n・他者からのフィードバック",
+			"他の原因と比べた時、具体的にどんな事実が重要であると思いますか？\nこれを解決すると、どんな効果があると思いますか？",
 	},
 	{
 		type: ElementType.dispute_counter,
 		label: "反対側の視点",
-		description: "選んだ失敗の原因が重要でないケースについて考えてみよう",
-		title: "<strong>D</strong>ispute（反対側の視点）",
+		description: "選んだ失敗の原因以外のケースについて考えてみよう",
+		title: "<strong>D</strong>ispute（他の視点）",
 		example:
-			"例：\n・別の解釈の可能性\n・見落としている要因\n・異なる視点からの考察",
+			"この原因だけではどんな点が見落とされるでしょうか？\n他の視点で説明可能な点は何でしょうか？",
 	},
 ];

@@ -87,7 +87,7 @@ export const DisputeCounterStep = ({
 				<textarea
 					className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-sm"
 					rows={5}
-					placeholder="反証の可能性を入力してください"
+					placeholder="入力例：〜という原因は、〜という点で不十分であり、〜という点が見落とされている"
 					value={disputeCounterText || ""}
 					onChange={(e) => setDisputeCounterText(e.target.value)}
 				/>
